@@ -1,3 +1,6 @@
+import numpy as np
+from genotypeArray import genotypeArray
+
 def accuracy_paternity(progeny, parents, paternity_array, partition, target_parent = 'father'):
     """
     Summarise how well a sibship partition returns information on the posterior
@@ -8,7 +11,7 @@ def accuracy_paternity(progeny, parents, paternity_array, partition, target_pare
     ARGUMENTS
     progeny: A genotype array of offspring individuals included in the paternity_array.
     
-    progeny: A genotype array of the candidate parents included in the paternity_array.
+    parents: A genotype array of the candidate parents included in the paternity_array.
     
     paternity_array: A matrix of probabilities that each candidate parent is the true
         parent of each individual. This array can be generated with paternity_array, or

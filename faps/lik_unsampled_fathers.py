@@ -1,4 +1,5 @@
 import numpy as np
+from pr_unsampled import pr_unsampled
 
 def lik_unsampled_fathers(offspring, mothers, allele_freqs, mu, mother_index=None):
     """

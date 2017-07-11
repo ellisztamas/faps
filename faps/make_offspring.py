@@ -1,4 +1,5 @@
 import numpy as np
+from genotypeArray import genotypeArray
 
 def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, family_name='offs'):
     """
@@ -40,7 +41,7 @@ def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, family_na
     # if parents have been specified, set noffs to the length of sires and dams.
     if dam_list is not None or sire_list is not None:
         noffs = len(dam_list)
-        if len(dam_list) is not len(sire_list):
+        if len(dam_list) != len(sire_list):
             print "List of sires must be the same length as the list of dams."
             return None
 
@@ -65,4 +66,4 @@ def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, family_na
     maternal_names    = parents.names[dam_list]
     paternal_names    = parents.names[sire_list]
 
-    return genotypeArray(offs_genotypes, offspring_names, maternal_names, paternal_names)
+    return genotypeArray(offs_genotypes, offspring_names, maternal_names, paternal_names, range(nloci))

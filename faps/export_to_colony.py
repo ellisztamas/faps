@@ -6,7 +6,8 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
                      haplodiploid= 0, polygamy = [0,0], infer_clones = 0, size_scaling = 1,
                      sibship_prior   = [0,1.0,1.0], known_allele_fr = 1, nruns = 1,
                      run_length = 2, monitor_method  = 0, monitor_interval= 100000,
-                     windows_gui = 0, analysis_method = 0,precision = 3, parents_present = [1,1]):
+                     windows_gui = 0, analysis_method = 0,precision = 3, parents_present = [1,1],
+                     n_incompatibilies = 3):
     """
     Export genotypeArray objects to run in Colony2.
     
@@ -163,7 +164,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
     fo.write('\n')
 
     # Number of offspring with a known father in the sample of fathers.
-    fo.write(str(sum([offspring.fathers[i] in known_dads for i in range(offspring.size)])) + ' ! Number of known father-offspring dyads \n')
+    fo.write(str(sum([offspring.fathers[i] in known_dads for i in range(offspring.size)])) + ' ' + str(n_incompatibilies) + ' ! Number of known father-offspring dyads \n')
     # Pairs of dyads of offspring and known fathers
     for o in range(offspring.size):
         if offspring.fathers[o] in known_dads:
@@ -171,7 +172,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
     fo.write('\n')
 
     # Number of offspring with a known mother in the sample of mothers.
-    fo.write(str(sum([offspring.mothers[i] in known_mums for i in range(offspring.size)])) + ' ! Number of known mother-offspring dyads \n')
+    fo.write(str(sum([offspring.mothers[i] in known_mums for i in range(offspring.size)])) + ' ' + str(n_incompatibilies) + ' ! Number of known mother-offspring dyads \n')
     # Pairs of dyads of offspring and known mothers
     for o in range(offspring.size):
         if offspring.mothers[o] in known_mums:

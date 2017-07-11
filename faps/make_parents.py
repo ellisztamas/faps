@@ -1,4 +1,5 @@
 import numpy as np
+from genotypeArray import genotypeArray
 
 def make_parents(size, allele_freqs, family_name = 'base'):
     """
@@ -29,4 +30,4 @@ def make_parents(size, allele_freqs, family_name = 'base'):
         maternal_names    = np.repeat('NA', size)
         paternal_names    = np.repeat('NA', size)
         
-        return genotypeArray(genomes, offspring_names, maternal_names, paternal_names)
+        return genotypeArray(genomes, offspring_names, maternal_names, paternal_names, range(allele_freqs.shape[0]))
