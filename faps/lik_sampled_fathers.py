@@ -7,30 +7,32 @@ def lik_sampled_fathers(offspring, mothers, males, mu, mother_index=None):
     of offspring, their known mothers, and a set of candidate males. This sums over all
     possible offspring and parental genotypes.
 
-    ARGUMENTS:
-    offspring: A genotypeArray of observed genotype data for the offspring.
+    Parameters
+    ----------
+    offspring: genotypeArray
+        Array of observed genotype data for the offspring.
 
-    mothers: an array of observed genotype data for the mothers. Data on mothers need
-        to be in the same order as those for the offspring. If a whole parent array is
-        used, this can be subsetted into the correct order using the option
-        mother_index.
+    mothers: genotypeArray
+        An array of observed genotype data for the mothers. Data on mothers need
+        to be in the same order as those for the offspring. If a whole parent
+        array is used, this can be subsetted into the correct order using the
+        option mother_index.
 
-    fathers: A genotypeArray of observed genotype data for the candidate males.
+    fathers: genotypeArray
+        Array of observed genotype data for the candidate males.
 
-    mu: point estimate of the genotyping error rate. Note that
-        sibship clustering is unstable if mu_input is set to exactly zero. Any zero
-        values will therefore be set to a very small number close to zero (10^-12).
+    mu: float
+        Point estimate of the genotyping error rate. Note that sibship clustering
+        is unstable if mu_input is set to exactly zero. Any zero values will
+        therefore be set to a very small number close to zero (10^-12).
 
-    mother_index: an optional list of integers indexing the position of the mother of
+    mother_index: list, optional
+        List of integers indexing the position of the mother of
         each offspring in the maternal_genotypes array. If left blank, the whole array
         is used.
 
-    threshold: the maximum value of the product of the numbers of loci, offspring and
-        candidate males to be considered before switching to looping over loci.
-
-    verbose: if True, print warnings about the memory threshold.
-
-    RETURNS:
+    Returns
+    -------
     A matrix of log likelihoods of paternity, with a row for each offspring and a
     column for each candidate male.
     """

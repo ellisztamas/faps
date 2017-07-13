@@ -7,23 +7,32 @@ def lik_unsampled_fathers(offspring, mothers, allele_freqs, mu, mother_index=Non
     and known mothers, but where the paternal allele is drawn from population allele
     frequencies.
     
-    ARGUMENTS:
-    offspring: A genotypeArray of observed genotype data for the offspring.
+    Parameters
+    ----------
+    offspring: genotypeArray
+        Array of observed genotype data for the offspring.
 
-    mothers: an genotypeArray of observed genotype data for the mothers. Data on mothers
-        need to be in the same order as those for the offspring. If a whole parent array
-        is used, this can be subsetted into the correct order using the option
-        mother_index.
+    mothers: genotypeArray
+        An array of observed genotype data for the mothers. Data on mothers need
+        to be in the same order as those for the offspring. If a whole parent
+        array is used, this can be subsetted into the correct order using the
+        option mother_index.
     
-    allele_freqs: a vector of population allele frequencies.
+    allele_freqs: array
+        Vector of population allele frequencies.
     
-    mu: point estimate of the genotyping error rate.
-    
-    mother_index: an optional list of integers indexing the position of the mother of
+    mu: float
+        Point estimate of the genotyping error rate. Note that sibship clustering
+        is unstable if mu_input is set to exactly zero. Any zero values will
+        therefore be set to a very small number close to zero (10^-12).
+
+    mother_index: list, optional
+        List of integers indexing the position of the mother of
         each offspring in the maternal_genotypes array. If left blank, the whole array
         is used.
-    
-    RETURNS:
+
+    Returns
+    -------
     A vector of log likelihoods with an elements for each offspring.
     """
     # If a list of indices for the mothers has been given, subset the maternal data

@@ -8,10 +8,15 @@ def accuracy_paternity(progeny, parents, paternity_array, partition, target_pare
     sampled, the probability that the father is drawn from population allele frequencies
     is returned.
     
-    ARGUMENTS
-    progeny: A genotype array of offspring individuals included in the paternity_array.
+    Deprecated in favour of a function within sibshipCluster.
     
-    parents: A genotype array of the candidate parents included in the paternity_array.
+    Parameters
+    ----------
+    progeny: genotypeArray
+        Genotype information on offspring individuals included in paternity_array.
+    
+    parents: genotypeArray
+        Genotype information on the candidate parents included in paternity_array.
     
     paternity_array: A matrix of probabilities that each candidate parent is the true
         parent of each individual. This array can be generated with paternity_array, or
@@ -21,7 +26,8 @@ def accuracy_paternity(progeny, parents, paternity_array, partition, target_pare
         or parents pairs. Valid arguments are 'mother', 'father' and 'parents',  or
             equivalently 'm' and 'f' respectively.
     
-    RETURNS
+    Returns
+    -------
     A list of two elements:
     1. The mean posterior probability of sampled true sires, conditioned on the father
         having been included in the sampled of candidate parents.

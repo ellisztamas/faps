@@ -5,15 +5,20 @@ def make_parents(size, allele_freqs, family_name = 'base'):
     """
     Draw a base population of reproductive individuals from population allele frequencies.
     
-    ARGUMENTS:
-    size: number of individuals to create.
+    Parameters
+    ----------
+    size: integer
+        Number of individuals to create.
     
-    allele_freqs: vector of allele frequencies.
+    allele_freqs: array-like
+        Vector of allele frequencies.
     
-    family_name: an optional string denoting the name for this family.
+    family_name: str, optional
+        String denoting the name for this family.
     
-    RETURNS:
-    A genotype_class object.
+    Returns
+    -------
+    A genotypeArray object.
     """
     if size < 2 or not isinstance(size, int):
         print "Size must be an integer of 2 or more."

@@ -9,19 +9,23 @@ def read_paternity_array(path, likelihood_col = 2, mothers_col=1, fathers_col=No
     indicate their labels to match up with a file of parental data. Otherwise,
     names for mothers and fathers are given as 'NA' in the output.
 
-    ARGUMENTS
-    path: filename path to locate the text file. This should contain unique ID
+    Parameters
+    ----------
+    path: str
+        filename path to locate the text file. This should contain unique ID
         labels for each individual in the first column, followed by (optional)
         columns of names for the mothers and fathers. After this include log
         likelihoods that each adult is the sire of each offspring. The header
         row should include names for each candidate, or else be left blank. The
         final column should be a vector of likelihoods that the true sire of
         each offspring has not been sampled.
-    genotype_col: indicate the column index where genotype information begins.
-    mothers_col: If a column of maternal names has been included, indicate column
-    	index here.
+    genotype_col: int
+        indicate the column index where genotype information begins.
+    mothers_col: int
+        If a column of maternal names has been included, indicate column index
+        here.
     fathers_col: If a column of paternal names has been included, indicate column
-    	index here.
+        index here.
     delimiter The symbol used to separate values in the text file. Defaults to
         commas.
 

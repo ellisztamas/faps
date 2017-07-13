@@ -4,12 +4,17 @@ def squash_siblings(paternity_probs, partitions):
     """
     Take an array of paternity likelihoods across fathers for each offspring, and multiply rows over putative siblings.
     
-    ARGUMENTS
-    paternity_probs: array of posterior probabilities of paternity.
+    Parameters
+    ----------
+    paternity_probs: array
+        Array of posterior probabilities of paternity. Usually, this is the
+        output of `prob_array` from a `paternityArray` object.
     
-    partitions: vector assigning a full sibship label to each individual.
+    partitions: array-like
+        vector assigning a full sibship label to each individual.
     
-    RETURNS
+    Returns
+    -------
     An array with a row for every full sibship and a column for every candidate father.
     """
     partitions  = partitions.astype('int')

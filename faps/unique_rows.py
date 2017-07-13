@@ -4,10 +4,13 @@ def unique_rows(a):
     """
     Pull out the unique set of rows of an n*m matrix along axis n.
     
-    ARGUMENTS
-    a: An n*m matrix
+    Parameters
+    ----------
+    a: array
+        An n*m matrix
     
-    RETURNS
+    Returns
+    -------
     A subset of one or more rows in a.
     """
     a = np.ascontiguousarray(a)

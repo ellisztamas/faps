@@ -3,19 +3,24 @@ import numpy as np
 def convert_genotypes(diploid_data):
     """
     Convert a table of diploid genotypes to an array of haploid genotypes for a
-    genotypeArray object.
+    genotypeArray object. Usually, this will be an internal function call when
+    importing genotype data from a text file to a genotypeArray.
     
     This function copies diploid data to each of two columns for haploid genotypes.
     Heterozygotes are assigned a 0 for locus 1 and a 1 for locus 2.
     Major allele homozygotes are assigned as 1 for both loci.
     Minor allele homozygotes are already coded 0 at both loci.
     
-    ARGUMENTS
-    diploid_data: Numpy array containing diploid genotypes of candiate parents, with a row
-    for every individual and a column for every SNP. The first column should label maternal
-    IDs, or else left blank. The first row should label SNPs, or else be left blank.
+    Parameters
+    ----------
+    diploid_data: array
+        Array containing diploid genotypes of candiate parents, with a row for
+        every individual and a column for every SNP. The first column should
+        label maternal IDs, or else left blank. The first row should label SNPs,
+        or else be left blank.
     
-    RETURNS
+    Returns
+    -------
     Haploid genotype array for genotypeArray objects.
     """
     n_inds = diploid_data.shape[0]         # number of individuals in the array

@@ -9,30 +9,32 @@ def make_sibships(parents, dam, sires, family_size, family_name='offs'):
     'parents'. These can be found from genotype objects using the function
     parent_index().
 
-    ARGUMENTS:
-    parents: A genotype object of parents to be mated.
+    Parameters
+    ----------
+    parents: genotypeArray
+        Genotype information on the parents to be mated.
 
-    dam: An integer giving the position of the mother in the parental
-        genotype object, to which multiple sires are mated.
+    dam: int
+        Position of the mother in the parental genotypeArray object, to whom
+        multiple sires are mated.
 
-    sires: A list indexing the position of the sires to be mated to the dam(s)
+    sires: list
+        A list indexing the position of the sires to be mated to the dam(s)
         within the parental genotype object. To create a full sibship, supply
         only a single father.
 
-    family_size: The sizes of each full sibship. If famillies are to be of the
+    family_size: int, list
+        The sizes of each full sibship. If famillies are to be of the
         same size give and integer. Alternatively, if different sizes are
         desired, supply a list of sizes for each parternal familes. This list
         must be the same length as the list of sires.
 
-    family_name: an optional string denoting the name for this family.
+    family_name: str
+        String denoting the name for this family.
 
-    RETURNS:
-    A genotype object of four components:
-    1. A three-dimensional array of genotype information of size, with axes
-        denoting number of individuals, number of loci, and the two alleles.
-    2. Names of each individual.
-    3. Names of the mother of each individual.
-    4. Names of the mother of each individual.
+    Returns
+    -------
+    A genotypeArray object.
     """
     # if there is only one sire, turn the integer into a list of length one.
     if isinstance(sires, int):

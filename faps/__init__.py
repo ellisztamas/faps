@@ -19,11 +19,9 @@ from pr_transition import pr_transition
 from lik_sampled_fathers import lik_sampled_fathers
 from lik_unsampled_fathers import lik_unsampled_fathers
 from paternity_array import paternity_array
-from paternity_list import paternity_list
 from draw_fathers import draw_fathers
 # clustering
 from sibshipCluster import sibshipCluster
 from lik_partition import lik_partition
-from pairwise_lik_fullsibs import pairwise_lik_fullsibs
 from sibship_clustering import sibship_clustering
-from relation_matrix import relation_matrix
+

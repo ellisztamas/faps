@@ -14,47 +14,70 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
     Variable descriptions are mostly copied from the manual for Colony2. See the Colony2
     manual for full descriptions of what they mean.
     
-    The output is rather crude: in particular, it does not support the options
+    The output is rather crude.
     
-    #############
-    # ARGUMENTS #
-    #############
-    offspring, mothers, males: genotypeArray objects for the offspring, mothers, and
+    Parameters
+    ----------
+    offspring, mothers, males: genotypeArray objects
+        Genotype information on the the offspring, mothers, and
         candidate males.
-    allele_freqs: a vector of population allele frequencies.
-
-    file_path: Folder to store analyses
-    project_name: Dataset name
-    output_name: Output file name
-    seed:  Seed for random number generator
-    dropout_rates: list of dropout rates for each locus.
-    error_rates: list of error rates for each locus.
-    known_dads, known_mums: Lists of names of the father and mother of each offspring
-        individual. There should be a single entry for each offspring. If the parent
+    allele_freqs: array 
+        A vector of population allele frequencies.
+    file_path: str
+        Folder to store analyses
+    project_name: str
+        Dataset name.
+    output_name: str
+        Output file name
+    seed: int
+        Random seed for random number generator.
+    dropout_rates: array-like
+        List of dropout rates for each locus.
+    error_rates: array-like
+        List of error rates for each locus.
+    known_dads, known_mums: lists
+        Lists of names of the father and mother of each offspring individual.
+        There should be a single entry for each offspring. If the parent
         is unknown, enter 'NA'.
-    update_af: 0/1=Not updating/updating allele frequency
-    two_sexes: 2/1=Dioecious/Monoecious species
-    inbreeding: 0/1=No inbreeding/inbreeding
-    haplodiploid: 0/1=Diploid species/HaploDiploid species
-    polygamy: 0/1=Polygamy/Monogamy for males and females
-    infer_clones: 0/1=Clone inference =No/Yes
-    size_scaling: 0/1=Full sibship size scaling =No/Yes
-    sibship_prior: 0,1,2,3=No,weak,medium,strong sibship size prior; mean paternal &
+    update_af: int
+        0/1=Not updating/updating allele frequency
+    two_sexes: int
+        2/1=Dioecious/Monoecious species
+    inbreeding: int
+        0/1=No inbreeding/inbreeding
+    haplodiploid: int
+        0/1=Diploid species/HaploDiploid species
+    polygamy: int
+        0/1=Polygamy/Monogamy for males and females
+    infer_clones: int
+        0/1=Clone inference =No/Yes
+    size_scaling: int
+        0/1=Full sibship size scaling =No/Yes
+    sibship_prior: int
+        0,1,2,3=No,weak,medium,strong sibship size prior; mean paternal &
         maternal sibship size.
-    known_allele_fr: 0/1=Unknown/Known population allele frequency
-    nruns: Number of runs
-    run_length: Length of run
-    monitor_method: 0/1=Monitor method by Iterate#/Time in second
-    monitor_interval: Monitor interval in Iterate# / in seconds
-    windows_gui: 0/1 running in Windows GUI version?
-    analysis_method: 0/1/2 pairwise-likelihood score (PLS), full likelihood (FL), or
+    known_allele_fr: int
+        0/1=Unknown/Known population allele frequency
+    nruns: int 
+        Number of runs
+    run_length:
+        1,2,3,4 =  short, medium, long, very long runs
+    monitor_method: int
+        0/1=Monitor method by Iterate#/Time in second
+    monitor_interval: int
+        Monitor interval in Iterate# / in seconds
+    windows_gui: int
+        0/1 running in Windows GUI version?
+    analysis_method: int
+        0/1/2 pairwise-likelihood score (PLS), full likelihood (FL), or
         the FL and PLS combined (FPLS) method.
-    precision: 1/2/3=low/medium/high Precision for Fulllikelihood
-    parents_present: prob. of dad/mum included in the candidates
+    precision: int
+        1/2/3=low/medium/high Precision for Fulllikelihood
+    parents_present:int
+        prob. of dad/mum included in the candidates
     
-    ###########
-    # RETURNS #
-    ###########
+    Returns
+    -------
     A .dat file suitable for using in Colony 2.
     """
     # Open a file

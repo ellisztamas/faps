@@ -8,20 +8,29 @@ def lik_partition(paternity_probs, partitions, includes_null=True, ndraws=1000):
     Find the likelihood of a partition by sampling fathers for each sibship proportional to his probability.
     This then removes duplicate sets of fathers, and sets for which more than one family shares a father.
 
-    ARGUMENTS:
-    paternity_probs: An array of probabilties of paternity supplied by lik_transition() or pr_transition().
+    Parameters
+    ----------
+    paternity_probs: array
+        An array of probabilties of paternity. This is usually supplied by a call
+        to the `prob_array` function of a paternityArray object.
 
-    partitions: A 1-d array of integers labelling individuals into families. This should have as many
-    elements as there are individuals in paternity_probs.
+    partitions: array-like
+        1-d array of integers labelling individuals into families. This should
+        have as many elements as there are individuals in paternity_probs.
 
-    includes_null: Boolean index indicating whether the final column of paternity_probs contains the posterior
-    probabilities that each individual is sired by an unsampled father. Defaults to True.
+    includes_null: bool
+        If True, the final column of paternity_probs is treated as containing
+        the posterior probabilities that each individual is sired by an unsampled
+        father. Defaults to True.
 
-    ndraws: The number of paths through fathers to be drawn. Set to 1000 by default. If you find that
-    partitions have log likelihoods with differences less than 1 log likelihood unit apart you might want to
-    increase this to get a more accurate estimate of the likelihood.
+    ndraws: int
+        The number of paths through fathers to be drawn. Set to 1000 by default.
+        If you find that partitions have log likelihoods with differences less
+        than 1 log likelihood unit apart you might want to increase this to get
+        a more accurate estimate of the likelihood.
 
-    RETURNS
+    Returns
+    -------
     A float indicating log likelihood for the proposed partition.
     """
     # check the partition is the correct length!

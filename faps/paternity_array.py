@@ -6,7 +6,7 @@ from lik_unsampled_fathers import lik_unsampled_fathers
 def paternity_array(offspring, mothers, males, allele_freqs, mu, purge=None, missing_parents=None, selfing_rate=None):
     """
     Construct a paternityArray object for the offspring given known mothers and a set of
-    candidate fathers
+    candidate fathers using genotype data. Currently only SNP data is supported.
 
     Parameters
     ---------

@@ -2,12 +2,39 @@ import numpy as np
 
 class genotypeArray(object):
     """
-    Information about an array of parents or offspring with four components:
-    1. A three-dimensional array of genotype information of size, with axes denoting
-        number of individuals, number of loci, and the two alleles.
-    2. Names of each individual.
-    3. Names of the mother of each individual.
-    4. Names of the mother of each individual.
+    Genotype information about a sample of individuals, the identity of any known
+    relatives, and metadata about the dataset.
+    
+    Currently only SNP data are supported. Data are recorded as integers: zeros 
+    and twos indicate opposing homozygous genotypes, and ones heterozygous
+    genotypes. If marker data is missing at a locus, this is indicated by -9.
+    
+    Parameters
+    ----------
+    geno: array
+        3-dimensional array of genotype data indexing (1) individual, (2) locus,
+        and (3) chromosome pair.
+    names: array-like
+        Unique identifiers for each individual.
+    mothers: array-like
+        Identifiers of the mother of each individual, if known.
+    fathers: array-like
+        Identifiers of the father of each individual, if known.
+    markers: array-like, optional
+        Marker names.
+    
+    Returns
+    -------
+    size: int
+        Number of indivudals
+    nloci: int
+        Number of markers in the dataset
+    parents: array
+        Names of parent pairs for each indivudals.
+    families: array
+        List of unique full-sib families, based on the names of parents.
+    nfamilies: int
+        Number of full-sib families, based on the names of parents.
     """
     def __init__(self, geno, names, mothers, fathers, markers=None):
         self.geno      = geno
@@ -84,14 +111,19 @@ class genotypeArray(object):
 
         This is essentially a convenient wrapper for np.where().
 
-        ARGUMENTS:
-        parent: A string indicating whether the offspring's mother or father is to
+        Parameters
+        ----------
+        parent: str
+            A string indicating whether the offspring's mother or father is to
             be located. Valid arguments are 'mother', 'father' and 'parents',  or
             equivalently 'm' and 'f' respectively.
 
-        parent_names: 1-d array of parental names.
+        parent_names: array
+            1-d array of parental names to be found in the lists of mothers,
+            father or parents.
 
-        RETURNS:
+        Returns
+        -------
         A list of positions of the parent for each entry in offs_names.
         """
         if parent is 'mother' or parent is 'm':
@@ -112,10 +144,8 @@ class genotypeArray(object):
         If one or more individuals has at least one missing parent they will be assigned to the
         same full sibship group.
 
-        ARGUMENTS
-        offspring: a genotype object of offspring.
-
-        RETURNS
+        Returns
+        -------
         An array of integers with an entry for each offspring individual. Individuals are labelled
         according to their full sibling group.
         """
@@ -137,13 +167,19 @@ class genotypeArray(object):
     def subset(self, individuals=None, loci=None):
         """
         Subset the genotype array by individual or number of loci.
+        
+        To subset by both individuals and loci, call the function twice.
 
-        ARGUMENTS
-        individuals: an integer or list of integers indexing the individuals to be included.
+        Parameters
+        ----------
+        individuals: int
+            an integer or list of integers indexing the individuals to be included.
 
-        loci: a list of loci to be included.
+        loci: array=like
+            a list of loci to be included.
 
-        RETURNS
+        Returns
+        -------
         A genotype array with only the target individuals included.
         """
         # if no subsetting indices are given, return the whole object.
@@ -166,10 +202,12 @@ class genotypeArray(object):
         """
         Remove specific individuals from the genotype array.
 
-        ARGUMENTS
+        Parameters
+        ----------
         individuals: an integer or list of integers indexing the individuals to be removed.
 
-        RETURNS
+        Returns
+        -------
         A genotype array with the target individuals removed.
         """
         if isinstance(individuals, int):
@@ -188,10 +226,13 @@ class genotypeArray(object):
         For all alleles present draw mutations given error rate mu, then swap zeroes and
         ones in the array.
 
-        ARGUMENTS
-        mu: haploid genotyping error rate.
+        Parameters
+        ----------
+        mu: float
+            Haploid genotyping error rate.
 
-        RETURNS
+        Returns
+        -------
         A copy of the input genotype data, but with point mutations added.
         """
         ninds    = self.geno.shape[0]
@@ -211,10 +252,13 @@ class genotypeArray(object):
         """
         Add allelic dropouts to an array of genotypic data.
 
-        ARGUMENTS
-        dr: diploid dropout rate.
+        Parameters
+        ----------
+        dr: float
+            Diploid dropout rate.
 
-        RETURNS
+        Returns
+        -------
         A copy of the input genotype data, but with dropouts. Alleles which dropout are
         given as -9, in contrast to useful data which can only be 0 or 1 (or 2 for diploid
         genotypes).

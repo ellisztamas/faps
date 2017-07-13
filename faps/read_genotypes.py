@@ -6,23 +6,28 @@ def read_genotypes(path, genotype_col = 1, mothers_col=None, fathers_col=None, d
     """
     Import a text file containing of diploid SNP data to FAPS.
 
-    Retrieve the file containing genotype data, and convert this to a genotypeArray.
+    Retrieves the file containing genotype data, and convert this to a genotypeArray.
     If the data are for offspring individuals, optional columns can be used to indicate
     their labels to match up with a file of parental data. Otherwise, names for mothers
     and fathers are given as 'NA' in the output genotypeArray.
 
-    ARGUMENTS
-    path: filename path to locate the text file. This should contain unique ID labels for
-    	each individual in the first column, followed by (optional) columns of names for
-    	the mothers and fathers. After this include diploid genotype information for each
-    	locus, with a single column for each marker. The header row should include names
-    	for each locus, or else be left blank. Homozygotes should be labelled 0 or 2, and
-    	heterozygotes as 1. Missing data should be labelled 'NA'.
-    genotype_col: indicate the column index where genotype information begins.
-    mothers_col: If a column of maternal names has been included, indicate column
-    	index here.
+    Parameters
+    ----------
+    path: str
+        Filename path to locate the text file. This should contain unique ID
+        labels for each individual in the first column, followed by (optional)
+        columns of names for the mothers and fathers. After this include diploid
+        genotype information for each locus, with a single column for each marker.
+        The header row should include names for each locus, or else be left blank.
+        Homozygotes should be labelled 0 or 2, and heterozygotes as 1. Missing
+        data should be labelled 'NA'.
+    genotype_col: int
+        indicate the column index where genotype information begins.
+    mothers_col: int
+        If a column of maternal names has been included, indicate column index
+        here.
     fathers_col: If a column of paternal names has been included, indicate column
-    	index here.
+        index here.
     delimiter The symbol used to separate values in the text file. Defaults to
         commas.
 

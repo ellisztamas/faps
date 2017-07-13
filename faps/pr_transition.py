@@ -11,17 +11,20 @@ def pr_transition(offspring_diploid, maternal_diploid, male_diploid, offspring_g
     This function works with diploid genotypes, rather than a genotypeArray. Generally
     this is not called directly, but through lik_sampled_fathers() or similar.
     
-    ARGUMENTS:
-    offspring_diploid, maternal_diploid, male_diploid: arrays of diploid genotypes for
-        the offspring, mothers and fathers.
+    Parameters
+    ----------
+    offspring_diploid, maternal_diploid, male_diploid: array
+        arrays of diploid genotypes for the offspring, mothers and fathers.
     
-    offspring_genotype, maternal_genotype, male_genotype: Two-element lists of zeroes
-        and ones indicating the diploid genotype of males, mothers and offspring to be
-        considered.
+    offspring_genotype, maternal_genotype, male_genotype: list
+        Two-element lists of zeroes and ones indicating the diploid genotype of 
+        males, mothers and offspring to be considered.
     
-    mu: point estimate of the genotyping error rate.
+    mu: float
+        point estimate of the genotyping error rate.
     
-    RETURNS:
+    Returns
+    -------
     A 3-dimensional array of probabilities indexing offspring, candidate males, and loci.
     These are given in linear, rather than log space.
     """

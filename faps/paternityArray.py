@@ -8,20 +8,52 @@ class paternityArray(object):
     """
     Likelihoods of that any of a set of candidate males is the true father of each
     offspring individual, assuming the mother is known.
+    
+    If you are constructing a paternityArray from genotypeArray objects, it is
+    easier to call the wrapper fucntion `paternity_array`.
 
-    ARGUMENTS:
-    offspring: A genotypeArray of observed genotype data for the offspring.
-
-    mothers: an array of observed genotype data for the mothers. Data on mothers need
-        to be in the same order as those for the offspring. If a whole parent array is
-        used, this can be subsetted into the correct order using the option
-        mother_index.
-
-    males: A genotypeArray of observed genotype data for the candidate males.
-
-    allele_freqs: vector of population allele frequencies for the parents.
-
-    mu: point estimate of the genotyping error rate.
+    Parameters
+    ----------
+    likelihood: array
+        Array of log likelihoods of paternity. Rows index offspring and columns
+        candidates. The ij^th element is the likelihood that candidate j is the
+        sire of offspring i.
+    lik_absent: array
+        Vector of log likelihoods that the true sire of each offspring is missing
+        from the sample of candidate males, and hence that offspring alleles are
+        drawn from population allele frequencies. Should be the same length as
+        the number of rows in `likelihood`.
+    offspring: array-like
+        Identifiers for each offspring individual.
+    mothers: array-like
+        Identifiers of the mother of each individual, if these are known.
+    fathers: array-like
+        Identifiers of the father of each individual, if these are known.
+    candidates: array-like
+        Identifiers of the candidate fathers.
+    mu: float
+        Point estimate of the genotyping error rate. Note that sibship clustering
+        is unstable if mu_input is set to exactly zero. Any zero values will
+        therefore be set to a very small number close to zero (10^-12).
+    purge: float between zero or one, int, array-like, optional
+        Individuals who can be removed from the paternity array a priori. If
+        a float is given, that proportion of individuals is removed from the
+        array at random. Alternatively an integer or vector of integers
+        indexing specific individuals can be supplied.
+    missing_parents : float between zero and one, or 'NA', optional
+        Input value for the proportion of adults who are missing from the sample.
+        This is used to weight the probabilties of paternity for each father
+        relative to the probability that a father was not sampled. If this is
+        given as 'NA', no weighting is performed.
+    selfing_rate: float between zero and one, optional
+        Input value for the prior probability of self-fertilisation.
+        
+    Returns
+    -------
+    prob_array: array
+        Array of probabilities of paternity, accounting for the probability that
+        a sire has not been sampled. This is the array `likelihood` with vector
+        `lik_absent` appended, with rows normalised to sum to one.
     """
 
     def __init__(self, likelihood, lik_absent, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None):

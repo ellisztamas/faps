@@ -8,21 +8,27 @@ def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, family_na
     sire_list. If only the number of offspring are specified parents are mated at
     random from the base population.
     
-    ARGUMENTS:
-    parents: a genotype object of parents to be mated.
+    Parameters
+    ----------
+    parents: genotypeArray
+        Genotype information on the parents to be mated.
     
-    noffs: number of offspring to be produced. If specific dams and sires are
+    noffs: int
+        Number of offspring to be produced. If specific dams and sires are
         specified, this is ignored.
         
-    dam_list, sire_list: integer lists of positions of sires and dams to be mated.
+    dam_list, sire_list: lists
+        Integer lists of positions of sires and dams to be mated.
         Pairs are mated in order (i.e. the first dam with the first sire, and so
         forth). If used these two lists must be of the same length. If no
         arguments are given for either list, parents are mated at random with
         replacement, and the possibility of self-fertilisation.
     
-    family_name: an optional string denoting the name for this family.
+    family_name: str, optional
+        String denoting the name for this family.
     
-    RETURNS:
+    Returns
+    -------
     A genotypeArray object.
     """
     if dam_list is None and sire_list is None and noffs is None:

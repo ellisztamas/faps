@@ -8,6 +8,9 @@ class sibshipCluster(object):
     """
     Information on  the results of hierarchical clustering of an offspring array
     into full sibling groups.
+    
+    This is typcially not called directly, but through an instance of the function
+    `paternity_array`.
 
     Parameters
     ----------
@@ -22,15 +25,15 @@ class sibshipCluster(object):
 
     Returns
     -------
-    linkage_matrix: Matrix describing distances between individuals for creating
-        dendrograms.
-    partitions: Array of possible partition structures from the linkage matrix.
-
-    lik_partitions: log likelihood of ecah partition structure.
-
-    prob_partitions: log posterior probabilities of each partition structure.
-
-    mlpartition: maximum-likelihood partition structure.
+    prob_partitions: array
+        log posterior probabilities of each partition structure (`lik_partitions`
+        normalised to sum to one).
+    mlpartition: list
+        maximum-likelihood partition structure.
+    noffspring: int
+        Number of offspring in the array.
+    npartitions: int
+        Number of partitions recovered from the dendrogram.
     """
     def __init__(self, paternity_array, linkage_matrix, partitions, lik_partitions):
         self.paternity_array= paternity_array.prob_array
