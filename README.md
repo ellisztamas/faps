@@ -10,7 +10,7 @@ The basic workflow is:
 3. Cluster offspring into sibships
 4. Infer biological parameters integrating out uncertainty in paternity and sibship structre.
 
-At present only biallelic diploid SNPs are supported. However, the method depends only only being able to calculate likelihoods in stage two, and provided you can do this there is nothing stopping you applying this to other marker types (e.g. microsatellites) or genetic systems (e.g. polyploids). If you are interested in doing this, please contact me at thomas[dot]ellis[at]ebc[dot]uu[dot]se.
+At present only biallelic diploid SNPs are supported. However, the method depends only only being able to calculate likelihoods in stage two, and provided you can do this there is nothing stopping you applying this to other marker types (e.g. microsatellites) or genetic systems (e.g. polyploids). If you are interested in doing this, please contact me (see below).
 
 ## Installation
 ### Dependencies
@@ -35,7 +35,7 @@ This project was part of my PhD work. Since I have now moved on to a different i
 
 ## Authors and license information
 
-Tom Ellis
+Tom Ellis (thomas[dot]ellis[at]ebc[dot]uu[dot]se)
 
 FAPS is available under the MIT license. See LICENSE.txt for more information
 
