@@ -42,7 +42,8 @@ FAPS is available under the MIT license. See LICENSE.txt for more information
 
 ## To do
 
-- Upload code and data files to support FAPS publication
+- Upload code and data files to support FAPS publication to IST repository
+- Check file paths in these files.
 - Revise user guides
 - Upload to Pypi
 - Include installation notes for PyPi
