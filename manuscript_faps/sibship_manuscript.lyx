@@ -16,11 +16,11 @@
 \language_package default
 \inputencoding auto
 \fontencoding global
-\font_roman "default" "default"
+\font_roman "times" "default"
 \font_sans "default" "default"
 \font_typewriter "default" "default"
 \font_math "auto" "auto"
-\font_default_family default
+\font_default_family rmdefault
 \use_non_tex_fonts false
 \font_sc false
 \font_osf false
@@ -94,7 +94,7 @@ Tom J.
 \begin_inset Formula $^{1,3}$
 \end_inset
 
- and Nick H.
+ and Nicholas H.
  Barton
 \begin_inset Formula $^{1}$
 \end_inset
@@ -153,7 +153,9 @@ Fractional sibship assignment
 \series bold
 Keywords
 \series default
-: pedigree, sibship, paternity, parentage, fractional assignment, SNPs
+: pedigree, sibships, paternity, fractional assignment, 
+\emph on
+Antirrhinum
 \end_layout
 
 \begin_layout Standard
@@ -532,9 +534,9 @@ key "jones2010practical"
 \begin_inset Formula $\mathbf{G}$
 \end_inset
 
- should account for errors and missing data in genotype information, and
- the most appropriate method for doing this will depend on the kind of marker
- being used, such as microsatellites 
+ should account for errors and missing data in genotype information (Appendixes
+ 1 and 2), and the most appropriate method for doing this will depend on
+ the kind of marker being used, such as microsatellites 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "marshall1998,wang2004"
@@ -553,59 +555,6 @@ key "anderson_garza2006"
 
 \begin_layout Subsection
 Clustering into full sibships
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide true
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename figures/dendrogram.eps
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Partitioning into full sibships using a dendrogram.
- A dendrogram can be constructed from a matrix of relatedness for five (A
- to E) individuals in a half-sibling array.
- By bisecting the dendrogram at positions there are five unique partitions
- to group individuals into possible full sibships, labelled T
-\begin_inset Formula $_{1}$
-\end_inset
-
--T
-\begin_inset Formula $_{5}$
-\end_inset
-
-.
- Partition structures are shown on the right.
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:dendrogram"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -725,14 +674,7 @@ D
 \end_inset
 
  unique configurations (one for every internal node of the dendrogram, and
- one for the tips; see figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:dendrogram"
-
-\end_inset
-
-).
+ one for the tips; see figure 1).
  This approach provides a sample of likely partitions without the need to
  explore the sample space of possible partitions iteratively.
 \end_layout
@@ -1242,7 +1184,6 @@ We used FAPS' power analysis tools to investigate how well FAPS was able
 
 ), and the number of candidate males varies.
  In all simulations below we ran 500 replicates for each parameter set.
- Python code to run these simulations is provided at [not uploaded yet].
 \end_layout
 
 \begin_layout Standard
@@ -1517,68 +1458,10 @@ Method robustness
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-wide true
-sideways false
-status open
-
-\begin_layout Plain Layout
-\align center
-\begin_inset Graphics
-	filename figures/accuracy_evensibships.eps
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-FAPS performance for four families of five offspring, as the number of typed
- loci, number of candidate fathers and genotype error rate vary.
- Sub-figures show the probability of recovering the true partition (top),
- accuracy of full-sibling relationship reconstruction (middle) and posterior
- probabilty of the each true sire on its offspring (bottom).
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:FAPS-performance"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 For the even-sibship-sizes mating scenario, all metrics of performance increased
  with the number of genotyped loci, and decreased with increasing genotyping
  error rates and the number of candidate fathers in the sample (figures
- 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:FAPS-performance"
-
-\end_inset
-
- and 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:inferred-family-sizes"
-
-\end_inset
-
-).
+ 2 and 3).
  Using 
 \begin_inset Formula $\mu=0.0015$
 \end_inset
@@ -1592,24 +1475,10 @@ reference "fig:inferred-family-sizes"
 
 \begin_layout Standard
 We found that 50 loci sufficed to identify full-sibling relationships and
- true sires with >95% posterior probability (figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:FAPS-performance"
-
-\end_inset
-
-).
+ true sires with >95% posterior probability (figure 2).
  Under all simulation parameter sets the distribution of family sizes remains
  centred on the true value, followed by a peak at family size of one, then
- one minus the true family size (figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:inferred-family-sizes"
-
-\end_inset
-
-).
+ one minus the true family size (figure 3).
  Thus, when true full siblings were assigned as half-siblings, this was
  in most cases due to a single individual being assigned to a singleton
  family.
@@ -1621,14 +1490,7 @@ FAPS correctly inferred >99.9% true half-sibling relationship across all
  parameter sets, even for cases with few loci, high errors and many candidate
  fathers.
  Partition structures that join two true full sibships, or otherwise over-estima
-ted family size had posterior probabilities very close to zero (figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:inferred-family-sizes"
-
-\end_inset
-
-).
+ted family size had posterior probabilities very close to zero (figure 3).
 \end_layout
 
 \begin_layout Standard
@@ -1637,111 +1499,11 @@ Simulation results were very similar in three other mating scenarios simulated
  One notable departure from the patterns described above is that for the
  single-family and all-half-siblings scenarios FAPS recovered the true partition
  in all simulated datasets (supplementary figures 1-2).
- These scenarios represent the tip and base of the dendrogram (figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:dendrogram"
-
-\end_inset
-
-).
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide true
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename figures/famsizes_evensibships.eps
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Distribution of inferred family sizes under the even- sibship-sizes mating
- scenario as number of loci, genotype error rate and the number of candidate
- fathers vary.
- For clarity only an illustrative subset of the parameter sets are shown.
- In plots in which a single variable does not vary, plots show the cases
- for 50 loci, 
-\begin_inset Formula $\mu=0.0015$
-\end_inset
-
- and 250 candidates.
- The true family size is five in all cases.
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:inferred-family-sizes"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
+ These scenarios represent the tip and base of the dendrogram (figure 1).
 \end_layout
 
 \begin_layout Subsubsection
 Reduced variance in larger families
-\end_layout
-
-\begin_layout Standard
-\begin_inset Float figure
-wide false
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename figures/sibship_size.eps
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Accuracy of pairwise full-sibling-relationship reconstruction as full-sibship
- size increases.
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:increased-family-size"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
 \end_layout
 
 \begin_layout Standard
@@ -1758,70 +1520,10 @@ Comparison with Colony2
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-wide true
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename figures/colony2.eps
-
-\end_inset
-
-
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Full-sibship reconstruction of simulated arrays of four full sibships of
- five offspring by FAPS (solid lines) and Colony2 (dashed lines), showing
- (left) 
-\begin_inset Formula $P_{full}$
-\end_inset
-
- (circles) or 
-\begin_inset Formula $P_{half}$
-\end_inset
-
- (squares), and (right) the sizes of reconstructed families.
- In the latter only means for 100 (circles) and 2000 candidates (squares)
- are shown for clarity.
- 
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:colony2"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 For the parameter combination used here, neither FAPS nor Colony2 showed
  strong dependence on the number of candidate fathers in the sample.
  FAPS correctly identified true full- and half-sibship relationships with
- posterior probabilities close to one (figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:colony2"
-
-\end_inset
-
-).
+ posterior probabilities close to one (figure 5).
  The distribution of number of full sibships was centred on the true value
  of four.
  For simulations with a large number of candidate males there was also support
@@ -1883,52 +1585,6 @@ Most-probable candidates were located between 29 and 620 metres from the
 \end_layout
 
 \begin_layout Standard
-\begin_inset Float figure
-wide true
-sideways false
-status open
-
-\begin_layout Plain Layout
-\begin_inset Graphics
-	filename figures/amajus_family_sizes.eps
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Plain Layout
-\begin_inset Caption Standard
-
-\begin_layout Plain Layout
-Sibship and inference in 18 
-\emph on
-A.
- majus
-\emph default
- arrays showing posterior distributions of (left) the number of full sibships
- and (right) the size of each full sibship.
- Shaded regions show 95% credible intervals.
-\begin_inset CommandInset label
-LatexCommand label
-name "fig:amajus"
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
 We used FAPS to cluster 18 samples from wild-pollinated maternal families
  of 
 \emph on
@@ -1940,14 +1596,7 @@ A.
  unsampled was less than 0.001.
  The posterior distribution of family number implies that a sample of 17
  offspring comprised between six and 15 full-sibling families of up to five
- offspring (figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:amajus"
-
-\end_inset
-
-).
+ offspring (figure 6).
 \end_layout
 
 \begin_layout Section
@@ -2002,14 +1651,7 @@ key "almudevar2012new"
  When there were errors in sibship assignment, single offspring tended to
  splinter into families on their own.
  Most such errors were due to individuals being assigned to a family on
- their own, rather with other individuals in a larger family (figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:inferred-family-sizes"
-
-\end_inset
-
-).
+ their own, rather with other individuals in a larger family (figure 3).
  These errors typically occurred when an unrelated candidate male had a
  higher likelihood of paternity than did the true sire due to stochasticity
  in Mendelian sampling.
@@ -2047,14 +1689,7 @@ A.
  17 offspring per array represent only a tiny fraction of the total seeds
  in the array.
  It is therefore likely that these full sibships are substantially larger
- than implied in figure 
-\begin_inset CommandInset ref
-LatexCommand ref
-reference "fig:amajus"
-
-\end_inset
-
-.
+ than implied in figure 6.
  Nevertheless, this demonstrates that a single seed capsule contains offspring
  from a large number of pollen donors, either through many independent pollinato
 r visits, or through fewer visits by pollinators delivering mixed pollen
@@ -2212,6 +1847,7 @@ A.
 \emph default
 dataset, as well as scripts to run the the simulations are available at
  https://github.com/ellisztamas/faps/tree/master/supporting_simulations.
+ Data will also be uploaded to the IST Austria data repository on publication.
 \end_layout
 
 \begin_layout Section
@@ -2425,6 +2061,129 @@ options "apa"
 \end_inset
 
 
+\end_layout
+
+\begin_layout Section
+Figure legends
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Figure 1
+\series default
+: Partitioning into full sibships using a dendrogram.
+ A dendrogram can be constructed from a matrix of relatedness for five (A
+ to E) individuals in a half-sibling array.
+ By bisecting the dendrogram at positions there are five unique partitions
+ to group individuals into possible full sibships, labelled T
+\begin_inset Formula $_{1}$
+\end_inset
+
+-T
+\begin_inset Formula $_{5}$
+\end_inset
+
+.
+ Partition structures are shown on the right.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Figure
+\series default
+ 
+\series bold
+2
+\series default
+: FAPS performance for four families of five offspring, as the number of
+ typed loci, number of candidate fathers and genotype error rate vary.
+ Sub-figures show the probability of recovering the true partition (top),
+ accuracy of full-sibling relationship reconstruction (middle) and posterior
+ probabilty of the each true sire on its offspring (bottom).
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Figure 3
+\series default
+: Distribution of inferred family sizes under the even- sibship-sizes mating
+ scenario as number of loci, genotype error rate and the number of candidate
+ fathers vary.
+ For clarity only an illustrative subset of the parameter sets are shown.
+ In plots in which a single variable does not vary, plots show the cases
+ for 50 loci, 
+\begin_inset Formula $\mu=0.0015$
+\end_inset
+
+ and 250 candidates.
+ The true family size is five in all cases.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Figure 4: 
+\series default
+Accuracy of pairwise full-sibling-relationship reconstruction as full-sibship
+ size increases.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Figure 5: 
+\series default
+Full-sibship reconstruction of simulated arrays of four full sibships of
+ five offspring by FAPS (solid lines) and Colony2 (dashed lines), showing
+ (left) 
+\begin_inset Formula $P_{full}$
+\end_inset
+
+ (circles) or 
+\begin_inset Formula $P_{half}$
+\end_inset
+
+ (squares), and (right) the sizes of reconstructed families.
+ In the latter only means for 100 (circles) and 2000 candidates (squares)
+ are shown for clarity.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+
+\series bold
+Figure 6
+\series default
+: Sibship and inference in 18 
+\emph on
+A.
+ majus
+\emph default
+ arrays showing posterior distributions of (left) the number of full sibships
+ and (right) the size of each full sibship.
+ Shaded regions show 95% credible intervals.
 \end_layout
 
 \end_body
