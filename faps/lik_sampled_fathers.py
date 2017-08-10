@@ -41,7 +41,7 @@ def lik_sampled_fathers(offspring, mothers, males, mu, mother_index=None):
         mothers = mothers.subset(mother_index)
     # if mu is given as zero, set this to a very small number for sibship clustering
     if mu == 0: mu = 1.0 / 10**12
-
+    
     # Diploid genotypes of each dataset.
     male_diploid = males.geno.sum(2)
     moth_diploid = mothers.geno.sum(2)
