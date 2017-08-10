@@ -57,10 +57,11 @@ def lik_unsampled_fathers(offspring, mothers, allele_freqs, mu, mother_index=Non
     dropout_mask = offs_diploid + moth_diploid
     # array of the number of loci for each trio for which one or more individual had a dropout.
     n_dropouts =(dropout_mask < 0).sum(1)
-    
+    valid_loci   = males.nloci - (dropout_mask < 0).sum(1)
+
     # Correct for dropouts
     lik_trans[dropout_mask < 0] = 0 # set loci with one or more dropouts to zero to allow summing.
     lik_trans = lik_trans.sum(1) # sum over loci.
-    lik_trans = lik_trans - np.log(offspring.nloci - n_dropouts) # scale by the number of valid SNPs.
+    lik_trans = lik_trans * (float(offspring.nloci) / valid_loci) # scale by the number of valid SNPs.
     
     return lik_trans

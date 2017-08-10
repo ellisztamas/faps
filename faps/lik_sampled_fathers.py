@@ -60,11 +60,11 @@ def lik_sampled_fathers(offspring, mothers, males, mu, mother_index=None):
     # sum diploid genotypes to identify where the negative values (i.e. dropouts) are.
     dropout_mask = offs_diploid[:, np.newaxis] + moth_diploid[:, np.newaxis] + male_diploid[np.newaxis]
     # array of the number of loci for each trio for which one or more individual had a dropout.
-    n_dropouts =(dropout_mask < 0).sum(2)
+    valid_loci   = males.nloci - (dropout_mask < 0).sum(2)
 
     # Correct for dropouts
     lik_trans[dropout_mask < 0] = 0 # set loci with one or more dropouts to zero to allow summing.
     lik_trans = lik_trans.sum(2) # sum over loci.
-    lik_trans = lik_trans - np.log(males.nloci - n_dropouts) # scale by the number of valid SNPs.
-
+    lik_trans = lik_trans * (float(males.nloci) / valid_loci) # scale by the number of valid SNPs.
+    
     return lik_trans
