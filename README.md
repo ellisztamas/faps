@@ -42,9 +42,8 @@ FAPS is available under the MIT license. See LICENSE.txt for more information
 
 ## To do
 
-- Correct path names in the analysis files
+- split function for paternityArrays
 - Upload code and data files to support FAPS publication to IST repository
-- Check file paths in these files.
 - Revise user guides
 - Upload to Pypi
 - Include installation notes for PyPi
