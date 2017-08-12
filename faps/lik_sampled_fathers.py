@@ -41,7 +41,7 @@ def lik_sampled_fathers(offspring, mothers, males, mu, mother_index=None):
         mothers = mothers.subset(mother_index)
     # if mu is given as zero, set this to a very small number for sibship clustering
     if mu == 0: mu = 1.0 / 10**12
-    
+
     # Diploid genotypes of each dataset.
     male_diploid = males.geno.sum(2)
     moth_diploid = mothers.geno.sum(2)
@@ -54,7 +54,7 @@ def lik_sampled_fathers(offspring, mothers, males, mu, mother_index=None):
         for m in [0,1,2]:
             for f in [0,1,2]:
                 lik_trans += pr_transition(offs_diploid, moth_diploid, male_diploid, o, m, f, mu)
-    lik_trans = lik_trans / 27 # correct for the number of combinations.
+    lik_trans = lik_trans # correct for the number of combinations.
     with np.errstate(divide='ignore'): lik_trans = np.log(lik_trans) # convert to log.
 
     # sum diploid genotypes to identify where the negative values (i.e. dropouts) are.
@@ -66,5 +66,5 @@ def lik_sampled_fathers(offspring, mothers, males, mu, mother_index=None):
     lik_trans[dropout_mask < 0] = 0 # set loci with one or more dropouts to zero to allow summing.
     lik_trans = lik_trans.sum(2) # sum over loci.
     lik_trans = lik_trans * (float(males.nloci) / valid_loci) # scale by the number of valid SNPs.
-    
+
     return lik_trans
