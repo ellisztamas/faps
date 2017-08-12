@@ -353,7 +353,12 @@ class sibshipCluster(object):
         true_found = int(1 in nmatches) # return 1 if the true partition is in self.partitions, otherwise zero
 
         delta_lik  = round(self.lik_partitions.max() - lik_partition(self.paternity_array, true_part),2) # delta lik
-        nfamilies  = self.nfamilies()[progeny.nfamilies-1] # Prob correct number of families
+        # Prob correct number of families
+        if self.npartitions == 1:
+            if len(np.unique(progeny.fathers)) == 1: nfamilies = 1
+            else: nfamilies  = 0
+        else:
+            nfamilies = self.nfamilies()[progeny.nfamilies-1]
         # Pairwise sibship relationships
         full_sibs = self.partition_score(progeny.true_partition(), rtype='fs') # accuracy of full sibship reconstruction
         half_sibs = self.partition_score(progeny.true_partition(), rtype='hs') # accuracy of full sibship reconstruction

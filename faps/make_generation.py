@@ -80,7 +80,7 @@ def make_generation(allele_freqs, candidates, sires, offspring, missing_loci=0, 
         11. input selfing rate
         12. time in seconds to create paternityArray
         13. time in seconds to perform clustering
-        14. binary indiciator for whether the true partition was included in the 
+        14. binary indiciator for whether the true partition was included in the
             sample of partitions.
         15. difference in log likelihood for the maximum likelihood partition
             identified and the true partition. Positive values indicate that the
@@ -134,19 +134,6 @@ def make_generation(allele_freqs, candidates, sires, offspring, missing_loci=0, 
     nmatches   = 1.0*nmatches / true_part.shape[0]**2 # divide by matrix size.
     true_found = int(1 in nmatches) # return 1 if the true partition is in sc.partitions, otherwise zero
 
-    # sibship accuracies.
-    sib_fs = sc.partition_score(progeny.true_partition(), 'fs') # full-sibling relationships
-    sib_hs = sc.partition_score(progeny.true_partition(), 'hs') # half-sibling relationships
-    sib_all= sc.partition_score(progeny.true_partition(), 'all') # overall accuracy
-
-    # posterior probabilities of paternity.
-    pat_sires  = sc.prob_paternity(progeny.parent_index('f', adults.names)) # mean probabilities for true fathers
-    #pat_absent = sc.prob_paternity(patlik, None) # mean probabilities for absent fathers
-    pat_selfed = sc.prob_paternity(progeny.parent_index('m', adults.names)) # mean probabilities of selfing
-    # take the arithmetic means
-    pat_sires  = np.exp(pat_sires).mean()
-    #pat_absent = np.exp(pat_absent).mean()
-    pat_selfed = np.exp(pat_selfed).mean()
     # value to return for the proportion of missing fathers
     if   isinstance(unsampled_real, float): sprop = unsampled_real
     elif isinstance(unsampled_real, list):  sprop = float(len(unsampled_real)) / candidates
@@ -170,7 +157,7 @@ def make_generation(allele_freqs, candidates, sires, offspring, missing_loci=0, 
                 round(t3-t2,3)  # time in seconds to perform clustering
                 ])
     output = np.append(output, sc.accuracy(progeny, adults))
-    
+
     outlist = [output]
     if return_paternities: outlist = outlist + [patlik]
     if return_clusters:    outlist = outlist + [sc]
