@@ -8,7 +8,7 @@ class sibshipCluster(object):
     """
     Information on  the results of hierarchical clustering of an offspring array
     into full sibling groups.
-    
+
     This is typcially not called directly, but through an instance of the function
     `paternity_array`.
 
@@ -362,7 +362,7 @@ class sibshipCluster(object):
         # Mean probability of paternity for true sires included in the sample.
         sire_ix = progeny.parent_index('f', adults.names) # positions of the true sires.
         dad_present = np.isfinite(self.paternity_array[range(progeny.size), sire_ix]) # index those sires with non-zero probability of paternity
-        if dad_present.sum() > 0:
+        if any(dad_present):
             sire_probs = self.prob_paternity(sire_ix)
             sire_probs = sire_probs[dad_present]
             sire_probs = alogsumexp(sire_probs) - np.log(len(np.array(sire_probs))) # take mean
@@ -371,9 +371,9 @@ class sibshipCluster(object):
 
         # Mean probability of being absent for those sires with zero prob of paternity
         dad_absent = np.isinf(self.paternity_array[range(progeny.size), sire_ix]) # index sires with zero probability of paternity
-        if dad_absent.sum() > 0:
-            abs_probs = self.prob_paternity()[dad_absent]
-            abs_probs = alogsumexp(abs_probs) - - np.log(len(abs_probs))
+        if any(dad_absent):
+            abs_probs = self.prob_paternity()[dad_absent, -1]
+            abs_probs = alogsumexp(abs_probs) - np.log(len(abs_probs))
         else:
             abs_probs = np.nan
 
