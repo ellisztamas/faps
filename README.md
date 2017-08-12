@@ -47,5 +47,5 @@ FAPS is available under the MIT license. See LICENSE.txt for more information
 - Revise user guides
 - Upload to Pypi
 - Include installation notes for PyPi
-
+- replace hierarchical cluster with fastcluster
 
