@@ -1,5 +1,6 @@
 import numpy as np
 import fastcluster
+from scipy.cluster import hierarchy
 from alogsumexp import alogsumexp
 from sibshipCluster import sibshipCluster
 from pairwise_lik_fullsibs import pairwise_lik_fullsibs
