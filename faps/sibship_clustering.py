@@ -1,6 +1,6 @@
 import numpy as np
+import fastcluster
 from alogsumexp import alogsumexp
-from scipy.cluster import hierarchy
 from sibshipCluster import sibshipCluster
 from pairwise_lik_fullsibs import pairwise_lik_fullsibs
 from unique_rows import unique_rows
@@ -35,7 +35,7 @@ def sibship_clustering(paternity_array, MC_draws=1000, exp=False):
     # Matrix of pairwise probabilities of being full siblings.
     fullpairs = pairwise_lik_fullsibs(prob_paternities, exp)
     # Clustering matrix z.
-    z= hierarchy.linkage(abs(fullpairs[np.triu_indices(fullpairs.shape[0], 1)]), method='average')
+    z= fastcluster.linkage(abs(fullpairs[np.triu_indices(fullpairs.shape[0], 1)]), method='average')
     z = np.clip(z, 0, 10**12)
     # A list of thresholds to slice through the dendrogram
     thresholds = np.append(0,z[:,2])
