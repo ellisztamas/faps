@@ -354,9 +354,8 @@ class sibshipCluster(object):
 
         delta_lik  = round(self.lik_partitions.max() - lik_partition(self.paternity_array, true_part),2) # delta lik
         # Prob correct number of families
-        if self.npartitions == 1:
-            if len(np.unique(progeny.fathers)) == 1: nfamilies = 1
-            else: nfamilies  = 0
+        if len(self.nfamilies()) < progeny.nfamilies:
+            nfamilies  = 0
         else:
             nfamilies = self.nfamilies()[progeny.nfamilies-1]
         # Pairwise sibship relationships
