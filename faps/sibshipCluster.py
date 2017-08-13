@@ -301,8 +301,8 @@ class sibshipCluster(object):
                            round(full_sibs, 3),
                            round(half_sibs, 3),
                            round(all_sibs,  3),
-                           round(sire_probs,3),
-                           round(abs_probs,3)])
+                           round(np.exp(sire_probs),3),
+                           round(np.exp(abs_probs),3)])
         return output
 
     def mating_events(self, prob_mating ,unit_draws=1000, total_draws=10000, n_subsamples = 1000, subsample_size = None):
