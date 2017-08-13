@@ -25,7 +25,7 @@ Download the package from the repository by hitting 'clone or download'. Copy th
 The best way to install FAPS is to use Python's package manager, Pip. Instructions to do so can be found at that projects [documentation page](https://pip.pypa.io/en/stable/installing/). You can then either download the package form this repository, and run `pip install .` from the package directory. At some point I will also endeavour to get the package on the PyPi database.
 
 ## Using FAPS
-A user's guide is provided in this repository. This provides a fairly step-by-step guide to importing data, clustering offspring into sibship groups, and using those clusters to investigate the underlying biological processes. This was written with users in mind who have little experience of working with Python. These documents are written in [iPython](https://ipython.org/), which I highly recommend as an interactive environment for running analyses in Python.
+A user's guide is provided in this repository (see the docs folder). This provides a fairly step-by-step guide to importing data, clustering offspring into sibship groups, and using those clusters to investigate the underlying biological processes. This was written with users in mind who have little experience of working with Python. These documents are written in [iPython](https://ipython.org/), which I highly recommend as an interactive environment for running analyses in Python.
 
 ## Issues
 
@@ -44,8 +44,8 @@ FAPS is available under the MIT license. See LICENSE.txt for more information
 
 - split function for paternityArrays
 - Upload code and data files to support FAPS publication to IST repository
-- Revise user guides
+- User guide for matingEvent
+- Simulations from empirical data
 - Upload to Pypi
 - Include installation notes for PyPi
-- replace hierarchical cluster with fastcluster
-
+- support for microsats
