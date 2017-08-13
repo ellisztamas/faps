@@ -37,6 +37,7 @@ class matingEvents(object):
     """
     if len(unit_weights) != len(unit_events):
         raise ValueError('Length of unit_weights ({}) does not match that of unit_events ({}).'.format(len(unit_weights), len(unit_events)))
+
     def __init__(self, unit_names, unit_weights, unit_events, total_events, subsamples = None):
         self.unit_names   = unit_names
         self.unit_weights = unit_weights,
