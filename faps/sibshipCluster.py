@@ -228,92 +228,6 @@ class sibshipCluster(object):
 
             return probs
 
-    def prob_mating(self, phenotypes, null_probs=None, ndraws=1000):
-        """
-        Calulate the probability that the mother mated with a male of each of a set of phenotype
-        categories. Sires are drawn for each full-sib family for each partition proportional to
-        his probability of paternity for that family. Since two full-sibships cannot share the
-        same father, draws for which two families share a father are removed.
-
-        Optionally, a sample of candidates can also be drawn at random, or proportional to some
-        other distribution. This can act as a null distribution to determine whether observed
-        patterns can be explained by random mating.
-
-        Parameters
-        ----------
-        phenotypes: array-like
-            A vector of phenotypes for each male. Phenotypes should be divided into discrete
-            categories. For continuous variables, this can take the form of grouping values
-            into bins of a set width.
-        ndraws: int
-            Number of Monte Carlo draws for each family.
-        null_probs: array-like or 'uniform', optional
-            Optional argument specifying whether a second set of sires should be drawn corresponding
-            to random mating. To draw candidates at random, give 'uniform'. To draw candidates from
-            some other distribution, for example a function of distance, supply a vector of
-            probabilities for each candidate that sums to one. If no argument is supplied, no extra
-            draws are made.
-
-        Returns
-        -------
-        A tuple containing (1) names of each phenotype, (2) probabilities of mating with each phenotype
-        class, and optionally (3) probabilities of mating with each phenotyp class under random mating.
-        The term labelled 'absent' indicates the probability that the father was unsampled, and hence
-        has no phenotype information.
-        """
-
-        # exclude partitions with zero posterior probability
-        valid_partitions = self.partitions[np.isfinite(self.lik_partitions)]
-        # convert phenotypes to list, and concatenate term for missing fathers.
-        if isinstance(phenotypes, np.ndarray): phenotypes = phenotypes.tolist()
-        phenotypes = phenotypes + ['absent']
-
-        # list of unique phenotype categories.
-        cats = list(set(phenotypes))
-        cats = [str(cats[i]) for i in range(len(cats))]
-
-        # an empty matrix to store phenotypes
-        count_table = np.zeros([len(cats), len(valid_partitions)])
-
-        if null_probs is None:
-            for j in range(len(valid_partitions)): # loop over partitions
-                this_part    = valid_partitions[j]
-                these_dads   = draw_fathers(this_part, self.paternity_array, null_probs=None, ndraws=ndraws)
-                these_phens  = np.array(phenotypes)[these_dads] # subset list of phenotypes for the candidates sampled.
-                #print these_phens
-                these_counts = np.array([sum(cats[i] == these_phens) for i in range(len(cats))]) # how many sampled fathers match each phenotype
-                these_counts = these_counts.astype('float') / len(these_dads)
-                #print these_counts
-                count_table[:,j] = np.log(these_counts)
-            # weight by probability of each partition, and sum over partition structures.
-            logprobs = count_table + self.prob_partitions[np.isfinite(self.lik_partitions)]
-            logprobs = alogsumexp(logprobs, 1)
-
-            return cats, logprobs
-        else:
-            null_table = np.copy(count_table) # empty matrix for NULL fathers.
-            for j in range(len(valid_partitions)): # loop over partitions
-                this_part    = valid_partitions[j]
-                these_dads, null_dads = draw_fathers(this_part, self.paternity_array, null_probs, ndraws)
-                # # subset list of phenotypes for the candidates sampled.
-                these_phens  = np.array(phenotypes)[these_dads]
-                null_phens   = np.array(phenotypes)[null_dads]
-                # how many sampled fathers match each phenotype.
-                these_counts = np.array([sum(cats[i] == these_phens) for i in range(len(cats))])
-                these_counts = these_counts.astype('float') / len(these_dads)
-                count_table[:,j] = np.log(these_counts)
-                # how many null fathers match each phenotype.
-                null_counts = np.array([sum(cats[i] == null_phens) for i in range(len(cats))])
-                null_counts = null_counts.astype('float') / len(null_dads)
-                null_table[:,j] = np.log(null_counts)
-            # weight by probability of each partition, and sum over partition structures.
-            logprobs = count_table + self.prob_partitions[np.isfinite(self.lik_partitions)]
-            lognull  = null_table  + self.prob_partitions[np.isfinite(self.lik_partitions)]
-            logprobs = alogsumexp(logprobs, 1)
-            lognull  = alogsumexp(lognull, 1)
-
-            return cats, logprobs, lognull
-
     def accuracy(self, progeny, adults):
         """
         Summarise statistics about the accuracy of sibship reconstruction when
@@ -390,3 +304,74 @@ class sibshipCluster(object):
                            round(sire_probs,3),
                            round(abs_probs,3)])
         return output
+
+    def mating_events(self, prob_mating ,unit_draws=1000, total_draws=10000, n_subsamples = 1000, subsample_size = None):
+        """
+        Sample plausible mating events from a sibshipCluster. These can then be used
+        to infer mating patterns using and array of phenotypes for each male.
+
+        Indices for possible fathers are drawn based on genetic data, other pertinent
+        information (such as distance between parents), or a combination of these
+        types. Mating events are drawn for each partition in a `sibshipCluster` object.
+        These samples are then resampled in proportion to a weight on each unit.
+        To assess uncertainty, the aggregate mating events can be subsampled.
+
+        Parameters
+        ----------
+        prob_mating: array
+            Array of probabilities of paternity. Rows should index offspring and columns
+            candidate fathers.
+        unit_draws: int
+            Number of mating events to sample for each partition.
+        total_draws: int
+            Total number of mating events to resample for each partition.
+        n_subsamples: int, optional
+            Number of subsamples to draw from the total mating events.
+        subsample_size: int, optional
+            Number of mating events in each subsample. Defaults to 0.1*total_draws.
+
+        Returns
+        -------
+        A matingEvents object.
+        """
+        if not isinstance(prob_mating, np.ndarray):
+            raise TypeError('prob_mating is not a NumPy array.')
+        if prob_mating.shape[0] != self.paternity_array.shape[0]:
+            raise ValueError('Number of offspring in prob_mating ({}) does not match the sibshipCluster ({}).'.format(prob_mating.shape[0], self.paternity_array.shape[0]))
+
+        if not isinstance(unit_draws, int):
+            raise ValueError('unit_draws should be an integer.')
+        if not isinstance(total_draws, int):
+            raise ValueError('total_draws should be an integer.')
+        if not isinstance(n_subsamples, int) and n_subsamples is not None:
+            raise ValueError('n_subsamples should be an integer.')
+        if not isinstance(subsample_size, int) and subsample_size is not None:
+            raise ValueError('subsample_size should be an integer.')
+        if subsample_size is not None and subsample_size >= total_draws:
+            raise ValueError('Number of subsamples must be smaller than total_draws')
+
+        # only consider partitions that would account for at least one mating event.
+        valid_ix = np.around(total_draws * np.exp(self.prob_partitions)) >= 1
+        valid_partitions = self.partitions[valid_ix]
+        # draw mating events for each partition.
+        unit_events = [draw_fathers(valid_partitions[i], prob_mating, unit_draws) for i in range(len(valid_partitions))]
+        # resample weighted by probability
+        unit_weights = np.around(np.exp(self.prob_partitions[valid_ix]) * total_draws).astype('int')
+
+        # resample unit_events proportional to the prob of each unit.
+        total_events = [np.random.choice(unit_events[i], unit_weights[i], replace=True) for i in range(len(unit_events))]
+        total_events = [item for sublist in total_events for item in sublist]
+        total_events = np.array(total_events)
+
+        # subsample mating events.
+        if n_subsamples is None:
+            sub_events = "Mating events not subsampled."
+        else:
+            if subsample_size is None:
+                subsample_size = np.around(total_draws*0.1).astype('int')
+            sub_events = np.random.choice(total_events, n_subsamples*subsample_size, replace=True)
+            sub_events = sub_events.reshape([n_subsamples, subsample_size])
+
+        unit_names = np.arange(sc.npartitions)[valid_ix]
+
+        return matingEvents(unit_names, unit_weights/total_draws, unit_events, total_events, sub_events)
