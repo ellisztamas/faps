@@ -46,6 +46,7 @@ FAPS is available under the MIT license. See LICENSE.txt for more information
 - Upload code and data files to support FAPS publication to IST repository
 - User guide for matingEvent
 - Simulations from empirical data
+- remove table from simulation docs
 - Upload to Pypi
 - Include installation notes for PyPi
 - support for microsats
