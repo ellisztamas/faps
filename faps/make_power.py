@@ -123,7 +123,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
         if verbose:
             print "{} of each parameter combination will be performed.".format(replicates)
     else:
-        print "ERROR: R should be a positive integer giving the number of replicate simulations to be performed."
+        raise TypeError("R should be a positive integer giving the number of replicate simulations to be performed.")
         return None
 
     if isinstance(nloci, int):
@@ -133,23 +133,23 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
         if verbose:
             print "Simulating arrays with multiple number of loci: {}.".format(nloci)
     else:
-        print "ERROR: nloci should be a positive integer, or a list of positive integer."
+        raise TypeError("nloci should be a positive integer, or a list of positive integer.")
         return None
     if any([nloci[i] < 0 or not isinstance(nloci[i], int) for i in range(len(nloci))]):
-        print "ERROR: nloci should be a positive integer, or a list of positive integer."
+        raise TypeError("nloci should be a positive integer, or a list of positive integer.")
         return None
     stdout.flush()
 
     # set up allele frequencies
     if isinstance(allele_freqs, float):
         if allele_freqs <=0 or allele_freqs >=1:
-            print "ERROR: Allele frequencies must be between 0 and 1."
+            raise ValueError("Allele frequencies must be between 0 and 1.")
             return None
         elif verbose:
             print "Uniform minor allele frequency of {}.format(allele_freqs)."
     elif isinstance(allele_freqs, list) or isinstance(allele_freqs, np.ndarray):
         if any([allele_freqs[i] < 0 and allele_freqs[i] > 1 for i in range(len(allele_freqs))]):
-            print "ERROR: Allele frequencies must be between 0 and 1."
+            raise ValueError("Allele frequencies must be between 0 and 1.")
             return None
         if len(allele_freqs) == 2 and verbose:
                 print "Drawing allele frequencies between {} and {}.".format(allele_freqs[0], allele_freqs[1])
@@ -158,8 +158,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
             if verbose:
                 print "Allele frequencies supplied by the user."
     else:
-        print "ERROR: Allele frequencies must be given as a single value between 0 and 1,"
-        print "a list of two elements, or else a vector of frequencies for each locus."
+        raise ValueError("Allele frequencies must be given as a single value between 0 and 1, a list of two elements, or else a vector of frequencies for each locus.")
         return None
     stdout.flush()
 
@@ -172,7 +171,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
         if verbose is True:
             print "Simulating adult populations of multiple sizes: {}.".format(candidates)
     else:
-        print "ERROR: candidates should be an integer or list of integers."
+        raise TypeError("candidates should be an integer or list of integers.")
         return None
     stdout.flush()
 
@@ -182,17 +181,17 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
             if verbose is True:
                 print "Simulating {} families of {} offspring.".format(sires, offspring)
         else:
-            print "ERROR: If a single integer is given for sires, then offspring must be a single integer."
+            raise TypeError("If a single integer is given for sires, then offspring must be a single integer.")
             return None
     elif isinstance(sires, list) or isinstance(sires, np.ndarray):
         if isinstance(offspring, list) or isinstance(offspring, np.ndarray):
             if len(offspring) != len(sires):
-                print "ERROR: offspring should be the same length as sires."
+                raise ValueError("offspring should be the same length as sires.")
                 return None
             if verbose is True:
                 print "Simulating {} full-sib families.".format(len(sires))
         else:
-            print "ERROR: sires and offspring should either both be an integer, or should be lists of identical length."
+            raise TypeError("sires and offspring should either both be an integer, or should be lists of identical length.")
             return None
     stdout.flush()
 
@@ -205,7 +204,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
             print "{}% of per-locus genotypes will be removed at random.".format(100*missing_loci)
         missing_loci = [missing_loci]
     else:
-        print "ERROR: missing_loci should be an float or list of floats between 0 and 1."
+        raise ValueError("missing_loci should be an float or list of floats between 0 and 1.")
         return None
     stdout.flush()
 
@@ -218,10 +217,10 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
             print "{}% of alleles will be mutated at random.".format(mu_real*100)
         mu_real = [mu_real]
     else:
-        print "ERROR: mu_real should be an integer or list of integers."
+        raise ValueError("mu_real should be an integer or list of integers.")
         return None
     if any([mu_real[i] < 0 or mu_real[i] > 1 for i in range(len(mu_real))]):
-        print "ERROR: All values for mu_real should be between zero and one."
+        raise ValueError("All values for mu_real should be between zero and one.")
         return None
     #if len(mu_real) > 1 and len(missing_parents) > 1 and len(mu_real) > 1 != len(missing_parents) > 1:
         #print "ERROR: If multiple values are given for mu_real and missing_parents supply the same number of arguments for each.
@@ -242,10 +241,10 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
     else:
         print "mu_input should be a float or list of floats between zero and one, or else None."
     if len(mu_real) > 1 and len(mu_input) > 1 and len(mu_real) != len(mu_input):
-        print "ERROR: If multiple values are given for mu_real and mu_input supply the same number of arguments for each."
+        raise TypeError("If multiple values are given for mu_real and mu_input supply the same number of arguments for each.")
         return None
     if any([mu_input[i] < 0 and mu_input[i] >= 1 for i in range(len(mu_input))]) and mu_input is not None:
-        print "ERROR: All elements in mu_input must be greater or equal to zero and less than one."
+        raise ValueError("All elements in mu_input must be greater or equal to zero and less than one.")
         return None
     stdout.flush()
 
@@ -258,15 +257,15 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
             if verbose is True:
                 print "Removing {}% of the candidates at random.".format(np.round(unsampled_real*100, 2))
         else:
-            print "ERROR: If unsampled_real is a float it should be greater or equal to zero and less than one."
+            raise ValueError("If unsampled_real is a float it should be greater or equal to zero and less than one.")
             return None
     elif isinstance(unsampled_real, list) or isinstance(unsampled_real, np.ndarray):
         if any([not isinstance(unsampled_real[i], int) or unsampled_real[i] < 0 for i in range(len(unsampled_real))]) :
-            print "ERROR: if a list is given for unsampled_real, all values should be positive integers."
+            raise TypeError("If a list is given for unsampled_real, all values should be positive integers.")
         if verbose is True:
             print "Removing candidates in positions {}.".format(unsampled_real)
     else:
-        print "ERROR unsampled_real should either be a float between zero and one, or else a list indexing candidate individuals to unsampled_real."
+        raise TypeError("unsampled_real should either be a float between zero and one, or else a list indexing candidate individuals to unsampled_real.")
         return None
     stdout.flush()
 
@@ -297,10 +296,10 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
                 print "Proportion missing canidates set to {}.".format(unsampled_input)
             unsampled_input = [unsampled_input]
         else:
-            print "ERROR: unsampled_input should be an float or list of floats between zero and one."
+            raise TypeError("unsampled_input should be an float or list of floats between zero and one.")
             return None
         if any([unsampled_input[i] >1 or unsampled_input[i] < 0 for i in range(len(unsampled_input))]):
-            print "ERROR: unsampled_input should be an float or list of floats between zero and one."
+            raise TypeError("unsampled_input should be an float or list of floats between zero and one.")
             return None
     stdout.flush()
 
@@ -313,10 +312,10 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
         if verbose is True:
             print "Self-fertilisation rate of {}.".format(selfing_rate)
     else:
-        print "ERROR: selfing_rate should be an float or list of floats between zero and one."
+        raise TypeError("selfing_rate should be an float or list of floats between zero and one.")
         return None
     if any([selfing_rate[i] >1 or selfing_rate[i] < 0 for i in range(len(selfing_rate))]):
-        print "ERROR: selfing_rate should be an float or list of floats between zero and one."
+        raise ValueError("selfing_rate should be an float or list of floats between zero and one.")
         return None
     stdout.flush()
 
@@ -325,12 +324,12 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
         if verbose is True:
             print "Performing {} Monte Carlo draws for sibship inference.\n".format(cluster_draws)
     else:
-        print "ERROR: Give an integer value for cluster_draws."
+        raise TypeError("Give an integer value for cluster_draws.")
     if not isinstance(exp_clusters, bool):
-        print "ERROR: exp_clusters should be logical."
+        raise TypeError("exp_clusters should be logical.")
         return None
     if not isinstance(verbose, bool):
-        print "ERROR: exp_clusters should be logical."
+        raise TypeError("exp_clusters should be logical.")
         return None
     stdout.flush()
 
@@ -399,3 +398,4 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
         if return_clusters:    results = results + [clusters]
         return results
     else: return df(results, columns=cn)
+
