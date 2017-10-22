@@ -47,7 +47,16 @@ class paternityArray(object):
         given as 'NA', no weighting is performed.
     selfing_rate: float between zero and one, optional
         Input value for the prior probability of self-fertilisation.
-        
+    clashes: array, optional
+        Array of the numbers of opposing homozygous incompatibilities for all
+        possible parent-offspring dyads. This should have a row for every offspring
+        and a column for every candidate father, and hence be the same shape as 
+        the `likelihood` array.
+    max_clashes: integer
+        Maximum number of double-homozygous incompatibilities allowed between
+        offspring and candidate fathers. Dyads with more incompatibilities than
+        this will have their probability set to zero.
+    
     Returns
     -------
     prob_array: array
@@ -56,7 +65,7 @@ class paternityArray(object):
         `lik_absent` appended, with rows normalised to sum to one.
     """
 
-    def __init__(self, likelihood, lik_absent, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None):
+    def __init__(self, likelihood, lik_absent, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None, clashes = None, max_clashes = None):
         self.mu         = mu
         self.offspring  = offspring
         self.mothers    = mothers
@@ -64,9 +73,10 @@ class paternityArray(object):
         self.candidates = candidates
         self.lik_array  = likelihood
         self.lik_absent = lik_absent
-        self.prob_array = self.adjust_prob_array(purge, missing_parents, selfing_rate)
+        self.clashes    = clashes
+        self.prob_array = self.adjust_prob_array(purge, missing_parents, selfing_rate, max_clashes)
 
-    def adjust_prob_array(self, purge=None, missing_parents=None, selfing_rate=None):
+    def adjust_prob_array(self, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None):
         """
         Construct an array of log posterior probabilities that each offspring is sired
         by each of the candidate males in the sample, or that the true father is not
@@ -89,14 +99,19 @@ class paternityArray(object):
             given as 'NA', no weighting is performed.
         selfing_rate: float between zero and one, optional
             Input value for the prior probability of self-fertilisation.
+        max_clashes: integer
+            Maximum number of double-homozygous incompatibilities allowed between
+            offspring and candidate fathers. Dyads with more incompatibilities than
+            this will have their probability set to zero.
 
-        RETURNS:
+        Returns
+        -------
         An array with a row for each offspring individual and column for each
         candidate male, with an extra final column for the probability that the offspring
         is drawn from population allele frequencies. Each element is a log
         probability, and as such each row sums to one.
         """
-        lik_array = np.append(self.lik_array, self.lik_absent[:,np.newaxis], 1)
+        new_array = np.append(self.lik_array, self.lik_absent[:,np.newaxis], 1)
 
         # set log lik of individuals to be purged to -Inf
         if purge is not None:
@@ -106,9 +121,9 @@ class paternityArray(object):
                     print" Error: purge must be between zero and one."
                     return None
                 ix = np.random.choice(range(nc), np.round(purge*nc).astype('int'), replace=False)
-                with(np.errstate(divide='ignore')): lik_array[:, ix] = np.log(0)
+                with(np.errstate(divide='ignore')): new_array[:, ix] = np.log(0)
             elif isinstance(purge, list) or isinstance(purge, np.ndarray) or isinstance(purge, int):
-                with(np.errstate(divide='ignore')): lik_array[:, purge] = np.log(0)
+                with(np.errstate(divide='ignore')): new_array[:, purge] = np.log(0)
             else:
                 print "Error: purge should be a float or list of floats between zero and one."
                 return None
@@ -122,11 +137,11 @@ class paternityArray(object):
             # if missing_parents is between zero and one, correct the likelihoods.
             if missing_parents >0 and missing_parents <=1:
                 if missing_parents ==1: print "Warning: missing_parents set to 100%."
-                lik_array[:, -1] = lik_array[:, -1] + np.log(  missing_parents)
-                lik_array[:,:-1] = lik_array[:,:-1] + np.log(1-missing_parents)
+                new_array[:, -1] = new_array[:, -1] + np.log(  missing_parents)
+                new_array[:,:-1] = new_array[:,:-1] + np.log(1-missing_parents)
             # if missing_parents is 0, set the term for unrelated fathers to zero.
             if missing_parents == 0:
-                with(np.errstate(divide='ignore')): lik_array[:,-1] = np.log(0)
+                with(np.errstate(divide='ignore')): new_array[:,-1] = np.log(0)
 
         # correct for selfing rate.
         if selfing_rate is not None:
@@ -139,12 +154,31 @@ class paternityArray(object):
                 ix = range(len(self.offspring))
                 with np.errstate(divide='ignore'):
                     maternal_pos = [np.where(np.array(self.candidates) == self.mothers[i])[0][0] for i in ix] # positions of the mothers
-                    lik_array[ix, maternal_pos] += np.log(selfing_rate)
+                    new_array[ix, maternal_pos] += np.log(selfing_rate)
+
+        # set the likleihood dyads with many incompatibilities to zero
+        if max_clashes is not None:
+            if self.clashes is None:
+                raise TypeError("Unable to adjust for number of incompatible homozygous loci because `clashes` is not given.")
+                return None
+            elif self.clashes.shape != self.lik_array.shape:
+                raise ValueError("Shape of the likelihood array does not match that of the array of clashes.")
+                return None
+            else:
+                inc = np.append(self.clashes, np.zeros(self.lik_absent.shape)[:,np.newaxis], 1) # add an extra column so the shapes match
+                with np.errstate(divide='ignore'): 
+                    ix = np.log(inc <= max_clashes) # index elements to alter
+                new_array = new_array + ix
 
         # normalise so rows sum to one.
-        lik_array = lik_array - alogsumexp(lik_array, axis=1)[:,np.newaxis]
+        new_array = new_array - alogsumexp(new_array, axis=1)[:,np.newaxis]
 
-        return lik_array
+        return new_array
+
+        # normalise so rows sum to one.
+        new_array = new_array - alogsumexp(new_array, axis=1)[:,np.newaxis]
+
+        return new_array
 
     def write(self, path):
         """

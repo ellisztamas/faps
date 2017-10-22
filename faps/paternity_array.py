@@ -2,8 +2,9 @@ import numpy as np
 from paternityArray import paternityArray
 from lik_sampled_fathers import lik_sampled_fathers
 from lik_unsampled_fathers import lik_unsampled_fathers
+from incompatibilities import incompatibilities
 
-def paternity_array(offspring, mothers, males, allele_freqs, mu, purge=None, missing_parents=None, selfing_rate=None):
+def paternity_array(offspring, mothers, males, allele_freqs, mu, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None):
     """
     Construct a paternityArray object for the offspring given known mothers and a set of
     candidate fathers using genotype data. Currently only SNP data is supported.
@@ -43,5 +44,7 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, purge=None, mis
     # arrays of log likelihoods of paternity for sampled and unsampled fathers
     paternity_liks = lik_sampled_fathers(offspring, mothers, males, mu)
     missing_liks   = lik_unsampled_fathers(offspring, mothers, allele_freqs, mu)
+    # count up the number of opposing homozygous incompatibilities.
+    incomp = incompatibilities(males, offspring)
 
-    return paternityArray(paternity_liks, missing_liks, offspring.names, offspring.mothers, offspring.fathers, males.names, mu, purge, missing_parents, selfing_rate)
+    return paternityArray(paternity_liks, missing_liks, offspring.names, offspring.mothers, offspring.fathers, males.names, mu, purge, missing_parents, selfing_rate, incomp, max_clashes)
