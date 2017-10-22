@@ -79,7 +79,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
     Returns
     -------
     A data frame listing:
-        0. simulation index (when called from `make_power`)
+        0. simulation index
         1. number of loci
         2. allele frequencies
         3. number of candidates
@@ -129,7 +129,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
     if isinstance(nloci, int):
         if verbose: print "Simulating {} diploid loci.".format(nloci)
         nloci = [nloci]
-    elif isinstance(nloci, list) or isinstance(nloci, ndarray):
+    elif isinstance(nloci, list) or isinstance(nloci, np.ndarray):
         if verbose:
             print "Simulating arrays with multiple number of loci: {}.".format(nloci)
     else:
