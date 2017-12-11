@@ -1,4 +1,5 @@
 import numpy as np
+import os
 
 def export_to_colony(offspring, mothers, males, allele_freqs,
                      file_path, project_name, output_name, seed, dropout_rates, error_rates,
@@ -81,7 +82,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
     A .dat file suitable for using in Colony 2.
     """
     # Open a file
-    fo = open(file_path+project_name+'.dat', "wb")
+    fo = open(os.path.join(file_path, project_name) + '.dat', "wb")
     # write population parameters
     fo.write(project_name+' !Dataset name \n' + 
              output_name +' !Output file name \n' +
@@ -187,20 +188,28 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
     fo.write('\n')
 
     # Number of offspring with a known father in the sample of fathers.
-    fo.write(str(sum([offspring.fathers[i] in known_dads for i in range(offspring.size)])) + ' ' + str(n_incompatibilies) + ' ! Number of known father-offspring dyads \n')
-    # Pairs of dyads of offspring and known fathers
-    for o in range(offspring.size):
-        if offspring.fathers[o] in known_dads:
-            fo.write(offspring.names[o] + ' ' + known_dads[0] + '\n')
-    fo.write('\n')
+    if all(offspring.fathers == 'NA'):
+        fo.write(str(0) + ' ' + str(n_incompatibilies) + ' ! Number of known father-offspring dyads \n\n')
+    else:
+        check_dads = offspring.fathers[offspring.fathers != 'NA']
+        fo.write(str(sum([check_dads[i] in known_dads for i in range(offspring.size)])) + ' ' + str(n_incompatibilies) + ' ! Number of known father-offspring dyads \n')
+        # Pairs of dyads of offspring and known fathers
+        for o in range(offspring.size):
+            if offspring.fathers[o] in known_dads:
+                fo.write(offspring.names[o] + ' ' + known_dads[o] + '\n')
+        fo.write('\n')
 
     # Number of offspring with a known mother in the sample of mothers.
-    fo.write(str(sum([offspring.mothers[i] in known_mums for i in range(offspring.size)])) + ' ' + str(n_incompatibilies) + ' ! Number of known mother-offspring dyads \n')
-    # Pairs of dyads of offspring and known mothers
-    for o in range(offspring.size):
-        if offspring.mothers[o] in known_mums:
-            fo.write(offspring.names[o] + ' ' + known_mums[0] + '\n')
-    fo.write('\n')
+    if all(offspring.mothers == 'NA'):
+        fo.write(str(0) + ' ' + str(n_incompatibilies) + ' ! Number of known mother-offspring dyads \n\n')
+    else:
+        check_mums = offspring.mothers[offspring.mothers != 'NA']
+        fo.write(str(sum([check_mums[i] in known_mums for i in range(offspring.size)])) + ' ' + str(n_incompatibilies) + ' ! Number of known mother-offspring dyads \n')
+        # Pairs of dyads of offspring and known mothers
+        for o in range(offspring.size):
+            if offspring.mothers[o] in known_mums:
+                fo.write(offspring.names[o] + ' ' + known_mums[o] + '\n')
+        fo.write('\n')
 
     # Number of known paternal full sibships
     paternal_families = np.unique(known_dads)
