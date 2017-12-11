@@ -7,7 +7,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
                      haplodiploid= 0, polygamy = [0,0], infer_clones = 0, size_scaling = 1,
                      sibship_prior   = [0,1.0,1.0], known_allele_fr = 1, nruns = 1,
                      run_length = 2, monitor_method  = 0, monitor_interval= 100000,
-                     windows_gui = 0, analysis_method = 0,precision = 3, parents_present = [1,1],
+                     windows_gui = 0, analysis_method = 1, precision = 3, parents_present = [1,1],
                      n_incompatibilies = 3):
     """
     Export genotypeArray objects to run in Colony2.
