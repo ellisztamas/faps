@@ -80,23 +80,28 @@ This documents contains supplementary figures to support the manuscript
 \begin_inset Quotes eld
 \end_inset
 
-Inference from paternity and sibships accounting for uncertainty in genealogy
+
+\lang british
+Efficient inference of paternity and sibship inference given known maternity
+ via hierarchical clustering 
+\lang english
+
 \begin_inset Quotes erd
 \end_inset
 
- by Tom Ellis, David Field and Nick Barton.
+ by Tom Ellis, David Field and Nicholas Barton.
 \end_layout
 
 \begin_layout Standard
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename /home/thoel507/Dropbox/sibship_paper/figures/accuracy_onefamily.eps
+	filename figures/accuracy_singsibships.eps
 
 \end_inset
 
@@ -109,12 +114,13 @@ status open
 \begin_layout Plain Layout
 
 \lang british
-Single family: FAPS performance for one full sibship of 20 offspring, as
- the number of typed loci, number of candidate fathers and genotype error
- rate vary.
- Subfigures show the probabililty of recovering the true partition (top),
- accuracy of full-sibling relationship reconstruction (middle) and posterior
- probabilty of the each true sire on its offspring (bottom).
+Single family: FAPS performance for one full sibship of 20 offspring.
+ Sub-figures show the probability of recovering the true partition (A, B),
+ accuracy of full-sibling relationship reconstruction (C, D) and posterior
+ probabilty of the each true sire on its offspring (E.
+ F) as the number of typed loci (A, C, E), genotype error rate (B, D, E)
+ and number of candidate fathers (see legend) vary.
+ 
 \end_layout
 
 \end_inset
@@ -135,12 +141,12 @@ Single family: FAPS performance for one full sibship of 20 offspring, as
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename /home/thoel507/Dropbox/sibship_paper/figures/accuracy_nosibships.eps
+	filename figures/accuracy_manysibships.eps
 
 \end_inset
 
@@ -154,11 +160,13 @@ status open
 
 \lang british
 All half siblings: FAPS performance for twenty full sibships of 1 offspring
- each, as the number of typed loci, number of candidate fathers and genotype
- error rate vary.
- Subfigures show the probabililty of recovering the true partition (top),
- accuracy of half-sibling relationship reconstruction (middle) and posterior
- probabilty of the each true sire on its offspring (bottom).
+ each.
+ Sub-figures show the probability of recovering the true partition (A, B),
+ accuracy of full-sibling relationship reconstruction (C, D) and posterior
+ probabilty of the each true sire on its offspring (E.
+ F) as the number of typed loci (A, C, E), genotype error rate (B, D, E)
+ and number of candidate fathers (see legend) vary.
+ 
 \end_layout
 
 \end_inset
@@ -179,12 +187,12 @@ All half siblings: FAPS performance for twenty full sibships of 1 offspring
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename /home/thoel507/Dropbox/sibship_paper/figures/accuracy_skew.eps
+	filename figures/accuracy_skewsibships.eps
 
 \end_inset
 
@@ -198,11 +206,13 @@ status open
 Reproductive skew: 
 \lang british
 FAPS performance for one full sibship of ten individuals plus ten families
- of one offspring, as the number of typed loci, number of candidate fathers
- and genotype error rate vary.
- Subfigures show the probabililty of recovering the true partition (top),
- accuracy of full-sibling relationship reconstruction (middle) and posterior
- probabilty of the each true sire on its offspring (bottom).
+ of one offspring.
+ Sub-figures show the probability of recovering the true partition (A, B),
+ accuracy of full-sibling relationship reconstruction (C, D) and posterior
+ probabilty of the each true sire on its offspring (E.
+ F) as the number of typed loci (A, C, E), genotype error rate (B, D, E)
+ and number of candidate fathers (see legend) vary.
+ 
 \end_layout
 
 \end_inset
@@ -227,12 +237,12 @@ FAPS performance for one full sibship of ten individuals plus ten families
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename /home/thoel507/Dropbox/sibship_paper/figures/top_candidates_map.eps
+	filename figures/top_candidates_map.eps
 
 \end_inset
 
@@ -249,7 +259,7 @@ A.
  majus
 \emph default
  dataset.
- Overlaid are the positions of mother M0009 (red), the most probable (blue)
+ Overlaid are the positions of mother L1872 (red), the most probable (blue)
  and second most probable (yellow) candidates for sibships given the most
  probable partition.
 \end_layout
@@ -272,12 +282,12 @@ A.
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename /home/thoel507/Dropbox/sibship_paper/figures/m9_relatedness.eps
+	filename figures/L1872_relatedness.eps
 
 \end_inset
 
@@ -294,7 +304,7 @@ Histograms of coefficients of relatedness among pairs of candidate fathers
 A.
  majus 
 \emph default
-family M0009.
+family L1872.
  Histograms show all pairwise relationships (blue) and among most probable
  candidates only (green).
 \end_layout
@@ -317,12 +327,12 @@ family M0009.
 \begin_inset Float figure
 wide false
 sideways false
-status open
+status collapsed
 
 \begin_layout Plain Layout
 \align center
 \begin_inset Graphics
-	filename /home/thoel507/Dropbox/sibship_paper/figures/m9_missingdata.eps
+	filename figures/L1872_missingdata.eps
 
 \end_inset
 
@@ -336,7 +346,7 @@ Histograms of the proportion of loci which failed to amplify among candidate
 A.
  majus 
 \emph default
-family M0009, showing all candidate fathers in the population (left), and
+family L1872, showing all candidate fathers in the population (left), and
  most probable fathers only (right).
 \end_layout
 
