@@ -299,3 +299,30 @@ class genotypeArray(object):
         ix = [np.where(by == groups[i])[0] for i in range(len(groups))]
         output = [self.subset(ix[i]) for i in range(len(ix))]
         return output
+
+    def write(self, filename, delimiter = ','):
+	    """
+	    Write data in a genotypeArray to disk. Columns for known mothers and fathers
+	    are included, even if these are all NA.
+
+	    Parameters
+	    ----------
+	    filename: stre
+	    	System path to write to.
+	    delimiter: str, optional
+	    	Column delimiter. Defaults to commas to generate CSV files.
+
+	    Returns
+	    -------
+	    A text file at the specified path.
+
+	    """
+	    # Names of individuals, plus mothers and fathers.
+	    nms = np.column_stack([self.names, self.mothers, self.fathers])
+	    # format genotype data as a strings
+	    output = self.geno.sum(2).astype('str')
+	    output[output == '-18'] = 'NA' # coerce missing data to NA
+
+	    output = np.concatenate([nms, output], axis=1)
+	    header = 'ID,mother,father,' + ','.join(self.markers)
+	    savetxt('../data_files/self2.csv', output, delimiter=delimiter, fmt="%s", header=header, comments='')
