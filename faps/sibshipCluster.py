@@ -3,6 +3,7 @@ from alogsumexp import alogsumexp
 from relation_matrix import relation_matrix
 from draw_fathers import draw_fathers
 from lik_partition import lik_partition
+from matingEvents import matingEvents
 
 class sibshipCluster(object):
     """
@@ -44,6 +45,83 @@ class sibshipCluster(object):
         self.mlpartition    = self.partitions[np.where(self.lik_partitions == self.lik_partitions.max())[0][0]]
         self.noffspring     = len(self.mlpartition)
         self.npartitions    = len(self.lik_partitions)
+
+    def accuracy(self, progeny, adults):
+        """
+        Summarise statistics about the accuracy of sibship reconstruction when
+        the true genealogy is known (for example from simulated families).
+
+        Parameters
+        ----------
+        progeny: genotypeArray
+            Genotype information on the progeny
+        adults: genotypeArray
+            Genotype information on the adults
+
+        Returns
+        -------
+        Vector of statistics:
+        0. Binary indiciator for whether the true partition was included in the
+            sample of partitions.
+        1. Difference in log likelihood for the maximum likelihood partition
+            identified and the true partition. Positive values indicate that the
+            ML partition had greater support.
+        2. Posterior probability of the true number of families.
+        3. Mean probabilities that a pair of full sibs are identified as full sibs.
+        4. Mean probabilities that a pair of half sibs are identified as half sibs.
+        5. Mean probabilities that a pair of half or full sibs are correctly
+            assigned as such.
+        6. Mean probability of paternity of the true sires for those sires who
+            had been sampled (who had non-zero probability in the paternityArray).
+        7. Mean probability that the sire had not been sampled for those
+            individuals whose sire was truly absent (who had non-zero probability
+            in the paternityArray).
+        """
+        # Was the true partition idenitifed by sibship clustering.
+        true_part  = progeny.true_partition()
+        nmatches   = np.array([(relation_matrix(self.partitions[x]) == relation_matrix(true_part)).sum()
+                            for x in range(self.npartitions)])
+        nmatches   = 1.0*nmatches / true_part.shape[0]**2 # divide by matrix size.
+        true_found = int(1 in nmatches) # return 1 if the true partition is in self.partitions, otherwise zero
+
+        delta_lik  = round(self.lik_partitions.max() - lik_partition(self.paternity_array, true_part),2) # delta lik
+        # Prob correct number of families
+        if len(self.nfamilies()) < progeny.nfamilies:
+            nfamilies  = 0
+        else:
+            nfamilies = self.nfamilies()[progeny.nfamilies-1]
+        # Pairwise sibship relationships
+        full_sibs = self.partition_score(progeny.true_partition(), rtype='fs') # accuracy of full sibship reconstruction
+        half_sibs = self.partition_score(progeny.true_partition(), rtype='hs') # accuracy of full sibship reconstruction
+        all_sibs  = self.partition_score(progeny.true_partition(), rtype='all')# accuracy of full sibship reconstruction
+
+        # Mean probability of paternity for true sires included in the sample.
+        sire_ix = progeny.parent_index('f', adults.names) # positions of the true sires.
+        dad_present = np.isfinite(self.paternity_array[range(progeny.size), sire_ix]) # index those sires with non-zero probability of paternity
+        if any(dad_present):
+            sire_probs = self.prob_paternity(sire_ix)
+            sire_probs = sire_probs[dad_present]
+            sire_probs = alogsumexp(sire_probs) - np.log(len(np.array(sire_probs))) # take mean
+        else:
+            sire_probs = np.nan
+
+        # Mean probability of being absent for those sires with zero prob of paternity
+        dad_absent = np.isinf(self.paternity_array[range(progeny.size), sire_ix]) # index sires with zero probability of paternity
+        if any(dad_absent):
+            abs_probs = self.prob_paternity()[dad_absent, -1]
+            abs_probs = alogsumexp(abs_probs) - np.log(len(abs_probs))
+        else:
+            abs_probs = np.nan
+
+        output = np.array([true_found,
+                           delta_lik,
+                           round(nfamilies, 3),
+                           round(full_sibs, 3),
+                           round(half_sibs, 3),
+                           round(all_sibs,  3),
+                           round(np.exp(sire_probs),3),
+                           round(np.exp(abs_probs),3)])
+        return output
 
     def nfamilies(self):
         """
@@ -228,84 +306,7 @@ class sibshipCluster(object):
 
             return probs
 
-    def accuracy(self, progeny, adults):
-        """
-        Summarise statistics about the accuracy of sibship reconstruction when
-        the true genealogy is known (for example from simulated families).
-
-        Parameters
-        ----------
-        progeny: genotypeArray
-            Genotype information on the progeny
-        adults: genotypeArray
-            Genotype information on the adults
-
-        Returns
-        -------
-        Vector of statistics:
-        0. Binary indiciator for whether the true partition was included in the
-            sample of partitions.
-        1. Difference in log likelihood for the maximum likelihood partition
-            identified and the true partition. Positive values indicate that the
-            ML partition had greater support.
-        2. Posterior probability of the true number of families.
-        3. Mean probabilities that a pair of full sibs are identified as full sibs.
-        4. Mean probabilities that a pair of half sibs are identified as half sibs.
-        5. Mean probabilities that a pair of half or full sibs are correctly
-            assigned as such.
-        6. Mean probability of paternity of the true sires for those sires who
-            had been sampled (who had non-zero probability in the paternityArray).
-        7. Mean probability that the sire had not been sampled for those
-            individuals whose sire was truly absent (who had non-zero probability
-            in the paternityArray).
-        """
-        # Was the true partition idenitifed by sibship clustering.
-        true_part  = progeny.true_partition()
-        nmatches   = np.array([(relation_matrix(self.partitions[x]) == relation_matrix(true_part)).sum()
-                            for x in range(self.npartitions)])
-        nmatches   = 1.0*nmatches / true_part.shape[0]**2 # divide by matrix size.
-        true_found = int(1 in nmatches) # return 1 if the true partition is in self.partitions, otherwise zero
-
-        delta_lik  = round(self.lik_partitions.max() - lik_partition(self.paternity_array, true_part),2) # delta lik
-        # Prob correct number of families
-        if len(self.nfamilies()) < progeny.nfamilies:
-            nfamilies  = 0
-        else:
-            nfamilies = self.nfamilies()[progeny.nfamilies-1]
-        # Pairwise sibship relationships
-        full_sibs = self.partition_score(progeny.true_partition(), rtype='fs') # accuracy of full sibship reconstruction
-        half_sibs = self.partition_score(progeny.true_partition(), rtype='hs') # accuracy of full sibship reconstruction
-        all_sibs  = self.partition_score(progeny.true_partition(), rtype='all')# accuracy of full sibship reconstruction
-
-        # Mean probability of paternity for true sires included in the sample.
-        sire_ix = progeny.parent_index('f', adults.names) # positions of the true sires.
-        dad_present = np.isfinite(self.paternity_array[range(progeny.size), sire_ix]) # index those sires with non-zero probability of paternity
-        if any(dad_present):
-            sire_probs = self.prob_paternity(sire_ix)
-            sire_probs = sire_probs[dad_present]
-            sire_probs = alogsumexp(sire_probs) - np.log(len(np.array(sire_probs))) # take mean
-        else:
-            sire_probs = np.nan
-
-        # Mean probability of being absent for those sires with zero prob of paternity
-        dad_absent = np.isinf(self.paternity_array[range(progeny.size), sire_ix]) # index sires with zero probability of paternity
-        if any(dad_absent):
-            abs_probs = self.prob_paternity()[dad_absent, -1]
-            abs_probs = alogsumexp(abs_probs) - np.log(len(abs_probs))
-        else:
-            abs_probs = np.nan
-
-        output = np.array([true_found,
-                           delta_lik,
-                           round(nfamilies, 3),
-                           round(full_sibs, 3),
-                           round(half_sibs, 3),
-                           round(all_sibs,  3),
-                           round(np.exp(sire_probs),3),
-                           round(np.exp(abs_probs),3)])
-        return output
-
-    def mating_events(self, prob_mating ,unit_draws=1000, total_draws=10000, n_subsamples = 1000, subsample_size = None):
+    def mating_events(self, prob_mating, unit_draws=1000, total_draws=10000, n_subsamples = 1000, subsample_size = None):
         """
         Sample plausible mating events from a sibshipCluster. These can then be used
         to infer mating patterns using and array of phenotypes for each male.
@@ -334,8 +335,8 @@ class sibshipCluster(object):
         -------
         A matingEvents object.
         """
-        if not isinstance(prob_mating, np.ndarray):
-            raise TypeError('prob_mating is not a NumPy array.')
+        #if not isinstance(prob_mating, ndarray):
+        #    raise TypeError('prob_mating is not a NumPy array.')
         if prob_mating.shape[0] != self.paternity_array.shape[0]:
             raise ValueError('Number of offspring in prob_mating ({}) does not match the sibshipCluster ({}).'.format(prob_mating.shape[0], self.paternity_array.shape[0]))
 
@@ -355,6 +356,7 @@ class sibshipCluster(object):
         valid_partitions = self.partitions[valid_ix]
         # draw mating events for each partition.
         unit_events = [draw_fathers(valid_partitions[i], prob_mating, unit_draws) for i in range(len(valid_partitions))]
+        unit_events = filter(None, unit_events) # remove empty lists
         # resample weighted by probability
         unit_weights = np.around(np.exp(self.prob_partitions[valid_ix]) * total_draws).astype('int')
 
@@ -372,6 +374,6 @@ class sibshipCluster(object):
             sub_events = np.random.choice(total_events, n_subsamples*subsample_size, replace=True)
             sub_events = sub_events.reshape([n_subsamples, subsample_size])
 
-        unit_names = np.arange(sc.npartitions)[valid_ix]
+        unit_names = np.arange(self.npartitions)[valid_ix]
 
         return matingEvents(unit_names, unit_weights/total_draws, unit_events, total_events, sub_events)
