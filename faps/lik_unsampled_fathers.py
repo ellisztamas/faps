@@ -1,5 +1,6 @@
 import numpy as np
 from pr_unsampled import pr_unsampled
+from genotypeArray import genotypeArray
 
 def lik_unsampled_fathers(offspring, mothers, allele_freqs, mu, mother_index=None):
     """
@@ -35,6 +36,11 @@ def lik_unsampled_fathers(offspring, mothers, allele_freqs, mu, mother_index=Non
     -------
     A vector of log likelihoods with an elements for each offspring.
     """
+    if not isinstance(offspring, genotypeArray):
+        raise TypeError('offspring data not given as a genotypeArray.')
+    elif not isinstance(mothers, genotypeArray):
+        raise TypeError('mothers not given as a genotypeArray.')
+    
     # If a list of indices for the mothers has been given, subset the maternal data
     if mother_index is not None:
         mothers = mothers.subset(mother_index)

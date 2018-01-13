@@ -3,6 +3,7 @@ from paternityArray import paternityArray
 from lik_sampled_fathers import lik_sampled_fathers
 from lik_unsampled_fathers import lik_unsampled_fathers
 from incompatibilities import incompatibilities
+from genotypeArray import genotypeArray
 
 def paternity_array(offspring, mothers, males, allele_freqs, mu, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None):
     """
@@ -11,9 +12,9 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, purge=None, mis
 
     Parameters
     ---------
-    offspring: genotypeArray
+    offspring: genotypeArray, or list of genotypeArrays
         Observed genotype data for the offspring.
-    mothers: genotypeArray
+    mothers: genotypeArray, or list of genotypeArrays
         Observed genotype data for the offspring. Data on mothers need
         to be in the same order as those for the offspring.
     males: genotypeArray
@@ -39,12 +40,32 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, purge=None, mis
 
     Returns
     -------
-    A paternityArray.
+    A paternityArray, or a list of paternityArray objects.
     """
-    # arrays of log likelihoods of paternity for sampled and unsampled fathers
-    paternity_liks = lik_sampled_fathers(offspring, mothers, males, mu)
-    missing_liks   = lik_unsampled_fathers(offspring, mothers, allele_freqs, mu)
-    # count up the number of opposing homozygous incompatibilities.
-    incomp = incompatibilities(males, offspring)
-
-    return paternityArray(paternity_liks, missing_liks, offspring.names, offspring.mothers, offspring.fathers, males.names, mu, purge, missing_parents, selfing_rate, incomp, max_clashes)
+    if isinstance(offspring, genotypeArray) & isinstance(mothers, genotypeArray):
+        # arrays of log likelihoods of paternity for sampled and unsampled fathers
+        paternity_liks = lik_sampled_fathers(offspring, mothers, males, mu)
+        missing_liks   = lik_unsampled_fathers(offspring, mothers, allele_freqs, mu)
+        # count up the number of opposing homozygous incompatibilities.
+        incomp = incompatibilities(males, offspring)
+        
+        return paternityArray(paternity_liks, missing_liks, offspring.names, offspring.mothers, offspring.fathers, males.names, mu, purge, missing_parents, selfing_rate, incomp, max_clashes)
+        
+    elif isinstance(offspring, list) & isinstance(mothers, list):
+        if len(offspring) != len(mothers):
+            raise ValueError('Lists of genotypeArrays are of different lengths.')
+        
+        output = []
+        for i in range(len(offspring)):
+            # arrays of log likelihoods of paternity for sampled and unsampled fathers
+            paternity_liks = lik_sampled_fathers(  offspring[i], mothers[i], males, mu)
+            missing_liks   = lik_unsampled_fathers(offspring[i], mothers[i], allele_freqs, mu)
+            # count up the number of opposing homozygous incompatibilities.
+            incomp = incompatibilities(males, offspring[i])
+            # create paternityArray
+            patlik = paternityArray(paternity_liks, missing_liks, offspring[i].names, offspring[i].mothers, offspring[i].fathers, males.names, mu, purge, missing_parents, selfing_rate, incomp, max_clashes)
+            output = output + [patlik]
+        return output
+    
+    else:
+        raise TypeError('offspring and mothers should be genotype arrays, or else lists thereof.')

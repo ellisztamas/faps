@@ -186,6 +186,8 @@ class genotypeArray(object):
         if individuals is None and loci is None:
             return self
         if individuals is not None:
+            if isinstance(individuals, int):
+                individuals = [individuals]
             output = genotypeArray(self.geno[individuals], self.names[individuals],
                                     self.mothers[individuals], self.fathers[individuals], markers=self.markers)
         if loci is not None:
@@ -325,4 +327,4 @@ class genotypeArray(object):
 
 	    output = np.concatenate([nms, output], axis=1)
 	    header = 'ID,mother,father,' + ','.join(self.markers)
-	    savetxt('../data_files/self2.csv', output, delimiter=delimiter, fmt="%s", header=header, comments='')
+	    np.savetxt(filename, output, delimiter=delimiter, fmt="%s", header=header, comments='')
