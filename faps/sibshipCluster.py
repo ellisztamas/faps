@@ -1,9 +1,11 @@
 import numpy as np
+from paternityArray import paternityArray
+from matingEvents import matingEvents
 from alogsumexp import alogsumexp
 from relation_matrix import relation_matrix
 from draw_fathers import draw_fathers
 from lik_partition import lik_partition
-from matingEvents import matingEvents
+
 
 class sibshipCluster(object):
     """
@@ -312,7 +314,7 @@ class sibshipCluster(object):
 
             return probs
             
-    def mating_events(self, paternity, unit_draws=1000, total_draws=10000, n_subsamples = 1000, subsample_size = None):
+    def mating_events(self, paternity, unit_draws=1000, total_draws=10000, n_subsamples = None, subsample_size = None, null_probs=None):
         """
         Sample plausible mating events from a sibshipCluster. These can then be used
         to infer mating patterns using and array of phenotypes for each male.
@@ -322,6 +324,12 @@ class sibshipCluster(object):
         types. Mating events are drawn for each partition in a `sibshipCluster` object.
         These samples are then resampled in proportion to a weight on each unit.
         To assess uncertainty, the aggregate mating events can be subsampled.
+
+        You can also supply an array of probabilities that a given father is the sire
+        based on some appropriare null model, which can then be compared with observed
+        mating patterns. For example, to test whether observed patterns could be
+        explained by random mating but with spatial clustering, you could supply an 
+        array of probabilities derived from an appropriate dispersal function.
 
         Parameters
         ----------
@@ -336,6 +344,11 @@ class sibshipCluster(object):
             Number of subsamples to draw from the total mating events.
         subsample_size: int, optional
             Number of mating events in each subsample. Defaults to 0.1*total_draws.
+        null_probs: array, optional
+            Array of probabilities for paternity if this were not based on marker
+            data. This should be the same shape as the prob_array in the paternity
+            argument, i.e. have a row for every offspring and a column for every
+            candidate.
 
         Returns
         -------
@@ -357,10 +370,19 @@ class sibshipCluster(object):
         if subsample_size is not None and subsample_size >= total_draws:
             raise ValueError('Number of subsamples must be smaller than total_draws')
 
-        prob_array = paternity.prob_array
         # only consider partitions that would account for at least one mating event.
         valid_ix = np.around(total_draws * np.exp(self.prob_partitions)) >= 1
         valid_partitions = self.partitions[valid_ix]
+
+        if isinstance(null_probs, np.ndarray):
+            if null_probs.shape != paternity.prob_array.shape:
+                raise ValueError('If null_probs is used it should have a row for every offspring and a column for every candidate.')
+            prob_array = null_probs
+        elif null_probs is None:
+            prob_array = paternity.prob_array
+        else:
+            raise TypeError('null_probs should be an array, or None.')
+        
         # draw mating events for each partition.
         unit_events = [draw_fathers(i, prob_array, unit_draws) for i in valid_partitions]
 
@@ -383,4 +405,4 @@ class sibshipCluster(object):
 
         unit_names = paternity.offspring[valid_ix]
 
-        return matingEvents(unit_names, paternity.candidates, unit_weights/total_draws, unit_events, total_events, sub_events, )
+        return matingEvents(unit_names, paternity.candidates, unit_weights/total_draws, unit_events, total_events, sub_events)

@@ -59,3 +59,5 @@ def draw_fathers(partition, paternity_probs, ndraws=1000, max_tries=100):
     valid  = [all((counts[i] == 1) & (counts[i] != nfathers))   for i in range(len(counts))]
     path_samples = np.array(path_samples)[np.array(valid)]
     output = [val for sublist in path_samples for val in sublist]
+
+    return np.array(output)

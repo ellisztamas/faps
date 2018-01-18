@@ -22,11 +22,13 @@ class matingEvents(object):
     ----------
     unit_names: array or list
         Names for each unit.
+    candidates: array or list
+        Names for each candidate.
     unit_weights: vector
         Relative contribution of each unit. If the matingEvent object is derived
         from a sibshipCluster object, this is the relative probability of each
         partition that had a non-zero probability.
-    unit_events: list
+    unit_events: array or list
         List of arrays, each of which documents mating events for a single unit.
     total_events: array
         Mating events for the whole sample. This is a resample of elements in
@@ -35,17 +37,19 @@ class matingEvents(object):
     subsamples: array, optional
         Array of subsamples of total_mating events.
     """
-    if len(unit_weights) != len(unit_events):
-        raise ValueError('Length of unit_weights ({}) does not match that of unit_events ({}).'.format(len(unit_weights), len(unit_events)))
 
-    def __init__(self, unit_names, unit_weights, unit_events, total_events, subsamples = None):
+    def __init__(self, unit_names, candidates, unit_weights, unit_events, total_events, subsamples = None):
         self.unit_names   = unit_names
+        self.candidates   = candidates
         self.unit_weights = unit_weights,
         self.unit_events  = unit_events
         self.total_events = total_events
         self.subsamples   = subsamples
+    
+    #if len(self.unit_weights) != len(self.unit_events):
+    #    raise ValueError('Length of unit_weights ({}) does not match that of unit_events ({}).'.format(len(self.unit_weights), len(self.unit_events)))
 
-    def subsample(self, n_subsamples = 1000, subsample_size = None):
+    def draw_subsample(self, n_subsamples = 1000, subsample_size = None):
         """
         Subsample total_events.
 
@@ -70,3 +74,5 @@ class matingEvents(object):
 
         sub_events = np.random.choice(self.total_events, n_subsamples*subsample_size, replace=True)
         sub_events = sub_events.reshape([n_subsamples, subsample_size])
+
+        return sub_events
