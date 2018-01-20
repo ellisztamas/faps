@@ -180,15 +180,45 @@ class paternityArray(object):
 
         return new_array
 
-    def write(self, path):
+    def split(self, by, purge=None, missing_parents=None, selfing_rate=None, max_clashes = None):
+        """
+        Split up a paternityArray into groups according to some grouping
+        factor. For example, divide an array containing genotype data for
+        multiple half-sibling arrays by the ID of their mothers.
+
+        Parameters
+        ----------
+        by: array-like
+            Vector containing grouping labels for each individual.
+
+        Returns
+        -------
+        A list of paternityArray objects.
+        """
+        groups = np.unique(by)
+        # indices for each family
+        ix = [np.where(by == groups[i])[0] for i in range(len(groups))]
+        # create new paternityArray objects for each family.
+        if self.clashes is None:
+            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, None, max_clashes) for i in ix]
+        else:
+            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, self.clashes[i], max_clashes) for i in ix]
+
+        return output
+        
+    def write(self, path, decimals=3):
         """
         Write a matrix of (unnormalised) likelihoods of paternity to disk.
 
-        ARGUMENTS:
+        Parameters
+        ----------
+        path: str
+            Path to write to.
+        decimals: int
+            Number of decimal places to be saved to disk for likleihood values.
 
-        path Path to write to.
-
-        RETURNS:
+        Returns
+        -------
         A CSV file indexing offspring ID, mother ID, followed by a matrix of likelihoods
         that each candidate male is the true father of each individual. The final
         column is the likelihood that the paternal alleles are drawn from population
@@ -198,11 +228,11 @@ class paternityArray(object):
         # append likelihoods of abset fathers on the back.
         newdata = np.append(self.offspring[:,np.newaxis],
                         np.append(self.mothers[:,np.newaxis],
-                                  np.append(self.lik_array,
-                                            self.lik_absent[:,np.newaxis],
+                                  np.append(np.around(self.lik_array, decimals),
+                                            np.around(self.lik_absent[:,np.newaxis], decimals),
                                             1),1),1)
         # headers
-        cn = ''.join(self.candidates )
+        cn = ','.join(self.candidates )
         cn = 'offspringID,motherID,' + cn + ',missing_father'
         # write to disk
         np.savetxt(path, newdata, fmt='%s', delimiter=',', comments='', header=cn)
