@@ -375,8 +375,6 @@ class sibshipCluster(object):
         valid_partitions = self.partitions[valid_ix]
 
         if isinstance(null_probs, np.ndarray):
-            if null_probs.shape != paternity.prob_array.shape:
-                raise ValueError('If null_probs is used it should have a row for every offspring and a column for every candidate.')
             prob_array = null_probs
         elif null_probs is None:
             prob_array = paternity.prob_array
