@@ -14,6 +14,7 @@ from make_generation import make_generation
 from make_power import make_power
 # paternity arrays
 from effective_nloci import effective_nloci
+from incompatibilities import incompatibilities
 from paternityArray import paternityArray
 from pr_transition import pr_transition
 from lik_sampled_fathers import lik_sampled_fathers
@@ -24,4 +25,7 @@ from draw_fathers import draw_fathers
 from sibshipCluster import sibshipCluster
 from lik_partition import lik_partition
 from sibship_clustering import sibship_clustering
-
+# mating events
+from matingEvents import matingEvents
+from mating_events import mating_events
+from mating_summary import mating_summary
