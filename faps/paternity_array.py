@@ -43,55 +43,38 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, purge=None, mis
     -------
     A paternityArray, or a list of paternityArray objects.
     """
+    if not isinstance(offspring, genotypeArray):
+        raise TypeError('offspring is not a genotypeArray')
+    if not isinstance(mothers, genotypeArray):
+        raise TypeError('mothers is not a genotypeArray')
+    if not isinstance(males, genotypeArray):
+        raise TypeError('males is not a genotypeArray')
     if mu == 0:
         mu = 10**-12
         warn('Setting error rate to exactly zero causes clustering to be unstable. mu set to 10**-12')
+
     if isinstance(offspring, genotypeArray) & isinstance(mothers, genotypeArray):
             # take the log of transition probabilities, and assign dropout_masks.
             prob_f, prob_a = transition_probability(offspring, mothers, males, allele_freqs, mu)
-            drop_f, drop_a = dropout_mask(offspring, mothers, males)
-            prob_f = np.log(prob_f)
-            prob_a = np.log(prob_a)
-            # set log likelihood loci with dropouts to zero.
-            prob_f[drop_f] = 0
-            prob_a[drop_a] = 0
-            # dropouts for candidates
-            corr = float(offspring.nloci) / (1-drop_f).sum(2)
-            prob_f = prob_f.sum(2) * corr
-            # dropouts for missing father
-            corr = float(offspring.nloci) / (1- drop_a).sum(1)
-            prob_a = prob_a.sum(1) * corr
             # array of opposing homozygous genotypes.
             incomp = incompatibilities(males, offspring)
 
             return paternityArray(prob_f, prob_a, offspring.names, offspring.mothers, offspring.fathers, males.names, mu, purge, missing_parents, selfing_rate, incomp, max_clashes)
         
-        elif isinstance(offspring, list) & isinstance(mothers, list):
-            if len(offspring) != len(mothers):
-                raise ValueError('Lists of genotypeArrays are of different lengths.')
-            
-            output = []
-            for i in range(len(offspring)):
-                # take the log of transition probabilities, and assign dropout_masks.
-                prob_f, prob_a = transition_probability(offspring[i], mothers[i], males, allele_freqs, mu)
-                drop_f, drop_a = dropout_mask(offspring[i], mothers[i], males)
-                prob_f = np.log(prob_f)
-                prob_a = np.log(prob_a)
-                # set log likelihood loci with dropouts to zero.
-                prob_f[drop_f] = 0
-                prob_a[drop_a] = 0
-                # dropouts for candidates
-                corr = float(offspring[i].nloci) / (1-drop_f).sum(2)
-                prob_f = prob_f.sum(2) * corr
-                # dropouts for missing father
-                corr = float(offspring[i].nloci) / (1- drop_a).sum(1)
-                prob_a = prob_a.sum(1) * corr
-                # array of opposing homozygous genotypes.
-                incomp = incompatibilities(males, offspring[i])
-                # create paternityArray and send to output
-                patlik = paternityArray(prob_f, prob_a, offspring[i].names, offspring[i].mothers, offspring[i].fathers, males.names, mu, purge, missing_parents, selfing_rate, incomp, max_clashes)
-                output = output + [patlik]
-            return output
+    elif isinstance(offspring, list) & isinstance(mothers, list):
+        if len(offspring) != len(mothers):
+            raise ValueError('Lists of genotypeArrays are of different lengths.')
         
-        else:
-            raise TypeError('offspring and mothers should be genotype arrays, or else lists thereof.')
+        output = []
+        for i in range(len(offspring)):
+            # take the log of transition probabilities, and assign dropout_masks.
+            prob_f, prob_a = transition_probability(offspring[i], mothers[i], males, allele_freqs, mu)
+            # array of opposing homozygous genotypes.
+            incomp = incompatibilities(males, offspring[i])
+            # create paternityArray and send to output
+            patlik = paternityArray(prob_f, prob_a, offspring[i].names, offspring[i].mothers, offspring[i].fathers, males.names, mu, purge, missing_parents, selfing_rate, incomp, max_clashes)
+            output = output + [patlik]
+        return output
+    
+    else:
+        raise TypeError('offspring and mothers should be genotype arrays, or else lists thereof.')

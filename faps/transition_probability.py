@@ -22,18 +22,24 @@ def transition_probability(offspring, mothers, males, allele_freqs, mu, inverse=
     mu: float between zero and one
         Point estimate of the genotyping error rate. Clustering is unstable if
         mu_input is set to exactly zero.
-    reciprocal: bool, optional
+    inverse: bool, optional
         If true, function return 1-transition probabilities, or the
         probability of *not* generating the offspring given maternal and
         candidate paternal genotypes
-    
+
     Returns
     -------
-    0. Array indexing offspring x candidates x number of loci for per-locus
-    transition probabilities
-    1. Array indexing offspring x number of loci for transition probabilities
+    0. Array indexing offspring x candidates transition probabilities.
+    1. Array indexing offspring only for transition probabilities
     from population allele frequencies
     """
+    if not isinstance(offspring, fp.genotypeArray):
+        raise TypeError('offspring is not a genotypeArray')
+    if not isinstance(mothers, fp.genotypeArray):
+        raise TypeError('mothers is not a genotypeArray')
+    if not isinstance(males, fp.genotypeArray):
+        raise TypeError('males is not a genotypeArray')
+
     trans_prob_array = np.array([[[1,  0.5, 0  ],
                                   [0.5,0.25,0  ],
                                   [0,  0,   0  ]],
@@ -82,5 +88,21 @@ def transition_probability(offspring, mothers, males, allele_freqs, mu, inverse=
 
         prob_f += prob_m[:, np.newaxis] * pr_males[np.newaxis]
         prob_a += prob_m * af[f][np.newaxis]
-        
+    
+    # indices of loci with missing data.
+    drop_f = (male_diploid == -18)[np.newaxis] + (offspring_diploid == -18)[:, np.newaxis] + (maternal_diploid == -18)[:,np.newaxis]
+    drop_a = (offspring_diploid == -18) + (maternal_diploid == -18)
+    
+    prob_f = np.log(prob_f)
+    prob_a = np.log(prob_a)
+    # set log likelihood loci with dropouts to zero.
+    prob_f[drop_f] = 0
+    prob_a[drop_a] = 0
+    # dropouts for candidates
+    corr = float(offspring.nloci) / (1-drop_f).sum(2)
+    prob_f = prob_f.sum(2) * corr
+    # dropouts for missing father
+    corr = float(offspring.nloci) / (1- drop_a).sum(1)
+    prob_a = prob_a.sum(1) * corr
+    
     return prob_f, prob_a
