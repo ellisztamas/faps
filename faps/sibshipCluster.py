@@ -107,13 +107,8 @@ class sibshipCluster(object):
         else:
             sire_probs = np.nan
 
-        # Mean probability of being absent for those sires with zero prob of paternity
-        dad_absent = np.isinf(self.paternity_array[range(progeny.size), sire_ix]) # index sires with zero probability of paternity
-        if any(dad_absent):
-            abs_probs = self.prob_paternity()[dad_absent, -1]
-            abs_probs = alogsumexp(abs_probs) - np.log(len(abs_probs))
-        else:
-            abs_probs = np.nan
+        # Mean probability that the father is absent
+        abs_probs = np.exp(self.prob_paternity(-1)).mean()
 
         output = np.array([true_found,
                            delta_lik,
@@ -122,7 +117,7 @@ class sibshipCluster(object):
                            round(half_sibs, 3),
                            round(all_sibs,  3),
                            round(np.exp(sire_probs),3),
-                           round(np.exp(abs_probs),3)])
+                           round(abs_probs,3)])
         return output
 
     def nfamilies(self):
@@ -255,16 +250,16 @@ class sibshipCluster(object):
 
     def prob_paternity(self, reference=None):
         """
-        Posterior probabilities of paternity for a set of reference fathers accounting
-        for uncertainty in sibship structure.
+        Posterior probabilities of paternity for a set of reference fathers
+        accounting for uncertainty in sibship structure.
 
         Parameters
         ----------
         reference: int, array-like, optional
-            Indices for the candidates to return. If an integer, returns probabilties
-            for a single candidate individual. To return probabilities for a vector
-            of candidates, supply a list or array of integers of the same length as
-            the number of offspring..
+            Indices for the candidates to return. If an integer, returns
+            probabilties for a single candidate individual. To return
+            probabilities for a vector of candidates, supply a list or array of
+            integers of the same length as the number of offspring.
 
         Returns
         -------

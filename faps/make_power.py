@@ -287,7 +287,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
             unsampled_input = [unsampled_input]
             print "No prior parameter used for the proportion of missing candidates."
     elif isinstance(unsampled_input, int) and unsampled_input == -9:
-        unsampled_input = [unsampled_input]
+        unsampled_input = [None]
         if verbose:
             print "No prior parameter used for the proportion of missing candidates."
     else:
