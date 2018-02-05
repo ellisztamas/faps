@@ -22,6 +22,6 @@ def squash_siblings(paternity_probs, partitions):
     if len(labels) == 1:
         return paternity_probs.sum(0)
     else:
-        fullsibliks = np.array([paternity_probs[partitions == labels[f]].sum(0) for f in range(len(labels))])
+        fullsibliks = np.array([paternity_probs[partitions == f].sum(0) for f in labels])
         return fullsibliks
 

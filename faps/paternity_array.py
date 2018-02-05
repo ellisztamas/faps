@@ -2,7 +2,6 @@ import numpy as np
 from paternityArray import paternityArray
 from genotypeArray import genotypeArray
 from transition_probability import transition_probability
-from dropout_mask import dropout_mask
 from incompatibilities import incompatibilities
 from warnings import warn
 
