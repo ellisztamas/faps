@@ -271,18 +271,21 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
 
     # input candidate sampling rate
     if unsampled_input is None:
-        if unsampled_real == 0 or unsampled_real is None:
+        if unsampled_real == 0 or unsampled_real is [0.0]:
             if verbose is True:
                 print "Constructing paternity arrays assuming complete sampling of candidates."
             unsampled_input = [0.0]
         if isinstance(unsampled_real, float):
             unsampled_input = [unsampled_real]
             if verbose is True:
-                print "Constructing paternity arrays assuming sampling proportion is known."
+                print "Constructing paternity arrays assuming sampling proportion is known to be {}.".format(1-unsampled_input)
         if isinstance(unsampled_real, list) or isinstance(unsampled_real, np.ndarray):
             unsampled_input = [float(len(unsampled_real)) / candidates[i] for i in range(len(candidates))]
             if verbose is True:
                 print "Constructing paternity arrays assuming {} candidates are missing.".format(len(unsampled_real))
+        else:
+            unsampled_input = [unsampled_input]
+            print "No prior parameter used for the proportion of missing candidates."
     elif isinstance(unsampled_input, int) and unsampled_input == -9:
         unsampled_input = [unsampled_input]
         if verbose:

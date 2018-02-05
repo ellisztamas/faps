@@ -125,15 +125,13 @@ class paternityArray(object):
             elif isinstance(purge, list) or isinstance(purge, np.ndarray) or isinstance(purge, int):
                 with(np.errstate(divide='ignore')): new_array[:, purge] = np.log(0)
             else:
-                print "Error: purge should be a float or list of floats between zero and one."
-                return None
+                raise TypeError("Error: purge should be a float or list of floats between zero and one.")
 
         # correct for input parameter for proportion of missing fathers.
         if missing_parents is not None and missing_parents is not 'NA':
             # apply correction for the prior on number of missing parents.
             if missing_parents < 0 or missing_parents >1:
-                print "missing_parents must be between 0 and 1!"
-                return None
+                raise ValueError("missing_parents must be between 0 and 1!")
             # if missing_parents is between zero and one, correct the likelihoods.
             if missing_parents >0 and missing_parents <=1:
                 if missing_parents ==1: print "Warning: missing_parents set to 100%."
@@ -147,8 +145,7 @@ class paternityArray(object):
         if selfing_rate is not None:
             # apply correction for the prior on number of missing parents.
             if selfing_rate < 0 or selfing_rate >1:
-                print "Error: selfing_rate must be between 0 and 1."
-                return None
+                raise ValueError("Error: selfing_rate must be between 0 and 1.")
             if selfing_rate >=0 and selfing_rate <=1:
                 if selfing_rate == 1: print "Warning: selfing_rate set to 100%."
                 ix = range(len(self.offspring))
@@ -160,20 +157,13 @@ class paternityArray(object):
         if max_clashes is not None:
             if self.clashes is None:
                 raise TypeError("Unable to adjust for number of incompatible homozygous loci because `clashes` is not given.")
-                return None
             elif self.clashes.shape != self.lik_array.shape:
                 raise ValueError("Shape of the likelihood array does not match that of the array of clashes.")
-                return None
             else:
                 inc = np.append(self.clashes, np.zeros(self.lik_absent.shape)[:,np.newaxis], 1) # add an extra column so the shapes match
                 with np.errstate(divide='ignore'): 
                     ix = np.log(inc <= max_clashes) # index elements to alter
                 new_array = new_array + ix
-
-        # normalise so rows sum to one.
-        new_array = new_array - alogsumexp(new_array, axis=1)[:,np.newaxis]
-
-        return new_array
 
         # normalise so rows sum to one.
         new_array = new_array - alogsumexp(new_array, axis=1)[:,np.newaxis]

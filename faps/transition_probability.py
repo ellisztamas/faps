@@ -33,11 +33,11 @@ def transition_probability(offspring, mothers, males, allele_freqs, mu, inverse=
     1. Array indexing offspring only for transition probabilities
     from population allele frequencies
     """
-    if not isinstance(offspring, fp.genotypeArray):
+    if not isinstance(offspring, genotypeArray):
         raise TypeError('offspring is not a genotypeArray')
-    if not isinstance(mothers, fp.genotypeArray):
+    if not isinstance(mothers, genotypeArray):
         raise TypeError('mothers is not a genotypeArray')
-    if not isinstance(males, fp.genotypeArray):
+    if not isinstance(males, genotypeArray):
         raise TypeError('males is not a genotypeArray')
 
     trans_prob_array = np.array([[[1,  0.5, 0  ],

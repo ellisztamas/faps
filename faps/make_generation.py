@@ -44,7 +44,7 @@ def make_generation(allele_freqs, candidates, sires, offspring, missing_loci=0, 
         be removed at random, reflecting incomplete sampling. If a list of integers is
         given, this indicates specific indices of candidates to be removed, such as
         a known true sire, or the mother.
-    unsampled_real: float or list
+    unsampled_input: float or list
         Value for the proportion of unsampled fathers to be used in sibship clustering.
         Values must be between 0 and 1.
     selfing_rate: float
