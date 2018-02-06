@@ -17,8 +17,6 @@ from effective_nloci import effective_nloci
 from incompatibilities import incompatibilities
 from paternityArray import paternityArray
 from transition_probability import transition_probability
-#from lik_sampled_fathers import lik_sampled_fathers
-#from lik_unsampled_fathers import lik_unsampled_fathers
 from paternity_array import paternity_array
 from draw_fathers import draw_fathers
 # clustering
