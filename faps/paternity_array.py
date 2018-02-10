@@ -1,4 +1,4 @@
-import numpy as np
+    import numpy as np
 from paternityArray import paternityArray
 from genotypeArray import genotypeArray
 from transition_probability import transition_probability
@@ -42,23 +42,17 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, purge=None, mis
     -------
     A paternityArray, or a list of paternityArray objects.
     """
-    if not isinstance(offspring, genotypeArray):
-        raise TypeError('offspring is not a genotypeArray')
-    if not isinstance(mothers, genotypeArray):
-        raise TypeError('mothers is not a genotypeArray')
-    if not isinstance(males, genotypeArray):
-        raise TypeError('males is not a genotypeArray')
     if mu == 0:
         mu = 10**-12
-        warn('Setting error rate to exactly zero causes clustering to be unstable. mu set to 10**-12')
+        warn('Setting error rate to exactly zero causes clustering to be unstable. mu set to 10e-12')
 
     if isinstance(offspring, genotypeArray) & isinstance(mothers, genotypeArray):
-            # take the log of transition probabilities, and assign dropout_masks.
-            prob_f, prob_a = transition_probability(offspring, mothers, males, allele_freqs, mu)
-            # array of opposing homozygous genotypes.
-            incomp = incompatibilities(males, offspring)
+        # take the log of transition probabilities, and assign dropout_masks.
+        prob_f, prob_a = transition_probability(offspring, mothers, males, allele_freqs, mu)
+        # array of opposing homozygous genotypes.
+        incomp = incompatibilities(males, offspring)
 
-            return paternityArray(prob_f, prob_a, offspring.names, offspring.mothers, offspring.fathers, males.names, mu, purge, missing_parents, selfing_rate, incomp, max_clashes)
+        return paternityArray(prob_f, prob_a, offspring.names, offspring.mothers, offspring.fathers, males.names, mu, purge, missing_parents, selfing_rate, incomp, max_clashes)
         
     elif isinstance(offspring, list) & isinstance(mothers, list):
         if len(offspring) != len(mothers):
