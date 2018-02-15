@@ -10,19 +10,28 @@ The basic workflow is:
 3. Cluster offspring into sibships
 4. Infer biological parameters integrating out uncertainty in paternity and sibship structre.
 
-At present only biallelic diploid SNPs are supported. However, the method depends only only being able to calculate likelihoods in stage two, and provided you can do this there is nothing stopping you applying this to other marker types (e.g. microsatellites) or genetic systems (e.g. polyploids). If you are interested in doing this, please contact me (see below).
+At present only biallelic diploid SNPs in half sibling arrays are supported. FAPS can handle multiple half-sibling arrays, but the idendity of one parent must be known. It is assumed that population allele frequencies are known and sampling of candidate fathers is complete, or nearly complete.
+
+There are however a number of extensions which I would be happy to attempt, but that I cannot justify investing time in unless someone has a specific need for it. For example, support for microsatellites, polyploids, bi-parental inference, or sibship inference without access to parental information. If any of these directions would be of use to you, please let me know by email, or better by filing an issue on GitHub directly.
 
 ## Installation
-### Dependencies
-FAPS is built using the `Numpy` library, with additional tools from `Scipy` and Pandas. These can be accessed together through the bundles of packages available from [Anaconda](https://www.continuum.io/downloads). 
+The best way to install FAPS is to use Python's package manager, Pip. Instructions to do so can be found at that projects [documentation page](https://pip.pypa.io/en/stable/installing/). Windows users might also consider [pip-Win](https://sites.google.com/site/pydatalog/python/pip-for-windows)
 
-For simulations, it also makes use of `Pandas` dataframes, and [iPython widgets](https://github.com/jupyter-widgets/ipywidgets). iPython widgets can be a little more troublesome to get working, but are only needed for simulations, and can be switched off. See [here](https://github.com/jupyter-widgets/ipywidgets/blob/master/docs/source/user_install.md) for installation instructions.
+### From PyPi
+To download the stable release run `pip install faps` in the command line.
+
+### From GitHub
+Download the .zip or tarball file, and unpack it. In a command line move into the folder this creates and run `pip install .`
 
 ### The messy way
 Download the package from the repository by hitting 'clone or download'. Copy the contents of the folder FAPS to the directory where you are running your analyses, then import the package in your Python script.
 
-### The clean way
-The best way to install FAPS is to use Python's package manager, Pip. Instructions to do so can be found at that projects [documentation page](https://pip.pypa.io/en/stable/installing/). You can then either download the package form this repository, and run `pip install .` from the package directory. At some point I will also endeavour to get the package on the PyPi database.
+### Dependencies
+If you install with pip, dependencies should be installed automatically.
+
+FAPS is built using the `Numpy` library, and Pandas. These can be accessed together through the bundles of packages available from [Anaconda](https://www.continuum.io/downloads). 
+
+For simulations, it also makes use of `Pandas` dataframes, and [iPython widgets](https://github.com/jupyter-widgets/ipywidgets). iPython widgets can be a little more troublesome to get working, but are only needed for simulations, and can be switched off. See [here](https://github.com/jupyter-widgets/ipywidgets/blob/master/docs/source/user_install.md) for installation instructions.
 
 ## Using FAPS
 A user's guide is provided in this repository (see the docs folder). This provides a fairly step-by-step guide to importing data, clustering offspring into sibship groups, and using those clusters to investigate the underlying biological processes. This was written with users in mind who have little experience of working with Python. These documents are written in [iPython](https://ipython.org/), which I highly recommend as an interactive environment for running analyses in Python.
@@ -38,15 +47,3 @@ This project was part of my PhD work. Since I have now moved on to a different i
 Tom Ellis (thomas[dot]ellis[at]ebc[dot]uu[dot]se)
 
 FAPS is available under the MIT license. See LICENSE.txt for more information
-
-
-## To do
-
-- split function for paternityArrays
-- Upload code and data files to support FAPS publication to IST repository
-- User guide for matingEvent
-- Simulations from empirical data
-- remove table from simulation docs
-- Upload to Pypi
-- Include installation notes for PyPi
-- support for microsats
