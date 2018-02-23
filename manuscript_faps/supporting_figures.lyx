@@ -71,12 +71,18 @@
 \begin_body
 
 \begin_layout Title
-Supporting figures
+Supplemental information
 \end_layout
 
 \begin_layout Standard
-This documents contains supplementary figures to support the manuscript
- 
+\align center
+for
+\end_layout
+
+\begin_layout Standard
+\align center
+
+\series bold
 \begin_inset Quotes eld
 \end_inset
 
@@ -89,7 +95,13 @@ Efficient inference of paternity and sibship inference given known maternity
 \begin_inset Quotes erd
 \end_inset
 
- by Tom Ellis, David Field and Nicholas Barton.
+
+\end_layout
+
+\begin_layout Standard
+\align center
+Thomas James Ellis, David Luke Field and Nicholas H.
+ Barton.
 \end_layout
 
 \begin_layout Standard

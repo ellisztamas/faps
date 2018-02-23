@@ -82,19 +82,8 @@
 \begin_body
 
 \begin_layout Title
-Efficient inference of paternity and 
-\change_inserted -1312060434 1509283107
-sibship 
-\change_unchanged
-inference 
-\change_inserted -1312060434 1513764432
-given known maternity 
-\change_unchanged
-via hierarchical clustering
-\change_inserted -1312060434 1513764402
- 
-\change_unchanged
-
+Efficient inference of paternity and sibship inference given known maternity
+ via hierarchical clustering 
 \end_layout
 
 \begin_layout Author
@@ -120,7 +109,7 @@ Institute of Science and Technology Austria, Am Campus 1, 3400 Klosterneuburg,
 \end_layout
 
 \begin_layout Enumerate
-Evolutionary Biology Centre, Uppsala University, Norbyvagen 18D, 75236 Uppsala,
+Evolutionary Biology Centre, Uppsala University, Norbyvägen 18D, 75236 Uppsala,
  Sweden
 \end_layout
 
@@ -141,13 +130,8 @@ Tom J.
 
 \begin_layout Standard
 \align center
-Evolutionary Biology Centre, Uppsala University, Norbyv
-\change_inserted -1312060434 1513761258
-ä
-\change_deleted -1312060434 1513761222
-a
-\change_unchanged
-gen 18D, 75236 Uppsala, Sweden
+Evolutionary Biology Centre, Uppsala University, Norbyvägen 18D, 75236 Uppsala,
+ Sweden
 \end_layout
 
 \begin_layout Standard
@@ -185,43 +169,42 @@ Antirrhinum
 \begin_layout Abstract
 Pedigree and sibship reconstruction are important methods in quantifying
  relationships and fitness of individuals in natural populations.
- 
-\change_deleted -1312060434 1513760521
-Despite major advances in reconstruction of parentage and sibship groups,
- the majority of methods consider only the most likely relationships, and
- ignore uncertainty in the genealogy.
- If not accounted for, this uncertainty can lead to biased inference of
- relevant biological processes.
- Here we extend fractional parentage methods to jointly infer paternity
- and full sibships.
 
-\change_inserted -1312060434 1513760568
- Current methods employ a Markov-chain-based algoithm to explore plausible
- possible
-\change_unchanged
+\change_deleted -1312060434 1518256689
  
-\change_inserted -1312060434 1513760690
-pedigrees iteratively.
+\change_unchanged
+ Current methods employ a Markov-chain-based 
+\change_deleted -1312060434 1518767588
+algoithm
+\change_inserted -1312060434 1518767588
+algorithm
+\change_unchanged
+ to explore plausible possible pedigrees iteratively.
  This provides accurate results, but is time consuming.
  Here we develop a method to infer sibship and paternity relationships from
- half-sibling arrays of known maternity using hierachical clustering.
+ half-sibling arrays of known maternity using 
+\change_deleted -1312060434 1518767591
+hierachical
+\change_inserted -1312060434 1518767591
+hierarchical
+\change_unchanged
+ clustering.
+ Given 
+\change_deleted -1312060434 1518256835
+realistic
+\change_inserted -1312060434 1518767609
+50 or more unlinked SNP markers and empirically-derived error rates,
+\change_unchanged
  
-\change_deleted -1312060434 1513760730
-In contrast to previous methods we employ a hierarchical clustering algorithm
- to identify plausible sibship configurations.
- This removes the need to explore probability space iteratively, as well
- as providing considerable increase in speed.
- 
-\change_inserted -1312060434 1513768527
-Given realistic genotype data the method performs as well as the widely-used
- package 
+\change_deleted -1312060434 1518256858
+genotype data 
+\change_unchanged
+the method performs as well as the widely-used package 
 \emph on
 Colony
 \emph default
 , but is faster by two orders of magnitude.
- 
-\change_unchanged
-Using simulations we show that the method performs well across contrasting
+ Using simulations we show that the method performs well across contrasting
  mating scenarios, even when samples are large.
  We then apply the method to open pollinated arrays of the snapdragon 
 \emph on
@@ -291,19 +274,8 @@ key "sieberts2002relationship,wang2009"
 \end_layout
 
 \begin_layout Standard
-Given the complexity of this problem, current methods employ an iter
-\change_inserted -1312060434 1509374717
-at
-\change_deleted -1312060434 1509374717
-ta
-\change_unchanged
-ive search 
-\change_deleted -1312060434 1509284028
-algorithm via a Monte Carlo Markov Chain
-\change_inserted -1312060434 1509284048
-via a Markov chain algorithm
-\change_unchanged
-
+Given the complexity of this problem, current methods employ an iterative
+ search via a Markov chain algorithm
 \emph on
  
 \emph default
@@ -317,10 +289,7 @@ key "emery2001assignment,thomas2002sibship,wang2004,jones2007estimating,wang2009
 
 .
  For example, Colony repeatedly merges and splits full-sibship groups, and
- infers the likely genotype of the parents of each group
-\change_inserted -1312060434 1509284095
- by simulated annealing
-\change_unchanged
+ infers the likely genotype of the parents of each group by simulated annealing
  
 \begin_inset CommandInset citation
 LatexCommand citep
@@ -330,11 +299,8 @@ key "wang2004,wang2009"
 
 .
  This provides accurate solutions, but can be slow, especially for large
- datasets, which limits their applicability to larger datasets
-\change_deleted -1312060434 1509374810
-,
-\change_unchanged
- or more complex downstream analyses.
+ datasets, which limits their applicability to larger datasets or more complex
+ downstream analyses.
  
 \begin_inset CommandInset citation
 LatexCommand citet
@@ -342,55 +308,21 @@ key "wang2012"
 
 \end_inset
 
- altered the method to 
-\change_deleted -1312060434 1513695955
-rely on estimates of relatedness among pairs of individuals rather than
- entire families
-\change_inserted -1312060434 1513695968
-run more efficiently with SNP data
-\change_unchanged
-.
+ altered the method to run more efficiently with SNP data.
  This was found to be less accurate than the full-likelihood method, but
  provides a substantial increase in speed and computational burden.
- In spite of this boost, it still relies on 
-\change_deleted -1312060434 1513686933
-MCMC
-\change_inserted -1312060434 1513686939
-a Markov-chain algorithm
-\change_unchanged
-, and remains time consuming.
+ In spite of this boost, it still relies on a Markov-chain algorithm, and
+ remains time consuming.
  As such there is still scope to improve the efficiency method to infer
  sibling and paternity relationships from genetic markers.
 \end_layout
 
 \begin_layout Standard
-An alternative way to group individuals into sibship groups is 
-\change_deleted -1312060434 1513686298
-to perform 
-\change_inserted -1312060434 1513686299
-through 
-\change_unchanged
-hierarchical clustering based on a metric of relatedness.
- Hierarchical clustering is a 
-\change_deleted -1312060434 1511092060
-very 
-\change_unchanged
-flexible machine-learning technique to identify plausible ways to group
- items based on some measure of how similar (or dissimilar) each
-\change_inserted -1312060434 1511092576
- pair of
-\change_unchanged
- item
-\change_inserted -1312060434 1511092578
-s
-\change_unchanged
- 
-\change_deleted -1312060434 1511092580
-is
-\change_inserted -1312060434 1511092580
-are
-\change_unchanged
- are to one another 
+An alternative way to group individuals into sibship groups is through hierarchi
+cal clustering based on a metric of relatedness.
+ Hierarchical clustering is a flexible machine-learning technique to identify
+ plausible ways to group items based on some measure of how similar (or
+ dissimilar) each pair of items are are to one another 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "murtagh2012algorithms"
@@ -406,31 +338,15 @@ key "murtagh2012algorithms"
  Hierarchical clustering does not return a single optimal configuration
  of groups, but rather a hierarchy of possible configurations that can be
  compared.
- This provides a
-\change_deleted -1312060434 1513686386
-n
-\change_inserted -1312060434 1513686387
- means
-\change_unchanged
+ This provides a means
+\change_deleted -1312060434 1518256689
  
-\change_deleted -1312060434 1513686384
-opportunity
 \change_unchanged
  to quickly generate samples of plausible sibship configurations, and to
- assess the 
-\change_deleted -1312060434 1513255231
-uncertainty about the exact sibship structure
-\change_inserted -1312060434 1513255234
-relative support for each
-\change_unchanged
-.
-\change_inserted -1312060434 1511095079
-
+ assess the relative support for each.
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513699768
 In the absence of perfect data, inference from pedigrees will be more reliable
  if we also account for uncertainty about parentage.
  In the simplest (and probably most commonly applied) approach, categorical
@@ -479,38 +395,17 @@ key "devlin1988fractional,roeder1989application,nielsen2001statistical"
  it is more challenging to deal with the parentage of full sibships in a
  fractional framework, because by definition no two families can share both
  parents.
-\change_unchanged
-
 \end_layout
 
 \begin_layout Standard
 In this paper we outline methods to jointly infer sibling and paternal relations
-hips using hierarchical clustering
-\change_inserted -1312060434 1511101600
- within a fractional framework
-\change_unchanged
-.
+hips using hierarchical clustering within a fractional framework.
  To simplify presentation we focus on inference of paternity, where the
- identity of the maternal parent is known with certainty, 
-\change_deleted -1312060434 1511091873
-but note that
-\change_inserted -1312060434 1513255349
-although in principle
-\change_unchanged
- the method is equally valid if both parents are 
-\change_inserted -1312060434 1513686805
-unknown
-\change_deleted -1312060434 1513255360
-to be inferred
-\change_unchanged
-.
+ identity of the maternal parent is known with certainty, although in principle
+ the method is equally valid if both parents are unknown.
  We present the Python package FAPS that allows users to implement the method
- and 
-\change_inserted -1312060434 1513255392
-easily 
-\change_unchanged
-draw inferences about family structure that automatically account for uncertaint
-y about paternity and sibling relationships.
+ and easily draw inferences about family structure that automatically account
+ for uncertainty about paternity and sibling relationships.
  Using simulations we demonstrate that the method is robust to genotype
  quality, sample size and mating patterns.
  We then apply the method to wild seedlings of the snapdragon 
@@ -560,33 +455,12 @@ In this paper we consider the case of half-sibling arrays, where a set of
 \end_layout
 
 \begin_layout Standard
-Our method relies on 
-\change_inserted -1312060434 1511107972
-individual-paternity 
-\change_unchanged
-matrix 
+Our method relies on individual-paternity matrix 
 \series bold
-G
-\change_inserted -1312060434 1511101665
-,
-\change_unchanged
-
+G,
 \series default
- 
-\change_deleted -1312060434 1511101666
-that 
-\change_unchanged
-describ
-\change_inserted -1312060434 1511101669
-ing
-\change_deleted -1312060434 1511101667
-es
-\change_unchanged
- 
-\change_inserted -1312060434 1511101672
-all 
-\change_unchanged
-possible pairwise relationships between offspring and candidate males.
+ describing all possible pairwise relationships between offspring and candidate
+ males.
 
 \series bold
  
@@ -637,17 +511,7 @@ key "thompson1987parental"
 \end_inset
 
  can be seen as a probability distribution of possible paternities for a
- single offspring, and as such 
-\change_deleted -1312060434 1509280987
-elements the
-\change_inserted -1312060434 1509280988
-each
-\change_unchanged
- row
-\change_deleted -1312060434 1509280990
-s
-\change_unchanged
- of 
+ single offspring, and as such each row of 
 \series bold
 G
 \series default
@@ -727,12 +591,9 @@ key "jones2010practical"
 \begin_inset Formula $\mathbf{G}$
 \end_inset
 
- should account for errors and missing data in genotype information 
-\change_deleted -1312060434 1511108284
-(Appendixes 1 and 2)
-\change_unchanged
-, and the most appropriate method for doing this will depend on the kind
- of marker being used, such as microsatellites 
+ should account for errors and missing data in genotype information , and
+ the most appropriate method for doing this will depend on the kind of marker
+ being used, such as microsatellites 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "marshall1998,wang2004"
@@ -747,8 +608,6 @@ key "anderson_garza2006"
 \end_inset
 
 .
-
-\change_inserted -1312060434 1513251049
  Unless otherwise stated we have followed 
 \begin_inset CommandInset citation
 LatexCommand citet
@@ -765,8 +624,6 @@ key "nielsen2001statistical"
 
  in the calculation of likelihoods of paternity for sampled and missing
  candidates respectively (appendices 1 and 2).
-\change_unchanged
-
 \end_layout
 
 \begin_layout Subsection
@@ -826,18 +683,10 @@ key "sokal1958statistical"
 
 \end_inset
 
-
-\change_deleted -1312060434 1511101779
- 
-\change_unchanged
 .
- 
-\change_inserted -1312060434 1511101865
-This is a specific instance of hierarchical clustering algorithms that uses
- the means distance between groups as its linkage function.
- 
-\change_unchanged
-We first calculate distance matrix 
+ This is a specific instance of hierarchical clustering algorithms that
+ uses the means distance between groups as its linkage function.
+ We first calculate distance matrix 
 \series bold
 D
 \series default
@@ -910,45 +759,14 @@ Likelihood of a partition
 \end_layout
 
 \begin_layout Standard
-
-\change_deleted -1312060434 1513252193
-Let 
-\begin_inset Formula $\gamma$
-\end_inset
-
- denote the matrix of probabilities of paternity for each sibship given
- partition structure 
-\begin_inset Formula $T_{c}$
-\end_inset
-
-.
- Like 
-\series bold
-G, 
-\series default
-it
-\series bold
- 
-\series default
-has one column for every candidate father, but rows correspond to proposed
- full sibships rather than individuals.
-\change_unchanged
-
-\end_layout
-
-\begin_layout Standard
 To qualify as an full-sibship, all individuals in putative subset 
 \begin_inset Formula $t_{k}$
 \end_inset
 
  must share the same father.
- For a given partition structure, the likelihood 
-\change_deleted -1312060434 1513251860
-
-\begin_inset Formula $\gamma_{kj}$
-\end_inset
-
-
+ For a given partition structure, the likelihood
+\change_deleted -1312060434 1518256689
+ 
 \change_unchanged
  that the 
 \begin_inset Formula $j^{th}$
@@ -963,9 +781,7 @@ To qualify as an full-sibship, all individuals in putative subset
  
 \emph default
 is proportional to the product of his probability of paternity for each
- offspring
-\change_inserted -1312060434 1513252093
-, 
+ offspring, 
 \begin_inset Formula $\prod_{i\in t_{k}}g_{ij}$
 \end_inset
 
@@ -978,70 +794,12 @@ is the sum over likelihoods for each father,
 \end_inset
 
 .
-\change_deleted -1312060434 1513252019
-.
- We can therefore define 
-\begin_inset Formula $\gamma_{k}$
-\end_inset
 
-, the vector of paternity likelihoods for 
-\emph on
-
-\begin_inset Formula $t_{k}$
-\end_inset
-
-
-\emph default
- as the element-wise product of each row in 
-\series bold
-G 
-\series default
-for all individuals in 
-\emph on
-
-\begin_inset Formula $t_{k}$
-\end_inset
-
-.
+\change_deleted -1312060434 1518256689
  
-\emph default
-Since the true father of 
-\emph on
-
-\begin_inset Formula $t_{k}$
-\end_inset
-
-
-\emph default
- may be any one of the candidate fathers, the probability of 
-\emph on
-
-\begin_inset Formula $t_{k}$
-\end_inset
-
-
-\emph default
- is proportional to 
-\begin_inset Formula $\sum_{j}\gamma_{kj}$
-\end_inset
-
-.
-
 \change_unchanged
- 
-\change_deleted -1312060434 1511103746
-Assuming
-\change_inserted -1312060434 1513251702
- If
-\change_unchanged
- each sibship 
-\change_deleted -1312060434 1511103751
-is
-\change_inserted -1312060434 1513251334
-were
-\change_unchanged
- independent, the likelihood of the proposed partition would simply be the
- product of the likelihoods for each set of full siblings:
+ If each sibship were independent, the likelihood of the proposed partition
+ would simply be the product of the likelihoods for each set of full siblings:
 \end_layout
 
 \begin_layout Standard
@@ -1056,11 +814,7 @@ where
 \begin_inset Formula $j$
 \end_inset
 
- indexes
-\change_inserted -1312060434 1511105449
- candidate
-\change_unchanged
- fathers, 
+ indexes candidate fathers, 
 \begin_inset Formula $i$
 \end_inset
 
@@ -1073,22 +827,14 @@ where
 
 \begin_layout Standard
 However, to be distinct families, each subset 
-\change_inserted -1312060434 1511158557
-
 \begin_inset Formula $t_{k}$
 \end_inset
 
- 
-\change_unchanged
-may not share its father with any other subset 
-\change_inserted -1312060434 1511158537
-
+ may not share its father with any other subset 
 \begin_inset Formula $t_{m\neq k}$
 \end_inset
 
- 
-\change_unchanged
-in 
+ in 
 \begin_inset Formula $T_{c}.$
 \end_inset
 
@@ -1099,20 +845,8 @@ reference "eq:lik-partition"
 
 \end_inset
 
- is 
-\change_inserted -1312060434 1511103131
-not
-\change_deleted -1312060434 1511103128
-only
-\change_unchanged
- valid 
-\change_deleted -1312060434 1511103133
-if
-\change_inserted -1312060434 1511103134
-unless
-\change_unchanged
- the set of compatible fathers for each full sibship is unique, with no
- intersection with that of any other full sibship.
+ is not valid unless the set of compatible fathers for each full sibship
+ is unique, with no intersection with that of any other full sibship.
  For example, imagine two proposed full sibships, 
 \emph on
 a 
@@ -1121,20 +855,9 @@ and
 \emph on
 b, 
 \emph default
-and three candidate fathers
-\change_inserted -1312060434 1511103260
- with non-zero probabilities of paternity for each full sibship.
- 
-\change_deleted -1312060434 1511103263
-, such
-\change_inserted -1312060434 1511103266
-Then,
-\change_unchanged
- 
-\change_deleted -1312060434 1511103268
-that 
-\change_unchanged
-
+and three candidate fathers with non-zero probabilities of paternity for
+ each full sibship.
+ Then, 
 \begin_inset Formula $\gamma_{a}=\{a_{1},a_{2},a_{3}\}$
 \end_inset
 
@@ -1191,8 +914,6 @@ reference "eq:lik-partition"
 
 , but this quickly becomes computationally demanding as the number of sibships
  and candidate fathers increases.
-
-\change_inserted -1312060434 1511103881
  For this reason, we should expect equation 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -1200,23 +921,7 @@ reference "eq:lik-partition"
 
 \end_inset
 
-
-\change_unchanged
- 
-\change_inserted -1312060434 1513251219
-to be intractable for most real-world cases.
-\change_deleted -1312060434 1511103348
-With five sibships and 100 candidate fathers, for example, there are 
-\begin_inset Formula $7.88$
-\end_inset
-
-x
-\begin_inset Formula $10^{69}$
-\end_inset
-
- terms to enumerate.
-\change_unchanged
-
+ to be intractable for most real-world cases.
 \end_layout
 
 \begin_layout Standard
@@ -1225,9 +930,7 @@ Nevertheless,
 \end_inset
 
  can be efficiently estimated using Monte Carlo simulations.
- 
-\change_inserted -1312060434 1513252593
-Let 
+ Let 
 \begin_inset Formula $\Gamma$
 \end_inset
 
@@ -1284,8 +987,6 @@ is proportional to the product of his probability of paternity for each
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513767276
 \begin_inset Formula 
 \begin{equation}
 \gamma_{kj}=\frac{\prod_{i\in t_{k}}g_{ij}}{\sum_{j}\prod_{i\in t_{k}}g_{ij}}\label{eq:gamma}
@@ -1307,54 +1008,21 @@ reference "eq:g_ij"
 
 , the numerator ensures that the probabilities of paternity for all candidates
  sum to one.
- 
-\change_unchanged
-Because each sibship has exactly one father, we can sample a valid set of
- possible fathers for each sibship by traversing a path through 
-\change_inserted -1312060434 1513767075
-
+ Because each sibship has exactly one father, we can sample a valid set
+ of possible fathers for each sibship by traversing a path through 
 \begin_inset Formula $\Gamma$
 \end_inset
 
-
-\change_deleted -1312060434 1513766979
-
-\begin_inset Formula $\gamma$
-\end_inset
-
-
-\change_unchanged
  from top to bottom, visiting each column at most once, and each row exactly
  once.
- 
-\change_deleted -1312060434 1513078153
-The likelihood of each path through 
-\begin_inset Formula $\gamma$
-\end_inset
-
- is the product of the probability of each element visited, and the likelihood
- for the whole partition is the sum of likelihoods for all valid paths through
- 
-\begin_inset Formula $\gamma$
-\end_inset
-
-.
- 
-\change_unchanged
-As before there will be generally be too many paths to enumerate.
+ As before there will be generally be too many paths to enumerate.
  However, because most rows will contain one or a handful of large values
  and many small values, only a small number of the possible paths will explain
  most of the total probability, and we can approximate the likelihood of
  the partition by only considering these.
-\change_inserted -1312060434 1513767075
-
 \end_layout
 
 \begin_layout Standard
-
-\change_deleted -1312060434 1513078168
- 
-\change_inserted -1312060434 1513767686
 For each row in 
 \begin_inset Formula $\Gamma$
 \end_inset
@@ -1387,8 +1055,6 @@ For each row in
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513768042
 We note that equation 
 \begin_inset CommandInset ref
 LatexCommand ref
@@ -1426,119 +1092,32 @@ key "sieberts2002relationship,wang2007parentage"
  father, assuming genotype error rates are not very high.
 \end_layout
 
-\begin_layout Standard
-
-\change_deleted -1312060434 1513078259
-To do this we draw samples with replacement from each row of 
-\begin_inset Formula $\gamma$
-\end_inset
-
-, sampling proportionally to the probability of each element, and combine
- drawn fathers into sets representing paths through 
-\begin_inset Formula $\gamma$
-\end_inset
-
-.
- We then remove duplicate sets, and any sets where two or more sibships
- share a father.
- The paths that remain are sets of unique fathers representing unique paths
- through 
-\begin_inset Formula $\gamma,$
-\end_inset
-
- drawn proportionally to the likelihood of those paths.
-\change_unchanged
-
-\end_layout
-
-\begin_layout Standard
-
-\change_deleted -1312060434 1513068210
-We have found Monte Carlo sampling of partitions to be very fast; 10,000
- Monte Carlo draws for 25 sibships with 1000 candidate fathers took 5.29ms
- on a MacBook Pro with a 2.4 GHz Intel Core i5 processor.
- This approximation may underestimate the true likelihood if many possible
- paths are possible, but given sufficient Monte Carlo draws this underestimate
- will be much smaller than differences between the likelihoods for different
- proposed partitions, and should therefore have a negligible effect on the
- power to distinguish these.
-\change_unchanged
-
-\end_layout
-
 \begin_layout Subsection
 Inference of mating patterns
-\change_inserted -1312060434 1511157051
-
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1511243138
 We can use the methods described above to inform questions about underlying
  biological processes.
-\change_deleted -1312060434 1511157329
-The clustering methods described above generate a sample of 
-\emph on
-n
-\emph default
- ways to partition 
-\begin_inset Formula $n$
-\end_inset
 
- offspring into full sibships, and a relative probability for each partition.
- To make meaningful inference about the underlying biological processes
- we need to account for uncertainty about the genealogy by integrating over
- possible genealogies proportional to their probabilities.
-
-\change_unchanged
+\change_deleted -1312060434 1518256689
  
-\change_deleted -1312060434 1511158368
-When the question concerns the number or size of full-sibships
-\change_inserted -1312060434 1511243147
- For questions about family structure and size
 \change_unchanged
-, it is straightforward to account for uncertainty in family structure by
- weighting outcomes by the relative support for each partition.
- For example, the probability that 
-\change_deleted -1312060434 1511157973
-two
-\change_inserted -1312060434 1511243285
-any pair of
-\change_unchanged
- individuals are full siblings is 
-\change_deleted -1312060434 1511157973
-simply 
-\change_unchanged
-the sum of the probabilities of each partition for which the individuals
+ For questions about family structure and size, it is straightforward to
+ account for uncertainty in family structure by weighting outcomes by the
+ relative support for each partition.
+ For example, the probability that any pair of individuals are full siblings
+ is the sum of the probabilities of each partition for which the individuals
  are full siblings.
+ The probability that there are
+\change_deleted -1312060434 1518256689
  
-\change_deleted -1312060434 1511243276
-Similarly, t
-\change_inserted -1312060434 1511243277
-T
-\change_unchanged
-he probability 
-\change_inserted -1312060434 1511158370
-that there are
-\change_deleted -1312060434 1511158368
-of
-\change_unchanged
- 
-\change_deleted -1312060434 1511158368
-observing
 \change_unchanged
  
 \begin_inset Formula $x$
 \end_inset
 
- full sibships 
-\change_inserted -1312060434 1511158382
-in a half-sibling array 
-\change_deleted -1312060434 1511158368
-can be calculated as
-\change_inserted -1312060434 1513092364
-is the sum of each 
+ full sibships in a half-sibling array is the sum of each 
 \begin_inset Formula $\Pr(T_{c})$
 \end_inset
 
@@ -1560,31 +1139,6 @@ is the sum of each
 \end_layout
 
 \begin_layout Standard
-
-\change_deleted -1312060434 1511242816
-\begin_inset Formula 
-\begin{equation}
-\Pr(|T_{c}|=x)=\frac{\sum_{c|N=x}\Pr(T_{c})}{\sum_{x}\sum_{c|N=x}\Pr(T_{c})}\label{eq:prob-number-sibships}
-\end{equation}
-
-\end_inset
-
-where 
-\begin_inset Formula $N_{c}$
-\end_inset
-
- is the number of full sibships in 
-\begin_inset Formula $T_{c}$
-\end_inset
-
-.
-\change_inserted -1312060434 1511243693
-
-\end_layout
-
-\begin_layout Standard
-
-\change_inserted -1312060434 1513093114
 If the 
 \begin_inset Formula $i^{th}$
 \end_inset
@@ -1652,8 +1206,6 @@ We can then estimate the the distribution of fertilities among candidates
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513094680
 \begin_inset Formula 
 \begin{equation}
 \frac{1}{n_{o}}\sum_{i}\Pr(o_{i}|f_{j},m,i\in t_{k}).\label{eq:fertility}
@@ -1673,8 +1225,6 @@ key "roeder1989application"
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513270068
 However, this equation is only valid when there is little sibship structure
  in the sample because the assumption that offspring are independent is
  violated.
@@ -1741,178 +1291,20 @@ fecundities
 .
 \end_layout
 
-\begin_layout Standard
-
-\change_deleted -1312060434 1513096933
-The situation is more complicated when the question directly concerns paternity.
- We could define the probability that the 
-\begin_inset Formula $j^{th}$
-\end_inset
-
- male has mated with the mother of the half sibship as the probability that
- he is the father of any single full sibship as 
-\end_layout
-
-\begin_layout Standard
-
-\change_deleted -1312060434 1513096933
-\begin_inset Formula 
-\begin{equation}
-\frac{\sum_{c}\Pr(T_{c})\frac{1}{N_{c}}\sum_{k}\gamma_{kj}}{\sum_{j}\sum_{c}\Pr(T_{c})\frac{1}{N_{c}}\sum_{k}\gamma_{kj}}.\label{eq:fecundity-direct}
-\end{equation}
-
-\end_inset
-
-
-\end_layout
-
-\begin_layout Standard
-
-\change_deleted -1312060434 1513096933
-However, as in the example of the likelihood of a partition noted previously,
- this is invalid, because it allows for the male being the father of multiple
- full sibships.
- Because rows in 
-\begin_inset Formula $\gamma$
-\end_inset
-
- sum to one, each row corresponds to a multinomial distribution, and we
- can approximate 
-\begin_inset Formula $\gamma$
-\end_inset
-
- by Monte Carlo simulation.
- For the 
-\begin_inset Formula $c^{th}$
-\end_inset
-
- partition structure, let 
-\series bold
-
-\begin_inset Formula $\mathbf{Y_{\gamma}}$
-\end_inset
-
-
-\series default
- be a matrix with a row for each 
-\begin_inset Formula $N_{c}$
-\end_inset
-
- full sibships and 
-\begin_inset Formula $N_{\phi}$
-\end_inset
-
- columns.
- For each row in 
-\series bold
-
-\begin_inset Formula $\mathbf{Y_{\gamma}}$
-\end_inset
-
- 
-\series default
-we draw 
-\begin_inset Formula $N_{\phi}$
-\end_inset
-
- candidate males proportional to the probabilities in each row in 
-\begin_inset Formula $\gamma$
-\end_inset
-
-, where 
-\begin_inset Formula $N_{\phi}$
-\end_inset
-
- is sufficiently large to sample most of the probability mass in 
-\begin_inset Formula $\gamma$
-\end_inset
-
-.
- We then exclude any columns in 
-\series bold
-
-\begin_inset Formula $\mathbf{Y_{\gamma}}$
-\end_inset
-
-
-\series default
- for which two or more full sibships are assigned the same father, leaving
- 
-\begin_inset Formula $N_{\phi}^{*}$
-\end_inset
-
- columns.
- The probability that the 
-\begin_inset Formula $j^{th}$
-\end_inset
-
- candidate is the father of any full sibship in 
-\begin_inset Formula $T_{c}$
-\end_inset
-
- is the proportion 
-\begin_inset Formula $\phi_{cj}$
-\end_inset
-
- of columns of 
-\series bold
-
-\begin_inset Formula $\mathbf{Y_{\gamma}}$
-\end_inset
-
-
-\series default
- containing 
-\begin_inset Formula $f_{j}$
-\end_inset
-
-.
- Hence, the probability that candidate 
-\begin_inset Formula $j$
-\end_inset
-
- has mated with the mother, accounting for uncertainty in partition structure,
- is proportional to
-\end_layout
-
-\begin_layout Standard
-
-\change_deleted -1312060434 1513096933
-\begin_inset Formula 
-\begin{equation}
-\Pr(f_{j}|\mathbf{Y_{\gamma}})=\sum_{c}\phi_{cj}\Pr(T_{c}).\label{eq:fecundity-MC}
-\end{equation}
-
-\end_inset
-
-
-\change_unchanged
-
-\end_layout
-
 \begin_layout Subsection
 FAPS package
 \end_layout
 
 \begin_layout Standard
 Our method is implemented in the Python package Fractional Analysis of Paternity
- and Sibships (FAPS)
-\change_inserted -1312060434 1513154549
-.
-\change_deleted -1312060434 1513154548
-,
-\change_unchanged
+ and Sibships (FAPS).
+ The packaged is based on
+\change_deleted -1312060434 1518256689
  
-\change_inserted -1312060434 1513154558
-The packaged is based on 
-\change_deleted -1312060434 1513154561
-and utilises the
 \change_unchanged
  
 \emph on
 NumPy
-\change_inserted -1312060434 1513270100
-
 \emph default
 , with additional tools from the 
 \emph on
@@ -1923,13 +1315,13 @@ fastcluster
 pandas
 \emph default
  packages
-\change_deleted -1312060434 1513154566
- and SciPy tools 
+\change_inserted -1312060434 1518768427
+ 
 \change_unchanged
 
 \begin_inset CommandInset citation
 LatexCommand citep
-key "mckinney2010data,vanderwalt2011numpy,mullner2013fastcluster"
+key "mckinney-proc-scipy-2010,vanderwalt2011numpy,muellner2013fastcluster"
 
 \end_inset
 
@@ -1939,66 +1331,19 @@ key "mckinney2010data,vanderwalt2011numpy,mullner2013fastcluster"
 \end_inset
 
  with a focus on SNP markers (Appendix), clustering individuals into sibships
- for multiple half-sibling arrays
-\change_inserted -1312060434 1513158135
-.
-\change_deleted -1312060434 1513158134
-,
+ for multiple half-sibling arrays.
+ FAPS also allows for for inference of family structure and mating patterns
+ with summary outputs that automatically account for uncertainty in genealogy.
+
+\change_deleted -1312060434 1518256689
+  
 \change_unchanged
- 
-\change_inserted -1312060434 1513158141
-FAPS also allows for 
-\change_deleted -1312060434 1513158142
-and 
-\change_unchanged
-for inference of 
-\change_inserted -1312060434 1513695629
-family structure and 
-\change_unchanged
-mating patterns 
-\change_inserted -1312060434 1513158195
-with summary outputs 
-\change_unchanged
-that automatically account for uncertainty in genealogy.
- 
-\change_deleted -1312060434 1513158206
-FAPS also
-\change_unchanged
- 
-\change_deleted -1312060434 1513158218
-includes
-\change_unchanged
- 
-\change_deleted -1312060434 1513158224
-e
-\change_inserted -1312060434 1513158225
-E
-\change_unchanged
-xtensive simulation tools 
-\change_inserted -1312060434 1513158229
-are provided 
-\change_unchanged
-to 
-\change_deleted -1312060434 1513158231
-perform 
-\change_inserted -1312060434 1513158235
-allow 
-\change_unchanged
-power analyses for hypothetical datasets, 
-\change_deleted -1312060434 1513158237
-and
-\change_inserted -1312060434 1513158238
-as well as
-\change_unchanged
- facilities for inspecting data prior to analysis.
- 
-\change_inserted -1312060434 1513247840
-FAPS can handle multiple half-sibling arrays, and makes no requirement that
- a candidate father sire offspring with multiple mothers.
- 
-\change_unchanged
-The package and accompanying tutorial is available from www.github.com/ellisztamas
-/faps.
+ Extensive simulation tools are provided to allow power analyses for hypothetica
+l datasets, as well as facilities for inspecting data prior to analysis.
+ FAPS can handle multiple half-sibling arrays, and makes no requirement
+ that a candidate father sire offspring with multiple mothers.
+ The package and accompanying tutorial is available from www.github.com/ellisztama
+s/faps.
 \end_layout
 
 \begin_layout Subsection
@@ -2007,45 +1352,17 @@ Simulations
 
 \begin_layout Standard
 We used FAPS' power analysis tools to investigate how well FAPS was able
- to infer sibship and mating patterns
-\change_inserted -1312060434 1513270146
- as the quality of genotype information, analysis parameters, and underlying
- family structure varied
-\change_deleted -1312060434 1513087259
- as number of loci, genotype error rate (
-\begin_inset Formula $\mu$
-\end_inset
-
-), and the number of candidate males varies
-\change_unchanged
-.
- In all simulations below we ran 
-\change_inserted -1312060434 1513087173
-3
-\change_deleted -1312060434 1513087173
-5
-\change_unchanged
-00 replicates for each parameter set.
-\change_inserted -1312060434 1513087271
-
+ to infer sibship and mating patterns as the quality of genotype information,
+ analysis parameters, and underlying family structure varied.
+ In all simulations below we ran 300 replicates for each parameter set.
 \end_layout
 
 \begin_layout Subsubsection
-
-\change_inserted -1312060434 1513087305
 Accuracy of relationship inference
-\change_unchanged
-
 \end_layout
 
 \begin_layout Standard
-We used 
-\change_deleted -1312060434 1513076508
-four
-\change_inserted -1312060434 1513076509
-five
-\change_unchanged
- metrics to assess sibship and paternity assignment:
+We used five metrics to assess sibship and paternity assignment:
 \end_layout
 
 \begin_layout Enumerate
@@ -2078,6 +1395,20 @@ five
 
  the mean posterior probability that an individual’s true sire is inferred
  to be the true sire;
+\change_inserted -1312060434 1518258092
+
+\end_layout
+
+\begin_layout Enumerate
+
+\change_inserted -1312060434 1518258194
+\begin_inset Formula $P_{absent}$
+\end_inset
+
+: the mean posterior probability that the true sire is inferred to be missing
+ from the sample of candidates;
+\change_unchanged
+
 \end_layout
 
 \begin_layout Enumerate
@@ -2117,8 +1448,6 @@ In a first set of simulations we investigated inference of family structure
 \end_inset
 
 =0.0015, 0.005, 0.01, or 0.015 to simulate errors in genotyping.
-\change_inserted -1312060434 1513087330
-
 \end_layout
 
 \begin_layout Subsubsection
@@ -2135,19 +1464,13 @@ To test the effect of overall offspring sample size we repeated simulations
 \end_inset
 
 =0.0015.
-\change_inserted -1312060434 1513087340
-
 \end_layout
 
 \begin_layout Subsubsection
-
-\change_inserted -1312060434 1513087340
 Number of Monte Carlo draws
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513092102
 To investigate the sensitivity of sibship inference to the number of Monte
  Carlo draws used to estimate the likelihood of a partition structure we
  repeated simulations of the four family-structure scenarios described above
@@ -2179,29 +1502,15 @@ To investigate the sensitivity of sibship inference to the number of Monte
  clustering.
  We also inferred the effect of changing the number of draws on the accuracy
  of sibship inference.
-\change_unchanged
-
 \end_layout
 
 \begin_layout Subsubsection
-Comparison with 
-\change_deleted -1312060434 1513768521
-Colony2
-\change_inserted -1312060434 1513768521
-Colony
-\change_unchanged
-
+Comparison with Colony
 \end_layout
 
 \begin_layout Standard
 We compared the performance of FAPS with the serial command-line version
- of Colony
-\change_inserted -1312060434 1513075935
- 2.0.6.3
-\change_deleted -1312060434 1513075926
-2
-\change_unchanged
- for Linux 
+ of Colony 2.0.6.3 for Linux 
 \begin_inset CommandInset citation
 LatexCommand citep
 key "wang2009"
@@ -2216,30 +1525,16 @@ key "wang2009"
 \end_inset
 
 =0.0015.
- We then used FAPS and Colony
-\change_deleted -1312060434 1513075940
-2
+ We then used FAPS and Colony to infer family structures of each 
+\change_deleted -1312060434 1518768455
+halfsibling
+\change_inserted -1312060434 1518768455
+half sibling
 \change_unchanged
- to infer family structures of each half
-\change_deleted -1312060434 1513074883
--
-\change_unchanged
-sib
-\change_deleted -1312060434 1513074893
-ship
-\change_inserted -1312060434 1513074895
-ling array
-\change_unchanged
- assuming no self-fertilisation.
-\change_inserted -1312060434 1513074912
-
+ array assuming no self-fertilisation.
 \end_layout
 
 \begin_layout Standard
-
-\change_deleted -1312060434 1513074912
- 
-\change_inserted -1312060434 1513760342
 Colony allows for three analysis methods: (1) 
 \begin_inset Quotes eld
 \end_inset
@@ -2274,36 +1569,14 @@ key "wang2009"
 \end_inset
 
 ).
- 
-\change_deleted -1312060434 1513075599
-For Colony2 we used the pairwise-likelihood score method, which is designed
- for dealing with SNP data
-\change_inserted -1312060434 1513075623
- 
-\change_deleted -1312060434 1513075727
- 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "wang2012"
 
-\end_inset
-
-, 
-\change_inserted -1312060434 1513075731
- We analysed each simulated dataset with all three methods, 
-\change_deleted -1312060434 1513075733
-with
-\change_inserted -1312060434 1513075734
-using
+\change_deleted -1312060434 1518256689
+  
 \change_unchanged
- no informative prior on sibship size.
- We also set allele frequencies as known,
-\change_deleted -1312060434 1513075767
- and
-\change_unchanged
- run length to medium
-\change_inserted -1312060434 1513760360
-, and likelihood accuracy to 
+ We analysed each simulated dataset with all three methods, using no informative
+ prior on sibship size.
+ We also set allele frequencies as known, run length to medium, and likelihood
+ accuracy to 
 \begin_inset Quotes eld
 \end_inset
 
@@ -2311,22 +1584,11 @@ high
 \begin_inset Quotes erd
 \end_inset
 
-
-\change_unchanged
 .
-
-\change_inserted -1312060434 1513163188
  For all analyses we included information about the identity of the mother
  of each half-sibling array.
  We note that inference based on pairwise relationships only is expected
  to perform more poorly than FL and FPLS, but we include it here for reference.
-
-\change_deleted -1312060434 1513075614
- Since Colony2 aims to find a maximum-likelihood solution to sibship assignment
- we report accuracy based on the most-likely partition structure, but compare
- this with values for FAPS based on integrating out uncertainty in genealogy.
-\change_unchanged
-
 \end_layout
 
 \begin_layout Subsection
@@ -2376,46 +1638,19 @@ key "ellis2016"
 .
  Briefly, we collected seed capsules from 96 mothers in July 2012, each
  containing many hundreds of seeds.
- We grew and collected tissue from a total of 
-\change_deleted -1312060434 1513165168
-1127
-\change_inserted -1312060434 1513165169
-1468
-\change_unchanged
- seedlings from 5
-\change_inserted -1312060434 1513164679
-7
-\change_deleted -1312060434 1513164679
-6
-\change_unchanged
- of these families, with between 3 and 35 seedlings per family.
- We also sampled 2128 adult plants, including 
-\change_deleted -1312060434 1513165188
-all 
-\change_unchanged
-maternal plants.
+ We grew and collected tissue from a total of 1468 seedlings from 57 of
+ these families, with between 3 and 35 seedlings per family.
+ We also sampled 2128 adult plants, including maternal plants.
  DNA was extracted from leaf material from seedlings, maternal and paternal
  parents, and subsequently genotyped at 120 SNPs by LGC Genomics.
- This SNP panel represents the 
-\change_deleted -1312060434 1513165343
-70
-\change_inserted -1312060434 1513165343
-42
-\change_unchanged
- SNPs described by 
+ This SNP panel represents the 42 SNPs described by 
 \begin_inset CommandInset citation
 LatexCommand citet
 key "ellis2016"
 
 \end_inset
 
- plus a further 
-\change_inserted -1312060434 1513165356
-27
-\change_deleted -1312060434 1513165347
-50
-\change_unchanged
- SNPs designed using the same procedure.
+ plus a further 27 SNPs designed using the same procedure.
  Parentage SNPs were chosen that showed as little spatial variation as possible,
  had minor allele frequencies close to 0.5, and that were at least 2cM apart.
 \end_layout
@@ -2434,37 +1669,16 @@ To estimate per locus error rates associated with KASPR sequencing repeated
 Unfortunately, the silica gel used to dry the offspring tissue did not have
  sufficient desiccating power, and the quality offspring DNA was highly
  variable.
- 
-\change_inserted -1312060434 1513763468
-We have found that individuals with many loci that failed to amplify also
+ We have found that individuals with many loci that failed to amplify also
  had high genotype-error rates at the remaining loci (David Luke Field,
  unpublished data).
  Rather than risk biasing statistical and biological conclusions through
  such errors we applied a stringent data cleaning protocol prior to sibship
  analysis.
- 
-\change_unchanged
-We excluded 54 SNPs with more than 5% missing data and four with heterozygosity
+ We excluded 54 SNPs with more than 5% missing data and four with heterozygosity
  <0.2 or >0.75.
- We also excluded 
-\change_deleted -1312060434 1513165513
-368
-\change_inserted -1312060434 1513165513
-736
-\change_unchanged
- offspring and 
-\change_deleted -1312060434 1513165517
-3
-\change_inserted -1312060434 1513165517
-6
-\change_unchanged
-6 adult individuals with greater than 
-\change_inserted -1312060434 1513165528
-5
-\change_deleted -1312060434 1513165527
-10
-\change_unchanged
-% missing genotype data.
+ We also excluded 736 offspring and 66 adult individuals with greater than
+ 5% missing genotype data.
  After these data cleaning steps, the remaining 64 SNPs had on average 1.7%
  missing data in the offspring, and 0.8% in the adults, and heterozygosity
  between 0.20 and 0.55.
@@ -2472,19 +1686,9 @@ We excluded 54 SNPs with more than 5% missing data and four with heterozygosity
 
 \begin_layout Standard
 We analysed these data in two stages.
- We first examined the largest family in the dataset (2
-\change_deleted -1312060434 1513165629
-2
-\change_inserted -1312060434 1513165630
-0
-\change_unchanged
- offspring from mother 
-\change_inserted -1312060434 1513165635
-L1872
-\change_deleted -1312060434 1513165634
-M0009
-\change_unchanged
-) to assess three factors which might indicate errors in genealogical inference.
+ We first examined the largest family in the dataset (20 offspring from
+ mother L1872) to assess three factors which might indicate errors in genealogic
+al inference.
  If assignment is accurate, we expect that the most probable candidates
  should be no more related to one another, nor show an increase in the proportio
 n of missing genotypes than would be expected by a random draw from the
@@ -2492,21 +1696,19 @@ n of missing genotypes than would be expected by a random draw from the
  Similarly, we would expect that the most probable pollen donors are found
  in close to the maternal plant, but that less likely candidates are drawn
  from the spatial distribution of candidates at random.
- We used FAPS to cluster family 
-\change_deleted -1312060434 1513165649
-M0009
-\change_inserted -1312060434 1513165650
-L1872
-\change_unchanged
- and identify most-probable fathers for each offspring, accounting for uncertain
-ty in sibship structure (equation 
+ We used FAPS to cluster family L1872 and identify most-probable fathers
+ for each offspring, accounting for uncertainty in sibship structure
+\change_deleted -1312060434 1518690160
+ (equation 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:fecundity-MC"
 
 \end_inset
 
-).
+)
+\change_unchanged
+.
  We then compared distributions of pairwise relatedness, proportion of missing
  data and geographic location for the probable candidate fathers to those
  for the base population.
@@ -2548,15 +1750,8 @@ For the even-sibship-sizes mating scenario, all metrics of performance increased
 \end_inset
 
  and 2000 candidate males, 40 loci are sufficient to recover the true partition
- with >99% reliability, even for the largest sample
-\change_inserted -1312060434 1513159065
-s
-\change_unchanged
- of candidate males
-\change_inserted -1312060434 1513159131
- (figures 2A and 2B) 
-\change_unchanged
-.
+ with >99% reliability, even for the largest samples of candidate males
+ (figures 2A and 2B) .
  In 99.9% of cases where the true partition was not recovered this was because
  FAPS identified an alternative partition structure with a higher likelihood
  of having generated the data than the true partition.
@@ -2564,11 +1759,7 @@ s
 
 \begin_layout Standard
 We found that 50 loci sufficed to identify full-sibling relationships and
- true sires with >95% posterior probability (figure 2
-\change_inserted -1312060434 1513159164
-C
-\change_unchanged
-).
+ true sires with >95% posterior probability (figure 2C).
  Under all simulation parameter sets the distribution of family sizes remains
  centred on the true value, followed by a peak at family size of one, then
  one minus the true family size (figure 3).
@@ -2579,24 +1770,9 @@ C
 \end_layout
 
 \begin_layout Standard
-FAPS correctly inferred >99.9% 
-\change_inserted -1312060434 1513159225
-of 
-\change_unchanged
-true half-sibling relationship across all parameter sets, even for cases
- with 
-\change_inserted -1312060434 1513159246
-the 
-\change_unchanged
-few
-\change_inserted -1312060434 1513159249
-est
-\change_unchanged
- loci, high
-\change_inserted -1312060434 1513159254
-est
-\change_unchanged
- errors and many candidate fathers.
+FAPS correctly inferred >99.9% of true half-sibling relationship across all
+ parameter sets, even for cases with the fewest loci, highest errors and
+ many candidate fathers.
  Partition structures that join two true full sibships, or otherwise over-estima
 ted family size had posterior probabilities very close to zero (figure 3).
 \end_layout
@@ -2608,6 +1784,15 @@ Simulation results were very similar in three other mating scenarios simulated
  single-family and all-half-siblings scenarios FAPS recovered the true partition
  in all simulated datasets (supplementary figures 1-2).
  These scenarios represent the tip and base of the dendrogram (figure 1).
+
+\change_inserted -1312060434 1518259058
+ Furthermore, the probability 
+\begin_inset Formula $P_{absent}$
+\end_inset
+
+ that the true was not sampled was less than 0.001 under all mating scenarios.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Subsubsection
@@ -2616,31 +1801,18 @@ Reduced variance in larger families
 
 \begin_layout Standard
 In simulations investigating the effect of sibship size, true full-sibling
- relationships were recovered with >0.98 posterior probability
-\change_inserted -1312060434 1513087413
-,
-\change_unchanged
- regardless of family size
-\change_inserted -1312060434 1513159312
- (figure 4)
-\change_unchanged
-.
+ relationships were recovered with >0.98 posterior probability, regardless
+ of family size (figure 4).
  However, the variance in accuracy between samples decreased as family size
  increases, reflecting the increased information about sibling relationships
  with larger families.
-\change_inserted -1312060434 1513087420
-
 \end_layout
 
 \begin_layout Subsubsection
-
-\change_inserted -1312060434 1513089101
 Little dependence on Monte Carlo draws
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513760381
 In all simulations the proportion of probability space explored by the Monte
  Carlo sampling algorithm decreased as the number of candidate fathers increased
  (figure 5, left-hand side).
@@ -2669,8 +1841,6 @@ reproductive-skew
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513164597
 The accuracy of full-sibship inference also decreased with increased number
  of candidate fathers.
  However, there was no change in either 
@@ -2685,16 +1855,10 @@ The accuracy of full-sibship inference also decreased with increased number
 \end_layout
 
 \begin_layout Subsubsection
-Comparison with 
-\change_deleted -1312060434 1513768523
-Colony2
-\change_inserted -1312060434 1513768523
-Colony
+Comparison with Colony
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513162836
 All three analysis methods in Colony showed very high accuracy of full-sibling
  inference, even where the number of loci was very small (figure 6A).
  FAPS showed substantially lower 
@@ -2707,8 +1871,6 @@ All three analysis methods in Colony showed very high accuracy of full-sibling
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513163044
 FAPS, FL and FPLS also showed near total accuracy in inferring half-sibling
  relationships regardless of the number of loci, but the pairwise method
  showed very low 
@@ -2721,8 +1883,6 @@ FAPS, FL and FPLS also showed near total accuracy in inferring half-sibling
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513163432
 The FL, PLS and FPLS completed analyses for all 300 datasets in 671.40, 322.43
  and 465.47 minutes respectively.
  FAPS required 2.05 minutes to create 
@@ -2733,50 +1893,6 @@ The FL, PLS and FPLS completed analyses for all 300 datasets in 671.40, 322.43
  same machine.
 \end_layout
 
-\begin_layout Standard
-
-\change_deleted -1312060434 1513162948
-For the parameter combination used here, neither FAPS nor Colony2 showed
- strong dependence on the number of candidate fathers in the sample.
- FAPS correctly identified true full- and half-sibship relationships with
- posterior probabilities close to one (figure 5).
- The distribution of number of full sibships was centred on the true value
- of four.
- For simulations with a large number of candidate males there was also support
- for five families, one of which was generally a singleton family.
-\end_layout
-
-\begin_layout Standard
-
-\change_deleted -1312060434 1513162948
-For the same datasets, Colony2 also correctly grouped 98% of full-sibling
- pairs into the same family, but reconstructed only 22% of half-sibling
- relationships.
- In more than 50% of cases with was because all individuals were assigned
- to a single full-sibling family.
- Consistent with this the distribution of family number is greatest for
- a single family, with a much smaller peak around the true number of families.
- The two methods thus showed contrasting patterns in the results, in that
- FAPS tended to slightly overestimate the number of families, whereas Colony2
- underestimated the true number of families.
-\end_layout
-
-\begin_layout Standard
-
-\change_deleted -1312060434 1513162948
-Colony2 completed analyses of all datasets in 4 hours and 10 minutes on
- a 3.4GHz Intel i7 processor.
- On the same machine FAPS calculated 
-\series bold
-G
-\series default
- matrices and performed clustering for the same datasets in 1 minute 41
- seconds.
- 
-\change_unchanged
-
-\end_layout
-
 \begin_layout Subsection
 Extensive polyandry in 
 \emph on
@@ -2785,95 +1901,24 @@ A.
 \end_layout
 
 \begin_layout Standard
-For 
-\change_deleted -1312060434 1513165736
-17 
-\change_inserted -1312060434 1513165738
-all 
-\change_unchanged
-of the 2
-\change_deleted -1312060434 1513165712
-2
-\change_inserted -1312060434 1513165714
-0
-\change_unchanged
- offspring in family 
-\change_deleted -1312060434 1513165716
-M0009
-\change_inserted -1312060434 1513165717
-L1872
-\change_unchanged
- there was a single candidate with a posterior probability of paternity
- >0.9
-\change_inserted -1312060434 1513165732
-6
-\change_deleted -1312060434 1513165732
-4
-\change_unchanged
-.
- These candidates were from a sample of 
-\change_deleted -1312060434 1513165849
-12
-\change_inserted -1312060434 1513165850
-7
-\change_unchanged
- independent most-probable pollen donors.
+For all of the 20 offspring in family L1872 there was a single candidate
+ with a posterior probability of paternity >0.96.
+ These candidates were from a sample of 7 independent most-probable pollen
+ donors.
  Given strong support for these candidates and for ease of presentation
  we focus discussion on these individuals.
 \end_layout
 
 \begin_layout Standard
-Most-probable candidates were located between 
-\change_deleted -1312060434 1513165984
-29
-\change_inserted -1312060434 1513165985
-32
-\change_unchanged
- and 
-\change_deleted -1312060434 1513165987
-620
-\change_inserted -1312060434 1513165987
-79
-\change_unchanged
- metres from the maternal plant (mean=
-\change_deleted -1312060434 1513165991
-233m
-\change_inserted -1312060434 1513166093
-48 metres
-\change_unchanged
-).
- In contrast, second most probable candidates were located between 
-\change_deleted -1312060434 1513166060
-49
-\change_inserted -1312060434 1513166060
-102
-\change_unchanged
- and 
-\change_deleted -1312060434 1513166069
-2379
-\change_inserted -1312060434 1513166072
-1367
-\change_unchanged
- metres from the maternal plant (mean=
-\change_deleted -1312060434 1513166087
-1146m
-\change_inserted -1312060434 1513166089
-833 metres
-\change_unchanged
-; supporting figure 4).
+Most-probable candidates were located between 32 and 79 metres from the
+ maternal plant (mean=48 metres).
+ In contrast, second most probable candidates were located between 102 and
+ 1367 metres from the maternal plant (mean=833 metres; supporting figure
+ 4).
  We found no evidence that most-probable candidates were more related to
  one another than would be expected from a random draw from the pool of
- candidates (supporting figure 5)
-\change_deleted -1312060434 1513166124
-.
- We found a slight bias towards increased missing data among most-probable
- candidates; modal number of loci with missing data among the whole population
- was zero but one among most probable candidates
-\change_inserted -1312060434 1513760424
-, nor that most-likely candidates had an unusually high proportion of missing
- SNP data
-\change_unchanged
- (supporting figure 6).
+ candidates (supporting figure 5), nor that most-likely candidates had an
+ unusually high proportion of missing SNP data (supporting figure 6).
 \end_layout
 
 \begin_layout Standard
@@ -2887,36 +1932,15 @@ A.
  For all 306 offspring the posterior probability that the true sire was
  unsampled was less than 0.001.
  The posterior distribution of family number implies that a sample of 17
- offspring comprised between 
-\change_deleted -1312060434 1513166312
-six
-\change_inserted -1312060434 1513166313
-four
-\change_unchanged
- and 15 full-sibling families of up to 
-\change_deleted -1312060434 1513166332
-five
-\change_inserted -1312060434 1513166343
-six
-\change_unchanged
- offspring (
-\change_deleted -1312060434 1513089087
-figure 6
-\change_inserted -1312060434 1513089087
-figure 7
-\change_unchanged
-).
+ offspring comprised between four and 15 full-sibling families of up to
+ six offspring (figure 7).
 \end_layout
 
 \begin_layout Section
 Discussion
-\change_inserted -1312060434 1513257340
-
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513263162
 In this paper we present a method for inferring sibship and paternity relationsh
 ips from half-sibling arrays.
  We use hierarchical clustering to identify plausible ways to partition
@@ -2930,42 +1954,6 @@ ips from half-sibling arrays.
  accounts for uncertain about the exact pedigree.
  As such FAPS represents an accurate and efficient tool that allows for
  robust and efficient biological inference from genealogies.
-\change_unchanged
-
-\end_layout
-
-\begin_layout Standard
-
-\change_deleted -1312060434 1513771824
-Ever since the arrival of molecular markers, quantifying sibship relationships
- in natural populations has been an ongoing challenge for biologists 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "thompson1976inference,thompson1987parental,blouin2003dna"
-
-\end_inset
-
-.
- Here, we present an accurate and efficient method for jointly inferring
- paternity and sibship relationships, that provides a substantial speed
- advantage over similar software.
- Because the method is based on pairwise likelihoods of paternity it is
- of broad application, since it does not depend on marker type or genetic
- system, provided this likelihood can be calculated (e.g.
- 
-\begin_inset CommandInset citation
-LatexCommand citealp
-key "anderson_garza2006,wang2014parentage"
-
-\end_inset
-
-).
- Furthermore, a key strength of the method are tools to explicitly account
- for uncertainty in sibling and paternity relationships.
- As such FAPS is a flexible tool that allows for robust biological inference
- from genealogies.
-\change_inserted -1312060434 1513265306
-
 \end_layout
 
 \begin_layout Standard
@@ -3010,13 +1998,9 @@ key "butler2004accuracy"
  partition.
  As such, the incorrect partitions identified by FAPS are in fact more consisten
 t with the data than the true genealogy.
-\change_inserted -1312060434 1513265316
-
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513760446
 We found Monte Carlo simulation to be an efficient approach to estimating
  the likelihood of a partition, while excluding the possibility that multiple
  full sibships share a father.
@@ -3032,12 +2016,16 @@ We found Monte Carlo simulation to be an efficient approach to estimating
  inference (figure 5, right-hand side).
  This indicates that the most likely configurations can be sampled with
  a small number of draws, and that the accuracy of FAPS does not depend
- on the paramter choice for the number of Monte Carlo draws.
+ on the 
+\change_deleted -1312060434 1518768462
+paramter
+\change_inserted -1312060434 1518768462
+parameter
+\change_unchanged
+ choice for the number of Monte Carlo draws.
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513266525
 Our hierarchical clustering algorithm relies on a matrix of probabilities
  that pairs of offspring are full siblings.
  As well as having low statistical power 
@@ -3059,8 +2047,13 @@ key "wang2007parentage"
  Finally, FAPS dramatically outperforms the pairwise-likelihood method implement
 ed in Colony (figure 6).
  These observations indicate that any inherent weakness in using the heuristic
- pairwise metric has negligible negative impact on the accurcay of this
- method.
+ pairwise metric has negligible negative impact on the 
+\change_deleted -1312060434 1518768465
+accurcay
+\change_inserted -1312060434 1518768465
+accuracy
+\change_unchanged
+ of this method.
 \end_layout
 
 \begin_layout Standard
@@ -3075,13 +2068,7 @@ A.
  17 offspring per array represent only a tiny fraction of the total seeds
  in the array.
  It is therefore likely that these full sibships are substantially larger
- than implied in 
-\change_deleted -1312060434 1513089094
-figure 6
-\change_inserted -1312060434 1513089094
-figure 7
-\change_unchanged
-.
+ than implied in figure 7.
  Nevertheless, this demonstrates that a single seed capsule contains offspring
  from a large number of pollen donors, either through many independent pollinato
 r visits, or through fewer visits by pollinators delivering mixed pollen
@@ -3094,25 +2081,9 @@ ce of this hybrid zone.
 \end_layout
 
 \begin_layout Standard
-Closer examination of a single large family found that the 2
-\change_inserted -1312060434 1513267203
-0
-\change_deleted -1312060434 1513267203
-2
-\change_unchanged
- offspring in family 
-\change_deleted -1312060434 1513267206
-M0009
-\change_inserted -1312060434 1513267207
-L1872
-\change_unchanged
- could be assigned to 
-\change_deleted -1312060434 1513267212
-12
-\change_inserted -1312060434 1513267212
-seven
-\change_unchanged
- pollen donors with high posterior probability.
+Closer examination of a single large family found that the 20 offspring
+ in family L1872 could be assigned to seven pollen donors with high posterior
+ probability.
  These donors were no more related to one another nor have substantially
  poorer quality genotype data than would be expected by chance.
  Furthermore, they were within close proximity to the maternal plant, as
@@ -3133,70 +2104,6 @@ key "ashley2010plant"
 \end_layout
 
 \begin_layout Standard
-
-\change_deleted -1312060434 1513267254
-Since estimation of relationships depends on the amount of relevant information
- provided 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "wang2007parentage,walling2010"
-
-\end_inset
-
-, there is great potential for improving paternity and sibship inference
- by maximising the information content in 
-\series bold
-G
-\series default
-.
- For example, 
-\begin_inset CommandInset citation
-LatexCommand citet
-key "devlin1988fractional"
-
-\end_inset
-
- described a framework for incorporating information about linkage between
- individual markers into paternity likelihoods.
- However, this method assumed perfect data, and the challenge remains to
- implement this for data containing genotype errors.
- Alternatively, one could include non-genetic information relevant to paternity
- 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "neff2001bayesian,hadfield2006"
-
-\end_inset
-
-.
- For example, in the case of the 
-\emph on
-A.
- majus
-\emph default
- population examined here, it is reasonable to expect that a candidate close
- to the mother plant is more likely to be a pollen donor than is a plant
- several kilometres away.
- If an estimate of dispersal were available it would be straightforward
- to incorporate this by multiplying a function of distance by 
-\series bold
-G
-\series default
-.
- Incorporation of such additional sources have been shown to increase the
- accuracy of genealogy reconstruction 
-\begin_inset CommandInset citation
-LatexCommand citep
-key "walling2010"
-
-\end_inset
-
-.
-\change_inserted -1312060434 1513267282
-
-\end_layout
-
-\begin_layout Standard
 Inference of the relationships between individuals in natural populations
  is an important technique for understanding patterns of gene dispersal
  and selection in the wild 
@@ -3210,36 +2117,15 @@ key "pemberton2008wild,ashley2010plant"
  The method presented here represent a useful tool to infer mating patterns
  from half-sibling arrays that accounts for uncertainty about exact relationship
 s.
- 
-\change_inserted -1312060434 1513269344
-Because the method requires only a likelihood of paternity for mother-offspring-
-father triplets, it does not depend on marker type or genetic system, provided
+ Because the method requires only a likelihood of paternity for mother-offspring
+-father triplets, it does not depend on marker type or genetic system, provided
  this likelihood can be calculated (e.g.
  ).
- 
-\change_deleted -1312060434 1513269447
-Although 
-\change_inserted -1312060434 1513269447
-W
-\change_deleted -1312060434 1513269447
-w
-\change_unchanged
-e have focused on the case where one mother is known
-\change_inserted -1312060434 1513269436
- and individuals are genotyped using biallelic SNPs.
- 
-\change_deleted -1312060434 1513269452
-, 
-\change_inserted -1312060434 1513269460
-Nevertheless 
-\change_deleted -1312060434 1513269463
-this approach
-\change_inserted -1312060434 1513269463
-it
-\change_unchanged
- could in principle be easily extended to the assignment of parent pairs
- simply by substituting an appropriate likelihood function to calculate
- 
+ We have focused on the case where one mother is known and individuals are
+ genotyped using biallelic SNPs.
+ Nevertheless it could in principle be easily extended to the assignment
+ of parent pairs simply by substituting an appropriate likelihood function
+ to calculate 
 \series bold
 G 
 \series default
@@ -3250,17 +2136,8 @@ key "meagher_thompson1986relationship"
 
 \end_inset
 
-
-\change_deleted -1312060434 1513269796
-.
- T
-\change_inserted -1312060434 1513269799
-, although t
-\change_unchanged
-he greater number of possible parents would require more markers, and more
- intense computation.
-
-\change_inserted -1312060434 1513269810
+, although the greater number of possible parents would require more markers,
+ and more intense computation.
  Moreover, it is equally applicable to any marker type (
 \begin_inset CommandInset citation
 LatexCommand citet
@@ -3276,21 +2153,7 @@ key "wang2014parentage"
 \end_inset
 
 , provided that it is possible to estimate likelihoods of paternity.
-
-\change_unchanged
  
-\change_deleted -1312060434 1513269849
-Nevertheless, this paper has demonstrated that the matrix-based approach
- used by FAPS is able to deal with large samples of candidates efficiently,
- which is encouraging that there is ample scope for extension.
-\change_inserted -1312060434 1513269849
-
-\end_layout
-
-\begin_layout Standard
-
-\change_inserted -1312060434 1513269778
-
 \end_layout
 
 \begin_layout Section
@@ -3306,10 +2169,11 @@ A.
 \emph default
 population, and Matthew Couchman and Harald Ringbauer for their help in
  processing and cleaning these data.
-
-\change_inserted -1312060434 1513269966
  We are also grateful to four anonymous reviewers whose comments significantly
  improved the quality of the manuscript.
+
+\change_inserted -1312060434 1518689916
+ This work was partially supported by ERC grant 250152 to NHB.
 \change_unchanged
 
 \end_layout
@@ -3319,14 +2183,53 @@ Data availability
 \end_layout
 
 \begin_layout Standard
+
+\change_inserted -1312060434 1518693040
+The FAPS package and documentation is available at https://github.com/ellisztamas
+/faps and from the PyPi package repository.
+ 
+\change_unchanged
 Genotype and GPS data for the 
 \emph on
 A.
  majus 
 \emph default
-dataset, as well as scripts to run the the simulations are available at
- https://github.com/ellisztamas/faps/tree/master/supporting_simulations.
+dataset, as well as scripts to run the the simulations are available 
+\change_inserted -1312060434 1518689830
+from the IST Austria data repository at https://datarep.app.ist.ac.at/95/ (DOI:10.154
+79/AT:ISTA:95).
+\change_deleted -1312060434 1518689731
+at
+\change_unchanged
+ 
+\change_deleted -1312060434 1518689719
+https://github.com/ellisztamas/faps/tree/master/supporting_simulations.
  Data will also be uploaded to the IST Austria data repository on publication.
+\change_inserted -1312060434 1518700414
+
+\end_layout
+
+\begin_layout Section
+
+\change_inserted -1312060434 1518700426
+Author contributions
+\end_layout
+
+\begin_layout Standard
+
+\change_inserted -1312060434 1518700693
+TJE conceived the method and performed simulations and analysis of family
+ structure in 
+\emph on
+A.
+ majus
+\emph default
+.
+ DLF arranged sampling and processing of the A.
+ majus population, and designed the SNP panel.
+ TJE, DLF and NHB wrote the manuscript.
+\change_unchanged
+
 \end_layout
 
 \begin_layout Section
@@ -3360,8 +2263,6 @@ key "meagher1986,meagher_thompson1986relationship,devlin1988fractional"
 \end_inset
 
 .
-
-\change_inserted -1312060434 1513698889
  This formulation assumes that all loci are unlinked, which may not hold
  for SNP data.
  
@@ -3373,8 +2274,6 @@ key "anderson_garza2006"
 
  found that linkage causes the SNP panel to behave as if there were fewer
  loci than had been typed, but that this effect was fairly minor.
-\change_unchanged
-
 \end_layout
 
 \begin_layout Standard
@@ -3510,9 +2409,9 @@ Individuals with large terms for
 \begin_inset Formula $\Pr(T_{c}|\mathbf{G})$
 \end_inset
 
+
+\change_deleted -1312060434 1518256689
  
-\change_deleted -1312060434 1513249493
-by Monte Carlo simulation
 \change_unchanged
  we therefore keep the requirement that no two sibships can share a father
  in 
@@ -3520,13 +2419,9 @@ by Monte Carlo simulation
 \end_inset
 
 , but do allow two sibships to share an unsampled father.
-\change_inserted -1312060434 1513250250
-
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513250568
 It is assumed that the sample of candidate males is sufficiently large to
  give a representative estimate of 
 \series bold
@@ -3544,8 +2439,6 @@ key "wang2004"
 \end_inset
 
 .
-\change_unchanged
-
 \end_layout
 
 \begin_layout Standard
@@ -3560,16 +2453,20 @@ By including
 , it is straightforward to account for unsampled fathers in biological inference.
  A missing father is treated like any other father, and the probability
  of a missing father is automatically incorporated into 
-\begin_inset Formula $\phi_{cj}$
+\begin_inset Formula $\boldsymbol{\Gamma}$
 \end_inset
 
- in equation 
+ 
+\change_deleted -1312060434 1518690192
+in equation 
 \begin_inset CommandInset ref
 LatexCommand ref
 reference "eq:fecundity-MC"
 
 \end_inset
 
+
+\change_unchanged
 .
  This will not bias inference about the relative fecundity of different
  phenotype classes provided that the true phenotypes of the missing fathers
@@ -3580,7 +2477,7 @@ reference "eq:fecundity-MC"
 \begin_inset CommandInset bibtex
 LatexCommand bibtex
 bibfiles "snap_refs"
-options "../../../Seafile/faps/manuscript_faps/apa"
+options "apa"
 
 \end_inset
 
@@ -3625,46 +2522,19 @@ Figure
 \series bold
 2
 \series default
-: FAPS performance for four families of five offspring
-\change_inserted -1312060434 1513090685
-.
-\change_deleted -1312060434 1513090681
-,
-\change_unchanged
+: FAPS performance for four families of five offspring.
+ Sub-figures show the probability of recovering the true partition (A, B),
+ accuracy of full-sibling relationship reconstruction (C, D) and posterior
  
-\change_deleted -1312060434 1513090723
-as the number of typed loci, number of candidate fathers and genotype error
- rate vary.
+\change_deleted -1312060434 1518767534
+probabilty
+\change_inserted -1312060434 1518767534
+probability
+\change_unchanged
+ of the each true sire on its offspring (E.
+ F) as the number of typed loci (A, C, E), genotype error rate (B, D, E)
+ and number of candidate fathers (see legend) vary.
  
-\change_unchanged
-Sub-figures show the probability of recovering the true partition (
-\change_deleted -1312060434 1513090629
-top
-\change_inserted -1312060434 1513090630
-A, B
-\change_unchanged
-), accuracy of full-sibling relationship reconstruction (
-\change_deleted -1312060434 1513090633
-middle
-\change_inserted -1312060434 1513090634
-C, D
-\change_unchanged
-) and posterior probabilty of the each true sire on its offspring (
-\change_deleted -1312060434 1513090637
-bottom
-\change_inserted -1312060434 1513090638
-E.
- F
-\change_unchanged
-)
-\change_inserted -1312060434 1513090742
- as the number of typed loci (A, C, E), genotype error rate (B, D, E) and
- number of candidate fathers (see legend) vary.
- 
-\change_deleted -1312060434 1513090731
-.
-\change_unchanged
-
 \begin_inset Newline newline
 \end_inset
 
@@ -3677,19 +2547,8 @@ E.
 Figure 3
 \series default
 : Distribution of inferred family sizes under the even- sibship-sizes mating
- scenario as number of loci
-\change_inserted -1312060434 1513090825
- (A)
-\change_unchanged
-, genotype error rate 
-\change_inserted -1312060434 1513090828
-(B) 
-\change_unchanged
-and the number of candidate fathers
-\change_inserted -1312060434 1513090833
- (C)
-\change_unchanged
- vary.
+ scenario as number of loci (A), genotype error rate (B) and the number
+ of candidate fathers (C) vary.
  For clarity only an illustrative subset of the parameter sets are shown.
  In plots in which a single variable does not vary, plots show the cases
  for 50 loci, 
@@ -3708,28 +2567,16 @@ and the number of candidate fathers
 
 \series bold
 Figure 4: 
-\change_inserted -1312060434 1513091011
-
 \series default
-Viola plots showing 
-\change_deleted -1312060434 1513091013
-A
-\change_inserted -1312060434 1513091015
-the a
-\change_unchanged
-ccuracy of pairwise full-sibling-relationship reconstruction as full-sibship
- size increases.
+Viola plots showing the accuracy of pairwise full-sibling-relationship reconstru
+ction as full-sibship size increases.
 \begin_inset Newline newline
 \end_inset
 
 
-\change_inserted -1312060434 1513088718
-
 \end_layout
 
 \begin_layout Standard
-
-\change_inserted -1312060434 1513163969
 
 \series bold
 Figure 5: 
@@ -3763,39 +2610,16 @@ Subplots show scenarios for even sibship sizes (A-B), a single family (C-D)
 \begin_layout Standard
 
 \series bold
-Figure 
-\change_deleted -1312060434 1513089048
-5
-\change_inserted -1312060434 1513089048
-6
-\change_unchanged
-: 
-\change_inserted -1312060434 1513163057
-
+Figure 6: 
 \series default
 Sibship inference using Colony and FAPS.
  Curves show reconstruction of full-sibling (A) and half-sibling (B) relationshi
 ps using the three methods in Colony (FL, PLS, FPLS) and FAPS.
+
+\change_deleted -1312060434 1518256689
  
-\change_deleted -1312060434 1513091102
-Full-sibship
 \change_unchanged
  
-\change_deleted -1312060434 1513091114
-reconstruction of simulated arrays of four full sibships of five offspring
- by FAPS (solid lines) and Colony2 (dashed lines), showing (left) 
-\begin_inset Formula $P_{full}$
-\end_inset
-
- (circles) or 
-\begin_inset Formula $P_{half}$
-\end_inset
-
- (squares), and (right) the sizes of reconstructed families.
- In the latter only means for 100 (circles) and 2000 candidates (squares)
- are shown for clarity.
-\change_unchanged
-
 \begin_inset Newline newline
 \end_inset
 
@@ -3806,43 +2630,21 @@ reconstruction of simulated arrays of four full sibships of five offspring
 
 \series bold
 Figure 
-\change_inserted -1312060434 1513089054
-
 \series default
-7
-\change_deleted -1312060434 1513089053
-
-\series bold
-6
-\change_unchanged
-
-\series default
-: Sibship and inference in 18 
+7: Sibship and inference in 18 
 \emph on
 A.
  majus
 \emph default
+ half-sibling arrays showing posterior distributions of
+\change_deleted -1312060434 1518256689
  
-\change_inserted -1312060434 1513091259
-half-sibling 
 \change_unchanged
-arrays showing posterior distributions of 
-\change_deleted -1312060434 1513091309
-(left)
+ the number of full sibships (A) and
+\change_deleted -1312060434 1518256689
+ 
 \change_unchanged
- the number of full sibships 
-\change_inserted -1312060434 1513091325
-(A) 
-\change_unchanged
-and 
-\change_deleted -1312060434 1513091316
-(right)
-\change_unchanged
- the size of each full sibship
-\change_inserted -1312060434 1513091331
- (B)
-\change_unchanged
-.
+ the size of each full sibship (B).
  Shaded regions show 95% credible intervals.
 \end_layout
 
