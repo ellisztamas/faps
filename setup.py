@@ -8,5 +8,5 @@ setup(name='faps',
       author_email='thomas.ellis@ebc.uu.se',
       license='MIT',
       packages=['faps'],
-      install_requires=['numpy','pandas','fastcluster'],
+      install_requires=['numpy','pandas','fastcluster','scipy'],
       zip_safe=False)
