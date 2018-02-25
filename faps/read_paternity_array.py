@@ -38,18 +38,18 @@ def read_paternity_array(path, likelihood_col = 2, mothers_col=1, fathers_col=No
 
     # Import individual names
     names = np.genfromtxt(path, dtype='str')
-    offspring = [names[i].split(",")[0].replace('"', '') for i in range(1, len(names))]
+    offspring = np.array([i.split(",")[0].replace('"', '') for i in names])
 
     # Names for the mothers, if these are given
     if isinstance(mothers_col, int):
-        mothers = [names[i].split(",")[mothers_col].replace('"', '') for i in range(1, len(names))]
+        mothers = np.array([i.split(",")[mothers_col].replace('"', '') for i in names])
     # If they aren't, return a list of NAs
     if mothers_col is None:
         mothers = np.repeat('NA', likelihood.shape[0])
 
     # Names for the fathers, if given
     if isinstance(fathers_col, int):
-        fathers = [names[i].split(",")[fathers_col].replace('"', '') for i in range(1, len(names))]
+        fathers = np.array([i.split(",")[fathers_col].replace('"', '') for i in names])
     # If they aren't, return a list of NAs
     if fathers_col is None:
         fathers = np.repeat('NA', likelihood.shape[0])
