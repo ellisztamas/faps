@@ -1,4 +1,4 @@
-    import numpy as np
+import numpy as np
 from paternityArray import paternityArray
 from genotypeArray import genotypeArray
 from transition_probability import transition_probability

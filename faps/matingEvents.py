@@ -70,7 +70,7 @@ class matingEvents(object):
         if not isinstance(subsample_size, int) and subsample_size is not None:
             raise ValueError('subsample_size should be an integer.')
         if subsample_size is None:
-                subsample_size = np.around(total_draws*0.1).astype('int')
+            subsample_size = np.around(0.1*len(self.total_events)).astype('int')
 
         sub_events = np.random.choice(self.total_events, n_subsamples*subsample_size, replace=True)
         sub_events = sub_events.reshape([n_subsamples, subsample_size])
