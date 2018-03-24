@@ -193,9 +193,9 @@ class paternityArray(object):
         ix = [np.where(by == i)[0] for i in groups]
         # create new paternityArray objects for each family.
         if self.clashes is None:
-            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.by_locus[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, None, max_clashes) for i in ix]
+            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.by_locus[:,i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, None, max_clashes) for i in ix]
         else:
-            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.by_locus[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, self.clashes[i], max_clashes) for i in ix]
+            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.by_locus[:,i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, self.clashes[i], max_clashes) for i in ix]
 
         return output
         
