@@ -72,4 +72,4 @@ def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, family_na
     maternal_names    = parents.names[dam_list]
     paternal_names    = parents.names[sire_list]
 
-    return genotypeArray(offs_genotypes, offspring_names, maternal_names, paternal_names, range(nloci))
+    return genotypeArray(offs_genotypes, offspring_names, maternal_names, paternal_names, np.arange(nloci))
