@@ -1,6 +1,4 @@
 from genotypeArray import genotypeArray
-from lik_sampled_fathers import lik_sampled_fathers
-from lik_unsampled_fathers import lik_unsampled_fathers
 from alogsumexp import alogsumexp
 import numpy as np
 
@@ -23,6 +21,10 @@ class paternityArray(object):
         from the sample of candidate males, and hence that offspring alleles are
         drawn from population allele frequencies. Should be the same length as
         the number of rows in `likelihood`.
+    by_locus: array
+        An array of log likelihoods for the offspring genotype given
+        the mother. The first axis has three elements, indexing cases for
+        the paternal genotype being 0, 1 or 2.
     offspring: array-like
         Identifiers for each offspring individual.
     mothers: array-like
@@ -65,7 +67,7 @@ class paternityArray(object):
         `lik_absent` appended, with rows normalised to sum to one.
     """
 
-    def __init__(self, likelihood, lik_absent, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None, clashes = None, max_clashes = None):
+    def __init__(self, likelihood, lik_absent, by_locus, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None, clashes = None, max_clashes = None):
         self.mu         = mu
         self.offspring  = offspring
         self.mothers    = mothers
@@ -73,6 +75,7 @@ class paternityArray(object):
         self.candidates = candidates
         self.lik_array  = likelihood
         self.lik_absent = lik_absent
+        self.by_locus   = by_locus
         self.clashes    = clashes
         self.prob_array = self.adjust_prob_array(purge, missing_parents, selfing_rate, max_clashes)
 
@@ -153,7 +156,7 @@ class paternityArray(object):
                     maternal_pos = [np.where(np.array(self.candidates) == self.mothers[i])[0][0] for i in ix] # positions of the mothers
                     new_array[ix, maternal_pos] += np.log(selfing_rate)
 
-        # set the likleihood dyads with many incompatibilities to zero
+        # set the likelihood dyads with many incompatibilities to zero
         if max_clashes is not None:
             if self.clashes is None:
                 raise TypeError("Unable to adjust for number of incompatible homozygous loci because `clashes` is not given.")
@@ -187,12 +190,12 @@ class paternityArray(object):
         """
         groups = np.unique(by)
         # indices for each family
-        ix = [np.where(by == groups[i])[0] for i in range(len(groups))]
+        ix = [np.where(by == i)[0] for i in groups]
         # create new paternityArray objects for each family.
         if self.clashes is None:
-            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, None, max_clashes) for i in ix]
+            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.by_locus[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, None, max_clashes) for i in ix]
         else:
-            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, self.clashes[i], max_clashes) for i in ix]
+            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.by_locus[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, self.clashes[i], max_clashes) for i in ix]
 
         return output
         
