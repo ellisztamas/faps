@@ -32,6 +32,9 @@ def transition_probability(offspring, mothers, males, allele_freqs, mu, inverse=
     0. Array indexing offspring x candidates transition probabilities.
     1. Array indexing offspring only for transition probabilities
     from population allele frequencies
+    2. An array indexing likelihoods for the offspring genotype given
+    the mother. The first axis has three elements, indexing cases for
+    the paternal genotype being 0, 1 or 2.
     """
     if not isinstance(offspring, genotypeArray):
         raise TypeError('offspring is not a genotypeArray')
@@ -40,6 +43,11 @@ def transition_probability(offspring, mothers, males, allele_freqs, mu, inverse=
     if not isinstance(males, genotypeArray):
         raise TypeError('males is not a genotypeArray')
 
+    offspring_diploid = offspring.geno.sum(2)
+    maternal_diploid = mothers.geno.sum(2)
+    male_diploid = males.geno.sum(2)
+
+    # array of viable transition probabilities
     trans_prob_array = np.array([[[1,  0.5, 0  ],
                                   [0.5,0.25,0  ],
                                   [0,  0,   0  ]],
@@ -49,22 +57,16 @@ def transition_probability(offspring, mothers, males, allele_freqs, mu, inverse=
                                  [[0,  0,   0  ],
                                   [0,  0.25,0.5],
                                   [0,  0.5, 1  ]]])
-    # arrays of diploid genotypes
-    offspring_diploid = offspring.geno.sum(2)
-    maternal_diploid = mothers.geno.sum(2)
-    male_diploid = males.geno.sum(2)
-    # array of probabilities for paternal genotypes when drawn from allele frequencies.
-    af = np.array([allele_freqs**2,
-              allele_freqs * (1-allele_freqs),
-              (1-allele_freqs)**2])
 
     # empty arrays to stores probabilities.
-    prob_f = np.zeros([offspring.size, males.size, offspring.nloci])
-    prob_a = np.zeros([offspring.size, males.nloci])
+    prob_m = np.zeros([3, offspring.size, offspring.nloci])
+    # positions of dropouts
+    drop_m = (maternal_diploid < 0) + (offspring_diploid < 0) # offspring vs mothers
+    # correction factor for dropouts
+    corr = 1/(1-drop_m.mean(1))[np.newaxis, :, np.newaxis]
 
     geno =[0,1,2]
     for f in geno:
-        prob_m = np.zeros(offspring_diploid.shape)
         for m in geno:
             prob_o = np.zeros(offspring_diploid.shape)
             for o in geno:
@@ -75,34 +77,42 @@ def transition_probability(offspring, mothers, males, allele_freqs, mu, inverse=
                 pr_offs = np.zeros(offspring_diploid.shape)
                 pr_offs[offspring_diploid == o] = 1-mu
                 pr_offs[offspring_diploid != o] = mu
-                prob_o = prob_o + (trans_prob * pr_offs * 1/3)
+                prob_o+= (trans_prob * pr_offs * 1/3)
             # Probabilities that the observed maternal marker data match observed data.
             pr_mothers = np.zeros(maternal_diploid.shape)
             pr_mothers[maternal_diploid == m] = 1-mu
             pr_mothers[maternal_diploid != m] = mu
-            prob_m = prob_m + (prob_o * pr_mothers * 1/3)
-        # Probabilities that the observed candidate male marker data match observed data.
+
+            prob_o[drop_m] = 1
+            prob_m[f] += (prob_o * pr_mothers * 1/3) 
+
+    prob_m = prob_m ** corr
+
+    # array of probabilities for paternal genotypes when drawn from allele frequencies.
+    af = np.array([allele_freqs**2,
+                   allele_freqs * (1-allele_freqs),
+                   (1-allele_freqs)**2])
+    af = af[:,np.newaxis]
+    # probability that observed alleles are drawn from the population.
+    prob_a = prob_m*af
+    prob_a = prob_a.sum(0)
+    prob_a = np.log(prob_a).sum(1)
+
+
+    prob_f = np.zeros([offspring.size, males.size, offspring.nloci])
+    drop_f = (male_diploid < 0)
+    corr   = 1/(1 - drop_f.mean(1))[np.newaxis, :, np.newaxis]
+
+    for f in [0,1,2]:
         pr_males = np.zeros(male_diploid.shape)
         pr_males[male_diploid == f] = 1-mu
         pr_males[male_diploid != f] = mu
+        pr_males[drop_f] = 1
 
-        prob_f += prob_m[:, np.newaxis] * pr_males[np.newaxis]
-        prob_a += prob_m * af[f][np.newaxis]
+        prob_f += prob_m[f][:, np.newaxis] * pr_males[np.newaxis]
+
+    prob_f = prob_f ** corr
+    with np.errstate(divide='ignore'): prob_f = np.log(prob_f)
     
-    # indices of loci with missing data.
-    drop_f = (male_diploid == -18)[np.newaxis] + (offspring_diploid == -18)[:, np.newaxis] + (maternal_diploid == -18)[:,np.newaxis]
-    drop_a = (offspring_diploid == -18) + (maternal_diploid == -18)
-    
-    prob_f = np.log(prob_f)
-    prob_a = np.log(prob_a)
-    # set log likelihood loci with dropouts to zero.
-    prob_f[drop_f] = 0
-    prob_a[drop_a] = 0
-    # dropouts for candidates
-    corr = float(offspring.nloci) / (1-drop_f).sum(2)
-    prob_f = prob_f.sum(2) * corr
-    # dropouts for missing father
-    corr = float(offspring.nloci) / (1- drop_a).sum(1)
-    prob_a = prob_a.sum(1) * corr
-    
-    return prob_f, prob_a
+    output = [prob_f.sum(2), prob_a, np.log(prob_m)]
+    return output

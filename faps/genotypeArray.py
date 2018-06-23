@@ -125,13 +125,25 @@ class genotypeArray(object):
         Returns
         -------
         A list of positions of the parent for each entry in offs_names.
+
+        Example
+        -------
+        from faps import *
+        import numpy as np
+        # create genotypes
+        allele_freqs = np.random.uniform(0.3,0.5,10)
+        parents = make_parents(5, allele_freqs, family_name='my_population')
+        progeny = make_sibships(mypop, 0, [1,2,3], 4, 'myprogeny')
+
+        progeny.parent_index('mother', parents.names) # position of the mother
+        progeny.parent_index('father', parents.names) # positions of the fathers
         """
         if parent is 'mother' or parent is 'm':
-            return [np.where(parent_names == self.mothers[x])[0][0] for x in range(len(self.mothers))]
+            return [np.where(parent_names == x)[0][0] for x in self.mothers]
         if parent is 'father' or parent is 'f':
-            return [np.where(parent_names == self.fathers[x])[0][0] for x in range(len(self.fathers))]
+            return [np.where(parent_names == x)[0][0] for x in self.fathers]
         if parent is 'parents' or parent is 'p':
-            return [np.where(parent_names == self.parents[x])[0][0] for x in range(len(self.parents))]
+            return [np.where(parent_names == x)[0][0] for x in self.parents]
         else:
             print "parent must be 'mother', 'father', or 'parents'."
 
