@@ -1,7 +1,7 @@
 import numpy as np
 from alogsumexp import alogsumexp
 
-def pairwise_lik_fullsibs(paternity_probs, exp = False):
+def pairwise_lik_fullsibs(paternity_probs, exp = True):
     """
     Create a matrix of probabilities that each pair of individuals in a
     half-sibling array are full siblings.
@@ -49,7 +49,7 @@ def pairwise_lik_fullsibs(paternity_probs, exp = False):
         # the sum can be quicker if you exponentiate, but this may harm precision.
         exp_array = np.exp(lik_array)
         # for each pair of offspring, the likelihood of not sharing each father.
-        pairwise_lik = np.matmul(lik_array, lik_array.T)
+        pairwise_lik = np.matmul(exp_array, exp_array.T)
         pairwise_lik = np.array(pairwise_lik).reshape([noffs, noffs]) # reshape
 
         return np.log(pairwise_lik)
