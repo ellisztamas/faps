@@ -20,6 +20,7 @@ from transition_probability import transition_probability
 from paternity_array import paternity_array
 from draw_fathers import draw_fathers
 # clustering
+from pairwise_lik_fullsibs import pairwise_lik_fullsibs
 from sibshipCluster import sibshipCluster
 from lik_partition import lik_partition
 from sibship_clustering import sibship_clustering

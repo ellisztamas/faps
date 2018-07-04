@@ -1,7 +1,7 @@
 import numpy as np
 from alogsumexp import alogsumexp
 
-def pairwise_lik_fullsibs(paternity_probs, exp = True):
+def pairwise_lik_fullsibs(paternity_probs, exp = False):
     """
     Create a matrix of probabilities that each pair of individuals in a
     half-sibling array are full siblings.
@@ -21,16 +21,38 @@ def pairwise_lik_fullsibs(paternity_probs, exp = True):
     ----------
     paternity_probs: array
         array of posterior probabilities of paternity.
-
     exp: bool, optional
         If True, probabilities of paternity are exponentiated before calculating
         pairwise probabilities of sibships. This gives a speed boost if this is
-        to be repeated many times, but there may be a cost to accuracy.
+        to be repeated many times, but there may be a cost to accuracy (this is 
+        untested!).
 
     Returns
     -------
     A noffspring*noffspring matrix of log likelihoods of
     being full siblings.
+
+    Example
+    -------
+    import numpy as np
+    from faps import *
+
+    # generate 4 families of 5 offspring
+    allele_freqs = np.random.uniform(0.3, 0.5, 50)
+    males = make_parents(200, allele_freqs)
+    offspring = make_sibships(males, 0, range(1,5), 5)
+
+    # Add muations
+    mu = 0.0013
+    males = males.dropouts(0.01).mutations(mu)
+    offspring= offspring.dropouts(0.01).mutations(mu)
+
+    mothers = males.subset(offspring.parent_index('m', males.names))
+    patlik = paternity_array(offspring, mothers, males, allele_freqs, mu)
+
+    prob_paternities = patlik.prob_array
+    # Matrix of pairwise probabilities of being full siblings.
+    fullpairs = pairwise_lik_fullsibs(prob_paternities)
     """
     lik_array = np.copy(paternity_probs)
     # pull out the number of offspring and parents
