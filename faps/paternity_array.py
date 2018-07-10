@@ -5,18 +5,17 @@ from transition_probability import transition_probability
 from incompatibilities import incompatibilities
 from warnings import warn
 
-def paternity_array(offspring, mothers, males, allele_freqs, mu, return_by_locus = True, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None):
+def paternity_array(offspring, mothers, males, allele_freqs, mu, return_by_locus = True, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None, covariate=None):
     """
-    Construct a paternityArray object for the offspring given known mothers and a set of
-    candidate fathers using genotype data. Currently only SNP data is supported.
+    Construct a paternityArray object for the offspring given known mothers and a set of candidate fathers using genotype data. Currently only SNP 
+    data is supported.
 
     Parameters
     ---------
     offspring: genotypeArray, or list of genotypeArrays
         Observed genotype data for the offspring.
     mothers: genotypeArray, or list of genotypeArrays
-        Observed genotype data for the offspring. Data on mothers need
-        to be in the same order as those for the offspring.
+        Observed genotype data for the offspring. Data on mothers need to be in the same order as those for the offspring.
     males: genotypeArray
         Observed genotype data for the candidate males.
     allele_freqs: array-like
@@ -58,21 +57,45 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, return_by_locus
         incomp = incompatibilities(males, offspring)
         # take the log of transition probabilities, and assign dropout_masks.
         prob_f, prob_a, prob_m = transition_probability(offspring, mothers, males, allele_freqs, mu)
-        return paternityArray(likelihood=prob_f, lik_absent=prob_a, by_locus=prob_m, offspring=offspring.names, mothers=offspring.mothers, fathers=offspring.fathers, candidates=males.names, mu=mu, purge=purge, missing_parents=missing_parents, selfing_rate=selfing_rate, clashes=incomp, max_clashes=max_clashes)
+        output = paternityArray(likelihood=prob_f, lik_absent=prob_a, by_locus=prob_m, offspring=offspring.names, mothers=offspring.mothers, fathers=offspring.fathers, candidates=males.names, mu=mu, purge=purge, missing_parents=missing_parents, selfing_rate=selfing_rate, clashes=incomp, max_clashes=max_clashes)
+
+        if covariate is not None:
+            output.add_covariate(covariate)
+
+        return output
     
-    # If a litst of genotype arrays for separate halfsib families are given:
+
+
+
+    # If a list of genotype arrays for separate halfsib families are given:
     elif isinstance(offspring, list) & isinstance(mothers, list):
         if len(offspring) != len(mothers):
             raise ValueError('Lists of genotypeArrays are of different lengths.')
-        output = []
+
+        # Set up input of covariates if necessary. 
+        if isinstance(covariate, list):
+            if len(offspring) != len(covariate):
+                raise ValueError("If a list of arrays of probabilities for covariates are supplied, this should have a row for every offspring genotypeArray.")
+            cov = covariate
+        elif covariate is None:
+            cov = np.zeros(males.size * len(offspring)).reshape([len(offspring), males.size])
+        else:
+            raise TypeError("If covariates are supplied for multiple half-sib arrays, this should be a list of 1-d vectors, each with an element for each candidate.")
+
+
+        output = [None] * len(offspring)
         for i in range(len(offspring)):
             # array of opposing homozygous genotypes.
             incomp = incompatibilities(males, offspring[i])
             # take the log of transition probabilities, and assign dropout_masks.
             prob_f, prob_a, by_locus = transition_probability(offspring[i], mothers[i], males, allele_freqs, mu)
             # create paternityArray and send to output
-            patlik = paternityArray(likelihood=prob_f, lik_absent=prob_a, by_locus=by_locus, offspring=offspring[i].names, mothers=offspring[i].mothers, fathers=offspring[i].fathers, candidates=males.names, mu=mu, purge=purge, missing_parents=missing_parents, selfing_rate=selfing_rate, clashes=incomp, max_clashes=max_clashes)
-            output = output + [patlik]
+            patlik = paternityArray(likelihood=prob_f,lik_absent=prob_a, by_locus=by_locus, offspring=offspring[i].names, mothers=offspring[i].mothers, fathers=offspring[i].fathers, candidates=males.names, mu=mu, purge=purge, missing_parents=missing_parents, selfing_rate=selfing_rate, clashes=incomp, max_clashes=max_clashes)
+
+            patlik.add_covariate(cov[i])
+            output[i] = patlik
+
+
         return output
     
     else:

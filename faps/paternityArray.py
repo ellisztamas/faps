@@ -1,6 +1,7 @@
 from genotypeArray import genotypeArray
 from alogsumexp import alogsumexp
 import numpy as np
+from warnings import warn
 
 class paternityArray(object):
     """
@@ -67,7 +68,7 @@ class paternityArray(object):
         `lik_absent` appended, with rows normalised to sum to one.
     """
 
-    def __init__(self, likelihood, lik_absent, by_locus, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None, clashes = None, max_clashes = None):
+    def __init__(self, likelihood, lik_absent, by_locus, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None, clashes = None, max_clashes = None, covariate=None):
         self.mu         = mu
         self.offspring  = offspring
         self.mothers    = mothers
@@ -77,8 +78,41 @@ class paternityArray(object):
         self.lik_absent = lik_absent
         self.by_locus   = by_locus
         self.clashes    = clashes
+        self.covariate  = covariate
         self.prob_array = self.adjust_prob_array(purge, missing_parents, selfing_rate, max_clashes)
 
+    def add_covariate(self, covariate):
+        """
+        Include a vector of (log) probabilities associated with covariates that
+        provide additional information about paternity beyond that provided by
+        genetic information (e.g. geographic distances).
+
+        Parameters
+        ----------
+        covariate: 1-d array
+            Vector of (log) probabilities of paternity based on non-genetic
+            information, with one element for every candidate father. If this is a
+            function of multiple sources they should be multiplied and included in
+            this vector. If a list of offspring arrays have been supplied, this
+            should be a list of vectors.
+
+        Returns
+        -------
+        No output is printed; the covariate is added to the paternityArray as 
+        the attribute 'covariate'. Any existing information is overwritten.
+        """
+        if isinstance(covariate, np.ndarray):
+            if len(covariate.shape) > 1:
+                raise ValueError("covariate should be a 1-d array, but has shape {}".format(covariate.shape))
+            if len(self.candidates) != covariate.shape[0]:
+                raise ValueError("Length of vector of covariates ({}) does not match the number of fathers ({})".format(len(self.candidates), covariate.shape[0]))
+            if not all(covariate <= 0):
+                warn("Not all values in covariate are less or equal to zero. Is it possible probabilities have not been log transformed?")
+            self.covariate = covariate
+        else:
+            raise TypeError("covariate should be a 1-d NumPy array.")
+
+    
     def adjust_prob_array(self, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None):
         """
         Construct an array of log posterior probabilities that each offspring is sired
@@ -121,8 +155,7 @@ class paternityArray(object):
             nc = len(self.candidates)
             if isinstance(purge, float):
                 if purge < 0 or purge > 1:
-                    print" Error: purge must be between zero and one."
-                    return None
+                    raise ValueError(" Error: purge must be between zero and one.")
                 ix = np.random.choice(range(nc), np.round(purge*nc).astype('int'), replace=False)
                 with(np.errstate(divide='ignore')): new_array[:, ix] = np.log(0)
             elif isinstance(purge, list) or isinstance(purge, np.ndarray) or isinstance(purge, int):
