@@ -29,7 +29,8 @@ def read_paternity_array(path, likelihood_col = 2, mothers_col=1, fathers_col=No
     delimiter The symbol used to separate values in the text file. Defaults to
         commas.
 
-    RETURNS:
+    Returns:
+    --------
     A paternityArray object.
     """
     # likelihoods of paternity, and off absent fathers.
@@ -56,4 +57,7 @@ def read_paternity_array(path, likelihood_col = 2, mothers_col=1, fathers_col=No
 
     # pull out names of candidate males
     candidates = names[0].split(",")[likelihood_col: -1]
-    return paternityArray(likelihood, lik_absent, offspring, mothers, fathers, candidates)
+
+    #
+    covar = np.zeros(likelihood.shape[0])
+    return paternityArray(likelihood, lik_absent, offspring, mothers, fathers, candidates, covariate= covar)
