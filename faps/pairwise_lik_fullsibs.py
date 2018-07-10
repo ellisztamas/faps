@@ -1,7 +1,4 @@
-import numpy as np
-from alogsumexp import alogsumexp
-
-def pairwise_lik_fullsibs(paternity_probs, exp = False):
+def pairwise_lik_fullsibs(paternity_array, covars = None, exp = False):
     """
     Create a matrix of probabilities that each pair of individuals in a
     half-sibling array are full siblings.
@@ -19,8 +16,8 @@ def pairwise_lik_fullsibs(paternity_probs, exp = False):
 
     Parameters
     ----------
-    paternity_probs: array
-        array of posterior probabilities of paternity.
+    paternity_array: paternityArray
+        Object listing information on paternity of individuals.
     exp: bool, optional
         If True, probabilities of paternity are exponentiated before calculating
         pairwise probabilities of sibships. This gives a speed boost if this is
@@ -50,16 +47,14 @@ def pairwise_lik_fullsibs(paternity_probs, exp = False):
     mothers = males.subset(offspring.parent_index('m', males.names))
     patlik = paternity_array(offspring, mothers, males, allele_freqs, mu)
 
-    prob_paternities = patlik.prob_array
     # Matrix of pairwise probabilities of being full siblings.
-    fullpairs = pairwise_lik_fullsibs(prob_paternities)
+    fullpairs = pairwise_lik_fullsibs(patlik)
     """
-    lik_array = np.copy(paternity_probs)
+    paternity_probs = paternity_array.prob_array
     # pull out the number of offspring and parents
-    noffs     = lik_array.shape[0]
-    nparents  = lik_array.shape[1]
-
-    #lik_array = lik_array - alogsumexp(lik_array, 1).reshape([noffs, 1]) # normalise to unity.
+    noffs     = paternity_probs.shape[0]
+    nparents  = paternity_probs.shape[1]
+    
     if exp is False:
         # this section of code calculates the matrix in log space, but I found it quicker to exponentiate (below).
         paternity_probs = paternity_probs[:,:, np.newaxis]
@@ -67,13 +62,11 @@ def pairwise_lik_fullsibs(paternity_probs, exp = False):
         pairwise_lik = np.array([alogsumexp(i + paternity_probs.T, 1) for i in paternity_probs]).squeeze()
 
         return pairwise_lik
-
-        return pairwise_lik
     if exp is True:
         # the sum can be quicker if you exponentiate, but this may harm precision.
-        exp_array = np.exp(lik_array)
+        paternity_probs = np.exp(paternity_probs)
         # for each pair of offspring, the likelihood of not sharing each father.
-        pairwise_lik = np.matmul(exp_array, exp_array.T)
+        pairwise_lik = np.matmul(paternity_probs, exp_array.T)
         pairwise_lik = np.array(pairwise_lik).reshape([noffs, noffs]) # reshape
 
         return np.log(pairwise_lik)

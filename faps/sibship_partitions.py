@@ -51,7 +51,7 @@ def sibship_partitions(paternity_array, exp=False, method='average', criterion =
     # Generate possible sets of partitions
     partition_sample = sibship_partitions(patlik)
     """
-    fullpairs = pairwise_lik_fullsibs(paternity_array.prob_array, exp)
+    fullpairs = pairwise_lik_fullsibs(paternity_array, exp)
     # Clustering matrix z.
     z= fastcluster.linkage(abs(fullpairs[np.triu_indices(fullpairs.shape[0], 1)]), method)
     z = np.clip(z, 0, 10**12)
