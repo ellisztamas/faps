@@ -62,9 +62,11 @@ def pairwise_lik_fullsibs(paternity_probs, exp = False):
     #lik_array = lik_array - alogsumexp(lik_array, 1).reshape([noffs, 1]) # normalise to unity.
     if exp is False:
         # this section of code calculates the matrix in log space, but I found it quicker to exponentiate (below).
-        # take all pairwise products of sharing fathers.
-        pairwise_lik = np.array([alogsumexp(lik_array[x] + lik_array[y], axis=0) for x in range(noffs) for y in range(noffs)])
-        pairwise_lik = pairwise_lik.reshape([noffs, noffs])
+        paternity_probs = paternity_probs[:,:, np.newaxis]
+        # take all pairwise products of sharing fathers.        
+        pairwise_lik = np.array([alogsumexp(i + paternity_probs.T, 1) for i in paternity_probs]).squeeze()
+
+        return pairwise_lik
 
         return pairwise_lik
     if exp is True:
