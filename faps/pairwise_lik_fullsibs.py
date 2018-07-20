@@ -1,3 +1,7 @@
+import numpy as np
+from paternityArray import paternityArray
+from alogsumexp import alogsumexp
+
 def pairwise_lik_fullsibs(paternity_array, covars = None, exp = False):
     """
     Create a matrix of probabilities that each pair of individuals in a
