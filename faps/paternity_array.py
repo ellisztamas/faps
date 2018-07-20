@@ -10,6 +10,8 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, return_by_locus
     Construct a paternityArray object for the offspring given known mothers and a set of candidate fathers using genotype data. Currently only SNP 
     data is supported.
 
+    Additional information about paternity from non-genetic sources can be provided through the argument `covariate`. For example, this might be a function of spatial distance between individuals, or social dominance.
+
     Parameters
     ---------
     offspring: genotypeArray, or list of genotypeArrays
@@ -42,10 +44,14 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, return_by_locus
         given as 'NA', no weighting is performed.
     selfing_rate: float between zero and one, optional
         Input value for the prior probability of self-fertilisation.
+    covariate: 1-d array, or list of 1-d arrays, optional
+        Vector of (log) probabilities of paternity based on non-genetic information, with one element for every candidate father. If this is a function of multiple sources they should be multiplied and included in this vector. If a list of offspring arrays have been supplied, this should be a list of vectors.
 
     Returns
     -------
     A paternityArray, or a list of paternityArray objects.
+
+    If covariate is not given this will be returned as a vector of zeros.
     """
     if mu == 0:
         mu = 10**-12
