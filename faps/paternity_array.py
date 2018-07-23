@@ -5,7 +5,7 @@ from transition_probability import transition_probability
 from incompatibilities import incompatibilities
 from warnings import warn
 
-def paternity_array(offspring, mothers, males, allele_freqs, mu, return_by_locus = True, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None, covariate=None):
+def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None, covariate=None):
     """
     Construct a paternityArray object for the offspring given known mothers and a set of candidate fathers using genotype data. Currently only SNP 
     data is supported.
@@ -20,8 +20,6 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, return_by_locus
         Observed genotype data for the offspring. Data on mothers need to be in the same order as those for the offspring.
     males: genotypeArray
         Observed genotype data for the candidate males.
-    allele_freqs: array-like
-        Vector of population allele frequencies for the parents.
     mu: float between zero and one
         Point estimate of the genotyping error rate. Clustering is unstable if
         mu_input is set to exactly zero. Any zero values will therefore be set
@@ -45,7 +43,11 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, return_by_locus
     selfing_rate: float between zero and one, optional
         Input value for the prior probability of self-fertilisation.
     covariate: 1-d array, or list of 1-d arrays, optional
-        Vector of (log) probabilities of paternity based on non-genetic information, with one element for every candidate father. If this is a function of multiple sources they should be multiplied and included in this vector. If a list of offspring arrays have been supplied, this should be a list of vectors.
+        Vector of (log) probabilities of paternity based on non-genetic 
+        information, with one element for every candidate father. If this is a
+        function of multiple sources they should be multiplied and included in
+        this vector. If a list of offspring arrays have been supplied, this
+        should be a list of vectors.
 
     Returns
     -------
@@ -62,7 +64,7 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, return_by_locus
         # array of opposing homozygous genotypes.
         incomp = incompatibilities(males, offspring)
         # take the log of transition probabilities, and assign dropout_masks.
-        prob_f, prob_a, prob_m = transition_probability(offspring, mothers, males, allele_freqs, mu)
+        prob_f, prob_a, prob_m = transition_probability(offspring, mothers, males, mu)
         output = paternityArray(likelihood=prob_f, lik_absent=prob_a, by_locus=prob_m, offspring=offspring.names, mothers=offspring.mothers, fathers=offspring.fathers, candidates=males.names, mu=mu, purge=purge, missing_parents=missing_parents, selfing_rate=selfing_rate, clashes=incomp, max_clashes=max_clashes)
 
         if covariate is not None:
@@ -94,7 +96,7 @@ def paternity_array(offspring, mothers, males, allele_freqs, mu, return_by_locus
             # array of opposing homozygous genotypes.
             incomp = incompatibilities(males, offspring[i])
             # take the log of transition probabilities, and assign dropout_masks.
-            prob_f, prob_a, by_locus = transition_probability(offspring[i], mothers[i], males, allele_freqs, mu)
+            prob_f, prob_a, by_locus = transition_probability(offspring[i], mothers[i], males, mu)
             # create paternityArray and send to output
             patlik = paternityArray(likelihood=prob_f,lik_absent=prob_a, by_locus=by_locus, offspring=offspring[i].names, mothers=offspring[i].mothers, fathers=offspring[i].fathers, candidates=males.names, mu=mu, purge=purge, missing_parents=missing_parents, selfing_rate=selfing_rate, clashes=incomp, max_clashes=max_clashes)
 

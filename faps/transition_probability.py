@@ -2,7 +2,7 @@ import numpy as np
 from paternityArray import paternityArray
 from genotypeArray import genotypeArray
 
-def transition_probability(offspring, mothers, males, allele_freqs, mu, inverse=False):
+def transition_probability(offspring, mothers, males, mu, inverse=False):
     """
     Calculate per-locus transition probabilities given data on offspring, known
     mothers and candidate fathers. Also returns probabilities that paternal
@@ -17,8 +17,6 @@ def transition_probability(offspring, mothers, males, allele_freqs, mu, inverse=
         to be in the same order as those for the offspring.
     males: genotypeArray
         Observed genotype data for the candidate males.
-    allele_freqs: array-like
-        Vector of population allele frequencies for the parents.
     mu: float between zero and one
         Point estimate of the genotyping error rate. Clustering is unstable if
         mu_input is set to exactly zero.
@@ -89,6 +87,7 @@ def transition_probability(offspring, mothers, males, allele_freqs, mu, inverse=
     prob_m = prob_m ** corr
 
     # array of probabilities for paternal genotypes when drawn from allele frequencies.
+    allele_freqs = males.allele_freqs()
     af = np.array([allele_freqs**2,
                    allele_freqs * (1-allele_freqs),
                    (1-allele_freqs)**2])

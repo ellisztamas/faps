@@ -120,7 +120,7 @@ def make_generation(allele_freqs, candidates, sires, offspring, missing_loci=0, 
 
     # Paternity array
     t1      = time()
-    patlik  = paternity_array(progeny, mothers, adults, allele_freqs, mu_input)
+    patlik  = paternity_array(progeny, mothers, adults, mu_input)
     patlik.prob_array = patlik.adjust_prob_array(unsampled_real, unsampled_input, selfing_rate)
     #Sibship clustering
     t2      = time()
@@ -141,8 +141,8 @@ def make_generation(allele_freqs, candidates, sires, offspring, missing_loci=0, 
 
     # a list of simulation data to return.
     output = np.array([counter,
-                len(allele_freqs), # number of loci
-                round(allele_freqs.mean(),3), #allele_freqs
+                len(adults.allele_freqs()), # number of loci
+                round(adults.allele_freqs().mean(),3), #allele_freqs
                 candidates, # number of candidates
                 len(np.unique(progeny.fathers)), # sires
                 progeny.size, # offspring
