@@ -4,7 +4,7 @@ import fastcluster
 from scipy.cluster.hierarchy import fcluster
 from pairwise_lik_fullsibs import pairwise_lik_fullsibs
 
-def sibship_partitions(paternity_array, exp=False, method='average', criterion = 'distance'):
+def sibship_partitions(paternity_array, exp=False, method='average', criterion = 'distance', use_covariates=False):
     """
     Generate a sample of partition structures from an array of likelihoods that
     each pair of individuals in a half-sib array are really full sibs.
@@ -23,6 +23,9 @@ def sibship_partitions(paternity_array, exp=False, method='average', criterion =
     criterion: str
         Clustering function used to bisect the dendrogram. See
         scipy.hierarchy.fcluster for available inputs. Defaults to 'distance'.
+    use_covariates: logical, optional
+        If True, information on prbabilities associated with covariates stored
+        in paternityArray objects are incorporated into sibship clustering.
     
     Returns
     -------
@@ -51,7 +54,7 @@ def sibship_partitions(paternity_array, exp=False, method='average', criterion =
     # Generate possible sets of partitions
     partition_sample = sibship_partitions(patlik)
     """
-    fullpairs = pairwise_lik_fullsibs(paternity_array, exp)
+    fullpairs = pairwise_lik_fullsibs(paternity_array, use_covariates=use_covariates, exp = exp)
     # Clustering matrix z.
     z= fastcluster.linkage(abs(fullpairs[np.triu_indices(fullpairs.shape[0], 1)]), method)
     z = np.clip(z, 0, 10**12)

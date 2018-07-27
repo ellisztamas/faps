@@ -2,7 +2,7 @@ import numpy as np
 from paternityArray import paternityArray
 from alogsumexp import alogsumexp
 
-def pairwise_lik_fullsibs(paternity_array, covars = None, exp = False):
+def pairwise_lik_fullsibs(paternity_array, use_covariates = False, exp = False):
     """
     Create a matrix of probabilities that each pair of individuals in a
     half-sibling array are full siblings.
@@ -27,6 +27,9 @@ def pairwise_lik_fullsibs(paternity_array, covars = None, exp = False):
         pairwise probabilities of sibships. This gives a speed boost if this is
         to be repeated many times, but there may be a cost to accuracy (this is 
         untested!).
+    use_covariates: logical, optional
+        If True, information on prbabilities associated with covariates stored
+        in paternityArray objects are incorporated into sibship clustering.
 
     Returns
     -------
@@ -60,17 +63,30 @@ def pairwise_lik_fullsibs(paternity_array, covars = None, exp = False):
     nparents  = paternity_probs.shape[1]
     
     if exp is False:
+        # Set up use of covariates
+        if use_covariates is True:
+            covar = paternity_array.covariate[np.newaxis, :, np.newaxis]
+        else: # If they are not to be used, use a log prob of 0.
+            covar = 0
+
         # this section of code calculates the matrix in log space, but I found it quicker to exponentiate (below).
         paternity_probs = paternity_probs[:,:, np.newaxis]
         # take all pairwise products of sharing fathers.        
-        pairwise_lik = np.array([alogsumexp(i + paternity_probs.T, 1) for i in paternity_probs]).squeeze()
+        pairwise_lik = np.array([alogsumexp(i + paternity_probs.T + covar, 1) for i in paternity_probs]).squeeze()
 
         return pairwise_lik
     if exp is True:
+        # Set up use of covariates
+        if use_covariates is True:
+            covar = paternity_array.covariate[np.newaxis]
+        else: # If they are not to be used, use a log prob of 0.
+            covar = 0
+
         # the sum can be quicker if you exponentiate, but this may harm precision.
         paternity_probs = np.exp(paternity_probs)
+        covar = np.exp(covar)
         # for each pair of offspring, the likelihood of not sharing each father.
-        pairwise_lik = np.matmul(paternity_probs, exp_array.T)
+        pairwise_lik = np.matmul(paternity_probs*covar, paternity_probs.T)
         pairwise_lik = np.array(pairwise_lik).reshape([noffs, noffs]) # reshape
 
         return np.log(pairwise_lik)
