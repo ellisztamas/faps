@@ -1,3 +1,6 @@
+from pkg_resources import get_distribution
+__version__ = get_distribution('faps').version
+
 from alogsumexp import alogsumexp
 # data import and export
 from genotypeArray import genotypeArray
