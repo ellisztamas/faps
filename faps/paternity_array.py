@@ -5,7 +5,7 @@ from transition_probability import transition_probability
 from incompatibilities import incompatibilities
 from warnings import warn
 
-def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None, covariate=None):
+def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None, covariate=None, allele_freqs=None):
     """
     Construct a paternityArray object for the offspring given known mothers and a set of candidate fathers using genotype data. Currently only SNP 
     data is supported.
@@ -42,12 +42,16 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
         given as 'NA', no weighting is performed.
     selfing_rate: float between zero and one, optional
         Input value for the prior probability of self-fertilisation.
+    max_clashes: int, optional
+        Maximum number of opposing homozygous loci for each parent-offspring.
     covariate: 1-d array, or list of 1-d arrays, optional
         Vector of (log) probabilities of paternity based on non-genetic 
         information, with one element for every candidate father. If this is a
         function of multiple sources they should be multiplied and included in
         this vector. If a list of offspring arrays have been supplied, this
         should be a list of vectors.
+    allele_freqs: Deprecated
+        Deprecated, but retained for backwards compatibility.
 
     Returns
     -------
