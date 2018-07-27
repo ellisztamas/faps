@@ -3,7 +3,7 @@ from paternityArray import paternityArray
 from sibshipCluster import sibshipCluster
 from do_clustering import do_clustering
 
-def sibship_clustering(paternity_array, ndraws=1000, exp=False):
+def sibship_clustering(paternity_array, ndraws=1000, use_covariates = False, exp=False):
     """
     Cluster offspring into full sibship groups using hierarchical clustering.
 
@@ -21,6 +21,9 @@ def sibship_clustering(paternity_array, ndraws=1000, exp=False):
         separate half-sibling arrays.
     ndraws: int
         Number of Monte Carlo simulations to run for each partition.
+    use_covariates: logical, optional
+        If True, information on prbabilities associated with covariates stored
+        in paternityArray objects are incorporated into sibship clustering.
     exp: logical, optional
         Indicates whether the probabilities of paternity should be exponentiated
         before calculating pairwise probabilities of sibships. This gives a
@@ -32,12 +35,12 @@ def sibship_clustering(paternity_array, ndraws=1000, exp=False):
     A sibshipCluster object.
     """
     if isinstance(paternity_array, paternityArray):
-        return do_clustering(paternity_array, ndraws, exp)
-
+        return do_clustering(paternity_array, ndraws=ndraws, use_covariates= use_covariates, exp=exp)
+    
     elif isinstance(paternity_array, list):
         if not all([isinstance(x, paternityArray) for x in paternity_array]):
             raise TypeError('Not all items in paternity_array are paternityArray objects.')
-        return [do_clustering(pa, ndraws, exp) for pa in paternity_array]
-    
+        return [do_clustering(pa, ndraws=ndraws, use_covariates= use_covariates, exp=exp) for pa in paternity_array]
+
     else:
         TypeError("paternity_array should be a paternityArray object, or list of paternityArray objects.")
