@@ -68,7 +68,7 @@ class paternityArray(object):
         `lik_absent` appended, with rows normalised to sum to one.
     """
 
-    def __init__(self, likelihood, lik_absent, by_locus, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None, clashes = None, max_clashes = None, covariate=None):
+    def __init__(self, likelihood, lik_absent, by_locus, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None, clashes = None, max_clashes = None, covariate=0):
         self.mu         = mu
         self.offspring  = offspring
         self.mothers    = mothers
@@ -99,7 +99,10 @@ class paternityArray(object):
         Returns
         -------
         No output is printed; the covariate is added to the paternityArray as 
-        the attribute 'covariate'. Any existing information is overwritten.
+        the attribute 'covariate'. Any existing information is overwritten. The
+        vector is appended with an additional zero to allow for the final column
+        of a the prob_array item in a paternityArray that accounts for the
+        probability of missing fathers.
         """
         if isinstance(covariate, np.ndarray):
             if len(covariate.shape) > 1:
@@ -108,6 +111,7 @@ class paternityArray(object):
                 raise ValueError("Length of vector of covariates ({}) does not match the number of fathers ({})".format(len(self.candidates), covariate.shape[0]))
             if not all(covariate <= 0):
                 warn("Not all values in covariate are less or equal to zero. Is it possible probabilities have not been log transformed?")
+            covariate = np.append(covariate, 0)
             self.covariate = covariate
         else:
             raise TypeError("covariate should be a 1-d NumPy array.")
