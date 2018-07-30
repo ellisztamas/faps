@@ -19,6 +19,7 @@ The best way to install FAPS is to use Python's package manager, Pip. Instructio
 
 ### From PyPi
 To download the stable release run `pip install faps` in the command line.
+If Python is unable to locate the package, try `pip install fap --user`.
 
 ### From GitHub
 Download the .zip or tarball file, and unpack it. In a command line move into the folder this creates and run `pip install .`
