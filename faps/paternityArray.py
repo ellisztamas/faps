@@ -113,6 +113,7 @@ class paternityArray(object):
                 warn("Not all values in covariate are less or equal to zero. Is it possible probabilities have not been log transformed?")
             covariate = np.append(covariate, 0)
             self.covariate = covariate
+            return None
         else:
             raise TypeError("covariate should be a 1-d NumPy array.")
 
