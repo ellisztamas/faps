@@ -132,9 +132,9 @@ class sibshipCluster(object):
         """
         pprobs = np.exp(self.prob_partitions) # exponentiate partition likelihoods for simplicity
         # number of families in each partition
-        nfams  = np.array([len(np.unique(self.partitions[i])) for i in range(self.npartitions)])
+        nfams  = np.array([len(np.unique(i)) for i in self.partitions])
         # sum the probabilities of each partition containing each value of family number
-        nprobs = np.array([pprobs[np.where(i == nfams)].sum() for i in range(1, len(nfams)+1)])
+        nprobs = np.array([pprobs[np.where(i == nfams)].sum() for i in range(1, self.noffspring+1)])
         nprobs = nprobs / nprobs.sum() # normalise
         return nprobs
 
@@ -160,7 +160,7 @@ class sibshipCluster(object):
         """
         Expected number of families given probabilities of each partition.
         """
-        return np.average(np.arange(self.noffspring), weights = self.nfamilies())
+        return np.average(np.arange(1, self.noffspring+1), weights=self.nfamilies())
 
     def full_sib_matrix(self, exp=False):
         """
@@ -329,7 +329,9 @@ class sibshipCluster(object):
         Parameters
         ----------
         paternity_array: paternityArray
-            Object listing information on paternity of individuals.
+            Object listing information on paternity of individuals. This should be the
+            same paternityArray object used to construct the sibshipCluster objects,
+            or else results will be meaningless.
         unit_draws: int
             Number of mating events to sample for each partition.
         total_draws: int
@@ -349,6 +351,32 @@ class sibshipCluster(object):
         Returns
         -------
         A matingEvents object.
+
+        Examples
+        --------
+        import numpy as np
+        from faps import *
+
+        # simulate genotype data
+        allele_freqs = np.random.uniform(0.1, 0.5, 50)
+        males = make_parents(250, allele_freqs)
+        offspring = make_sibships(males, 0, range(1,5), 5)
+        mothers = males.subset(offspring.parent_index('m', males.names))
+
+        # Creat paternityArrays and cluster into full sibships.
+        patlik = paternity_array(offspring, mothers, males, mu=0.0015)
+        patlik.add_covariate(np.log(np.repeat(1.0/males.size, males.size)))
+        sc = sibship_clustering(patlik)
+
+        # Basic usage
+        sc.mating_events(patlik)
+
+        # Including probabilities from covariates stored in the paternityArray.
+        sc.mating_events(patlik, use_covariates=True)
+
+        # Generate a sample in proportion to some other probability function not including genetic information
+        null_probs = np.repeat(1.0/males.size, males.size)
+        sc.mating_events(patlik, null_probs=null_probs)
         """
         if not isinstance(paternity_array, paternityArray):
             raise TypeError('paternity_array should be a paternityArray.')
