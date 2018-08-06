@@ -3,6 +3,8 @@ from warnings import warn
 from alogsumexp import alogsumexp
 from unique_rows import unique_rows
 from squash_siblings import squash_siblings
+from paternityArray import paternityArray
+
 
 def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000, use_covariates=False):
     """
@@ -68,14 +70,16 @@ def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000
 
     elif isinstance(null_probs, np.ndarray):
         if len(null_probs.shape) > 1:
-            raise ValueError("null_probs is supplied should be a one dimensional vector for a single half-sibs array, but has shape {}.format(null_probs.shape}.")  
+            raise ValueError("null_probs is supplied should be a one dimensional vector for a single half-sibs array, but has shape {}.format(null_probs.shape}.") 
+        if not all(null_probs <= 0):
+            warn("Not all values in null_probs are less or equal to zero. Is it possible probabilities have not been log transformed?")
         nfathers   = null_probs.shape[0]
         prob_array = null_probs - alogsumexp(null_probs)
         prob_array = np.tile(prob_array, nfamilies).reshape([nfamilies, len(null_probs)])
         prob_array = np.exp(prob_array)
     else:
         raise TypeError("Supply an array for either paternity_probs or null_probs.")
-    if paternity_array and null_probs:
+    if paternity_array is not None and null_probs is not None:
         warn('Values supplied for both paternity_probs and null_probs. null_probs will be ignored.')
     
     # generate a sample of possible paths through the matrix of candidate fathers.

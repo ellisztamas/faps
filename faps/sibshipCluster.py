@@ -406,11 +406,11 @@ class sibshipCluster(object):
             if len(null_probs.shape) != 1:
                 raise ValueError("null_probs should be a 1-d vector, but has shape {}".format("null_probs.shape"))
             elif len(null_probs) != len(paternity_array.candidates):
-                raise ValueError("null_probs should have an element for every candidate father,but has length {}.".format(len(null_probs)))
+                raise ValueError("null_probs should have an element for every candidate father, but has length {}.".format(len(null_probs)))
             else:
                 unit_events = [draw_fathers(i, null_probs=null_probs, ndraws=unit_draws) for i in valid_partitions]
         else:
-            raise TypeError('null_probs should be an array, or None.')
+            raise TypeError('null_probs is of type {}. If supplied, this should is supplied it should be an array.'.format(type(null_probs)))
             
         # resample weighted by probability
         unit_weights = np.around(np.exp(self.prob_partitions[valid_ix]) * total_draws).astype('int')
