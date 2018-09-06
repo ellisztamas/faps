@@ -20,7 +20,7 @@ def squash_siblings(paternity_probs, partitions):
     partitions  = partitions.astype('int')
     labels      = np.unique(partitions)
     if len(labels) == 1:
-        return paternity_probs.sum(0)
+        return paternity_probs.sum(0)[np.newaxis]
     else:
         fullsibliks = np.array([paternity_probs[partitions == f].sum(0) for f in labels])
         return fullsibliks
