@@ -37,6 +37,25 @@ For simulations, it also makes use of `Pandas` dataframes, and [iPython widgets]
 ## Using FAPS
 A user's guide is provided in this repository (see the docs folder). This provides a fairly step-by-step guide to importing data, clustering offspring into sibship groups, and using those clusters to investigate the underlying biological processes. This was written with users in mind who have little experience of working with Python. These documents are written in [iPython](https://ipython.org/), which I highly recommend as an interactive environment for running analyses in Python.
 
+## Citing FAPS
+If you use FAPS in any puiblished work please cite:
+
+Ellis, TJ, Field DL, Barton, NH (2018) Efficient inference of paternity and sibship inference given known maternity via hierarchical clustering. Molecular Ecology Resources 18:988–999. https://doi.org/10.1111/1755-0998.12782
+
+Here is the relevant bibtex reference:
+
+@Article{ellis2018efficient,
+  Title                    = {Efficient inference of paternity and sibship inference given known maternity via hierarchical clustering},
+  Author                   = {Ellis, Thomas James and Field, David Luke and Barton, Nicholas H},
+  Journal                  = {Molecular ecology resources},
+  Year                     = {2018},
+  Volume                   = {18},
+  pages                    = {988--999},
+  Doi                      = {10.1111/1755-0998.12782},
+  Publisher                = {Wiley Online Library}
+}
+
+
 ## Issues
 
 Please report any bugs or requests that you have using the GitHub issue tracker! But before you do that, please check the user's guide folder in the docs folder to see if your question is answered there.
