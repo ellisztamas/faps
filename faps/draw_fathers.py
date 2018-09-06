@@ -58,15 +58,11 @@ def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000
         else:
             covar = 0
         
-        nfathers  = len(patlik.candidates)+1
+        nfathers  = len(paternity_array.candidates)+1
         # multiply likelihoods for individuals within each full sibship, then normalise rows to sum to 1.
         prob_array = squash_siblings(paternity_array.prob_array, partition)
         prob_array = prob_array + covar
-        if nfamilies == 1:
-            prob_array = np.exp(prob_array - alogsumexp(prob_array))
-            prob_array = prob_array[np.newaxis] # add extra dimension so looping is still possible.
-        if nfamilies >  1:
-            prob_array = np.exp(prob_array - alogsumexp(prob_array,1)[:, np.newaxis])
+        prob_array = np.exp(prob_array - alogsumexp(prob_array,1)[:, np.newaxis])
 
     elif isinstance(null_probs, np.ndarray):
         if len(null_probs.shape) > 1:
