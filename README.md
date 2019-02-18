@@ -58,10 +58,11 @@ Topics covered:
 ## Citing FAPS
 If you use FAPS in any puiblished work please cite:
 
-Ellis, TJ, Field DL, Barton, NH (2018) Efficient inference of paternity and sibship inference given known maternity via hierarchical clustering. Molecular Ecology Resources 18:988–999. https://doi.org/10.1111/1755-0998.12782
+> Ellis, TJ, Field DL, Barton, NH (2018) Efficient inference of paternity and sibship inference given known maternity via hierarchical clustering. Molecular Ecology Resources 18:988–999. https://doi.org/10.1111/1755-0998.12782
 
 Here is the relevant bibtex reference:
 
+```
 @Article{ellis2018efficient,
   Title                    = {Efficient inference of paternity and sibship inference given known maternity via hierarchical clustering},  
   Author                   = {Ellis, Thomas James and Field, David Luke and Barton, Nicholas H},  
@@ -72,7 +73,7 @@ Here is the relevant bibtex reference:
   Doi                      = {10.1111/1755-0998.12782},  
   Publisher                = {Wiley Online Library}  
 }
-
+```
 
 ## Issues
 
