@@ -5,9 +5,10 @@ FAPS stands for Fractional Analysis of Sibships and Paternity. It is a Python pa
 ## Table of contents
 
 1. [Overview](#overview)
-2. [Using FAPS](#using-faps)
-3. [Citing FAPS](#citing-faps)
-4. [Authors and license information](#authors-and-license-information)
+2. [Installation](#installation)
+3. [Using FAPS](#using-faps)
+4. [Citing FAPS](#citing-faps)
+5. [Authors and license information](#authors-and-license-information)
 
 ## Overview
 The basic workflow is:
