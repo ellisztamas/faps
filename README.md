@@ -2,6 +2,13 @@
 
 FAPS stands for Fractional Analysis of Sibships and Paternity. It is a Python package for reconstructing genealogical relationships in wild populations in a way that accounts for uncertainty in the genealogy. It uses a clustering algorithm to sample plausible partitions of offspring into full sibling families, negating the need to apply an iterative search algorithm. Simulation tools are provided to assist with planning and verifying results.
 
+## Table of contents
+
+1. [Overview](#overview)
+2. [Using FAPS](#using-faps)
+3. [Citing FAPS](#citing-faps)
+4. [Authors and license information](#authors-and-license-information)
+
 ## Overview
 The basic workflow is:
 
@@ -35,7 +42,18 @@ FAPS is built using the `Numpy` library, and Pandas. These can be accessed toget
 For simulations, it also makes use of `Pandas` dataframes, and [iPython widgets](https://github.com/jupyter-widgets/ipywidgets). iPython widgets can be a little more troublesome to get working, but are only needed for simulations, and can be switched off. See [here](https://github.com/jupyter-widgets/ipywidgets/blob/master/docs/source/user_install.md) for installation instructions.
 
 ## Using FAPS
-A user's guide is provided in this repository (see the docs folder). This provides a fairly step-by-step guide to importing data, clustering offspring into sibship groups, and using those clusters to investigate the underlying biological processes. This was written with users in mind who have little experience of working with Python. These documents are written in [iPython](https://ipython.org/), which I highly recommend as an interactive environment for running analyses in Python.
+A user's guide is provided in this repository. This provides a fairly step-by-step guide to importing data, clustering offspring into sibship groups, and using those clusters to investigate the underlying biological processes. This was written with users in mind who have little experience of working with Python. These documents are written in [iPython](https://ipython.org/), which I highly recommend as an interactive environment for running analyses in Python.
+
+Topics covered:
+
+1. [Intorduction](https://github.com/ellisztamas/faps/blob/master/docs/01%20Introduction.ipynb)
+2. [Genotype data](https://github.com/ellisztamas/faps/blob/master/docs/02%20Genotype%20data.ipynb)
+3. [Paternity arrays](https://github.com/ellisztamas/faps/blob/master/docs/03%20Paternity%20arrays.ipynb)
+4. [Sibship clustering](https://github.com/ellisztamas/faps/blob/master/docs/04%20Sibship%20clustering.ipynb)
+5. Inference about mating patterns - under construction!
+6. [Simulating data](https://github.com/ellisztamas/faps/blob/master/docs/06%20Simulating%20data.ipynb)
+7. [Dealing with multiple families](https://github.com/ellisztamas/faps/blob/master/docs/07%20Dealing%20with%20multiple%20half-sib%20families.ipynb)
+8. [Case study: data preparation in *Antirrhinum majus*](https://github.com/ellisztamas/faps/blob/master/docs/08%20Data%20cleaning%20in%20A.%20majus.ipynb)
 
 ## Citing FAPS
 If you use FAPS in any puiblished work please cite:
@@ -45,14 +63,14 @@ Ellis, TJ, Field DL, Barton, NH (2018) Efficient inference of paternity and sibs
 Here is the relevant bibtex reference:
 
 @Article{ellis2018efficient,
-  Title                    = {Efficient inference of paternity and sibship inference given known maternity via hierarchical clustering},
-  Author                   = {Ellis, Thomas James and Field, David Luke and Barton, Nicholas H},
-  Journal                  = {Molecular ecology resources},
-  Year                     = {2018},
-  Volume                   = {18},
-  pages                    = {988--999},
-  Doi                      = {10.1111/1755-0998.12782},
-  Publisher                = {Wiley Online Library}
+  Title                    = {Efficient inference of paternity and sibship inference given known maternity via hierarchical clustering},  
+  Author                   = {Ellis, Thomas James and Field, David Luke and Barton, Nicholas H},  
+  Journal                  = {Molecular ecology resources},  
+  Year                     = {2018},  
+  Volume                   = {18},  
+  pages                    = {988--999},  
+  Doi                      = {10.1111/1755-0998.12782},  
+  Publisher                = {Wiley Online Library}  
 }
 
 
