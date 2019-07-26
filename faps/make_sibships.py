@@ -47,10 +47,8 @@ def make_sibships(parents, dam, sires, family_size, family_name='offs'):
     # if family_size is given as a list
     if isinstance(family_size, list) or isinstance(family_size, np.ndarray):
         # return an error if the two lists are of unequal length.
-        if len(family_size) is not len(sires):
-            print "family_size must either be an integer, or a list of the same length"
-            print "as the list of sires."
-            return None
+        if len(family_size) != len(sires):
+            raise ValueError("family_size must either be an integer, or a list of the same length as the list of sires.")
         else:
             sire_list = [[sires[x]] * family_size[x] for x in range(len(sires))]
             sire_list = [item for sublist in sire_list for item in sublist]
