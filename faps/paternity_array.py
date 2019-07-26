@@ -7,17 +7,21 @@ from warnings import warn
 
 def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None, covariate=None, allele_freqs=None):
     """
-    Construct a paternityArray object for the offspring given known mothers and a set of candidate fathers using genotype data. Currently only SNP 
+    Construct a paternityArray object for the offspring given known mothers
+    and a set of candidate fathers using genotype data. Currently only SNP 
     data is supported.
 
-    Additional information about paternity from non-genetic sources can be provided through the argument `covariate`. For example, this might be a function of spatial distance between individuals, or social dominance.
+    Additional information about paternity from non-genetic sources can be
+    provided through the argument `covariate`. For example, this might be a
+    function of spatial distance between individuals, or social dominance.
 
     Parameters
     ---------
     offspring: genotypeArray, or list of genotypeArrays
         Observed genotype data for the offspring.
     mothers: genotypeArray, or list of genotypeArrays
-        Observed genotype data for the offspring. Data on mothers need to be in the same order as those for the offspring.
+        Observed genotype data for the offspring. Data on mothers need to be 
+        in the same order as those for the offspring.
     males: genotypeArray
         Observed genotype data for the candidate males.
     mu: float between zero and one
