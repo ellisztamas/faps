@@ -4,11 +4,11 @@ class genotypeArray(object):
     """
     Genotype information about a sample of individuals, the identity of any known
     relatives, and metadata about the dataset.
-    
-    Currently only SNP data are supported. Data are recorded as integers: zeros 
+
+    Currently only SNP data are supported. Data are recorded as integers: zeros
     and twos indicate opposing homozygous genotypes, and ones heterozygous
     genotypes. If marker data is missing at a locus, this is indicated by -9.
-    
+
     Parameters
     ----------
     geno: array
@@ -22,7 +22,7 @@ class genotypeArray(object):
         Identifiers of the father of each individual, if known.
     markers: array-like, optional
         Marker names.
-    
+
     Returns
     -------
     size: int
@@ -106,8 +106,8 @@ class genotypeArray(object):
 
     def parent_index(self, parent, parent_names):
         """
-        Finds the position of parental names in a vector of possible parental names.
-        This can be the name of the mother or the father.
+        Finds the position of parental names in a vector of possible parental
+        names. This can be the name of the mother or the father.
 
         This is essentially a convenient wrapper for np.where().
 
@@ -179,7 +179,7 @@ class genotypeArray(object):
     def subset(self, individuals=None, loci=None):
         """
         Subset the genotype array by individual or number of loci.
-        
+
         To subset by both individuals and loci, call the function twice.
 
         Parameters
