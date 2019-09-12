@@ -8,7 +8,7 @@ from warnings import warn
 def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None, covariate=None, allele_freqs=None):
     """
     Construct a paternityArray object for the offspring given known mothers
-    and a set of candidate fathers using genotype data. Currently only SNP 
+    and a set of candidate fathers using genotype data. Currently only SNP
     data is supported.
 
     Additional information about paternity from non-genetic sources can be
@@ -20,8 +20,9 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
     offspring: genotypeArray, or list of genotypeArrays
         Observed genotype data for the offspring.
     mothers: genotypeArray, or list of genotypeArrays
-        Observed genotype data for the offspring. Data on mothers need to be 
-        in the same order as those for the offspring.
+        Observed genotype data for the mothers. Data on mothers need to be
+        in the same order as those for the offspring, or a single mother should
+        be given.
     males: genotypeArray
         Observed genotype data for the candidate males.
     mu: float between zero and one
@@ -49,7 +50,7 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
     max_clashes: int, optional
         Maximum number of opposing homozygous loci for each parent-offspring.
     covariate: 1-d array, or list of 1-d arrays, optional
-        Vector of (log) probabilities of paternity based on non-genetic 
+        Vector of (log) probabilities of paternity based on non-genetic
         information, with one element for every candidate father. If this is a
         function of multiple sources they should be multiplied and included in
         this vector. If a list of offspring arrays have been supplied, this
@@ -62,6 +63,26 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
     A paternityArray, or a list of paternityArray objects.
 
     If covariate is not given this will be returned as a vector of zeros.
+
+    Examples
+    --------
+    # Generate a population of adults
+    allele_freqs = np.random.uniform(0.3,0.5,50)
+    adults = make_parents(100, allele_freqs)
+
+    # Mate the first adult to the next three.
+    mother = males.subset(0)
+    progeny = make_sibships(males, 0, [1,2,3], 5, 'x')
+    # Create paternityArray
+    patlik = paternity_array(progeny, mother, adults, mu=0.0013)
+
+    # Example with multiple half-sib families
+    progeny = make_offspring(parents = adults, dam_list=[7,7,1,8,8,0], sire_list=[2,4,6,3,0,7])
+    # Split mothers and progeny up by half-sib array.
+    mothers = adults.split(progeny.mothers)
+    progeny = progeny.split(progeny.mothers)
+    # Create paternity array for each family
+    paternity_array(progeny, mothers, adults, mu)
     """
     if mu == 0:
         mu = 10**-12
@@ -79,7 +100,7 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
             output.add_covariate(covariate)
 
         return output
-    
+
 
 
 
@@ -88,7 +109,7 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
         if len(offspring) != len(mothers):
             raise ValueError('Lists of genotypeArrays are of different lengths.')
 
-        # Set up input of covariates if necessary. 
+        # Set up input of covariates if necessary.
         if isinstance(covariate, list):
             if len(offspring) != len(covariate):
                 raise ValueError("If a list of arrays of probabilities for covariates are supplied, this should have a row for every offspring genotypeArray.")
@@ -113,6 +134,6 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
 
 
         return output
-    
+
     else:
         raise TypeError('offspring and mothers should be genotype arrays, or else lists thereof.')

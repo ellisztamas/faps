@@ -184,12 +184,13 @@ class genotypeArray(object):
 
         Parameters
         ----------
-        individuals: int
-            an integer or list of integers indexing the individuals to be included.
+        individuals: int, str, or a vector thereof
+            Either a list of individual names, or integers indexing those
+            individuals.
 
-        loci: array=like
-            a list of loci to be included.
-
+        loci: int, str, or a vector thereof
+            Either a list of individual markers, or integers indexing those
+            individuals.
         Returns
         -------
         A genotype array with only the target individuals included.
@@ -197,19 +198,47 @@ class genotypeArray(object):
         # if no subsetting indices are given, return the whole object.
         if individuals is None and loci is None:
             return self
+
+        # Subset individuals if necessary
         if individuals is not None:
+            # If only a single individual is given, make it a list.
             if isinstance(individuals, int):
                 individuals = [individuals]
-            output = genotypeArray(self.geno[individuals], self.names[individuals],
-                                    self.mothers[individuals], self.fathers[individuals], markers=self.markers)
+            if isinstance(individuals, str):
+                individuals = [individuals]
+            # If a names are given, find the positions in the list of names
+            if all(isinstance(x, str) for x in individuals):
+                individuals = [np.where(self.names == x)[0][0] for x in individuals]
+            # Subset the genotypeArray
+            output = genotypeArray(
+                geno    = self.geno[individuals],
+                names   = self.names[individuals],
+                mothers = self.mothers[individuals],
+                fathers = self.fathers[individuals],
+                markers = self.markers)
+
+        # Subset loci if necessary
         if loci is not None:
+            # If only a single locus is given, make it a list.
             if isinstance(loci, int):
                 loci = [loci]
+            if isinstance(loci, str):
+                loci = [loci]
+            # If a marker names are given, find the positions in the list of names
+            if all(isinstance(x, str) for x in loci):
+                loci = [np.where(self.markersz == x)[0][0] for x in loci]
+            # If an array of boolean values are given, make to a list
             if isinstance(loci, np.ndarray):
                 if np.result_type(loci) == 'bool':
                     loci = np.arange(len(loci))[loci]
                 loci = loci.tolist()
-            output = genotypeArray(self.geno[:,loci], self.names, self.mothers, self.fathers, markers=self.markers[loci])
+            # Subset the genotypeArray
+            output = genotypeArray(
+                geno    = self.geno[:,loci],
+                names   = self.names,
+                mothers = self.mothers,
+                fathers = self.fathers,
+                markers = self.markers[loci])
         return output
 
     def drop(self, individuals):
@@ -294,7 +323,7 @@ class genotypeArray(object):
 
         return output
 
-    def split(self, by):
+    def split(self, by, return_dict=True):
         """
         Split up a gentotypeArray into groups according to some grouping
         factor. For example, divide an array containing genotype data for
@@ -304,14 +333,19 @@ class genotypeArray(object):
         ----------
         by: array-like
             Vector containing grouping labels for each individual
+        output_format = str
+            String indic
 
         Returns
         -------
-        A list of genotypeArray objects.
+        A dictionary of genotypeArray objects.
         """
         groups = np.unique(by)
         ix = [np.where(by == groups[i])[0] for i in range(len(groups))]
-        output = [self.subset(ix[i]) for i in range(len(ix))]
+        if return_dict:
+            output = {k:self.subset(i) for k,i in zip(by, ix)}
+        else:
+            output = [self.subset(i) for i in ix]
         return output
 
     def write(self, filename, delimiter = ','):
