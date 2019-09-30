@@ -7,7 +7,7 @@ class paternityArray(object):
     """
     Likelihoods of that any of a set of candidate males is the true father of each
     offspring individual, assuming the mother is known.
-    
+
     If you are constructing a paternityArray from genotypeArray objects, it is
     easier to call the wrapper fucntion `paternity_array`.
 
@@ -22,10 +22,6 @@ class paternityArray(object):
         from the sample of candidate males, and hence that offspring alleles are
         drawn from population allele frequencies. Should be the same length as
         the number of rows in `likelihood`.
-    by_locus: array
-        An array of log likelihoods for the offspring genotype given
-        the mother. The first axis has three elements, indexing cases for
-        the paternal genotype being 0, 1 or 2.
     offspring: array-like
         Identifiers for each offspring individual.
     mothers: array-like
@@ -53,13 +49,13 @@ class paternityArray(object):
     clashes: array, optional
         Array of the numbers of opposing homozygous incompatibilities for all
         possible parent-offspring dyads. This should have a row for every offspring
-        and a column for every candidate father, and hence be the same shape as 
+        and a column for every candidate father, and hence be the same shape as
         the `likelihood` array.
     max_clashes: integer
         Maximum number of double-homozygous incompatibilities allowed between
         offspring and candidate fathers. Dyads with more incompatibilities than
         this will have their probability set to zero.
-    
+
     Returns
     -------
     prob_array: array
@@ -68,7 +64,7 @@ class paternityArray(object):
         `lik_absent` appended, with rows normalised to sum to one.
     """
 
-    def __init__(self, likelihood, lik_absent, by_locus, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None, clashes = None, max_clashes = None, covariate=0):
+    def __init__(self, likelihood, lik_absent, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None, clashes = None, max_clashes = None, covariate=0):
         self.mu         = mu
         self.offspring  = offspring
         self.mothers    = mothers
@@ -76,7 +72,6 @@ class paternityArray(object):
         self.candidates = candidates
         self.lik_array  = likelihood
         self.lik_absent = lik_absent
-        self.by_locus   = by_locus
         self.clashes    = clashes
         self.covariate  = covariate
         self.prob_array = self.adjust_prob_array(purge, missing_parents, selfing_rate, max_clashes)
@@ -98,7 +93,7 @@ class paternityArray(object):
 
         Returns
         -------
-        No output is printed; the covariate is added to the paternityArray as 
+        No output is printed; the covariate is added to the paternityArray as
         the attribute 'covariate'. Any existing information is overwritten. The
         vector is appended with an additional zero to allow for the final column
         of a the prob_array item in a paternityArray that accounts for the
@@ -117,7 +112,7 @@ class paternityArray(object):
         else:
             raise TypeError("covariate should be a 1-d NumPy array.")
 
-    
+
     def adjust_prob_array(self, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None):
         """
         Construct an array of log posterior probabilities that each offspring is sired
@@ -202,7 +197,7 @@ class paternityArray(object):
                 raise ValueError("Shape of the likelihood array does not match that of the array of clashes.")
             else:
                 inc = np.append(self.clashes, np.zeros(self.lik_absent.shape)[:,np.newaxis], 1) # add an extra column so the shapes match
-                with np.errstate(divide='ignore'): 
+                with np.errstate(divide='ignore'):
                     ix = np.log(inc <= max_clashes) # index elements to alter
                 new_array = new_array + ix
 
@@ -231,12 +226,12 @@ class paternityArray(object):
         ix = [np.where(by == i)[0] for i in groups]
         # create new paternityArray objects for each family.
         if self.clashes is None:
-            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.by_locus[:,i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, None, max_clashes) for i in ix]
+            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, None, max_clashes) for i in ix]
         else:
-            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.by_locus[:,i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, self.clashes[i], max_clashes) for i in ix]
+            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, self.clashes[i], max_clashes) for i in ix]
 
         return output
-        
+
     def write(self, path, decimals=3):
         """
         Write a matrix of (unnormalised) likelihoods of paternity to disk.

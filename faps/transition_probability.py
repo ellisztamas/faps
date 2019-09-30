@@ -29,10 +29,7 @@ def transition_probability(offspring, mothers, males, mu, inverse=False):
     -------
     0. Array indexing offspring x candidates transition probabilities.
     1. Array indexing offspring only for transition probabilities
-    from population allele frequencies
-    2. An array indexing likelihoods for the offspring genotype given
-    the mother. The first axis has three elements, indexing cases for
-    the paternal genotype being 0, 1 or 2.
+    from population allele frequencies.
     """
     if not isinstance(offspring, genotypeArray):
         raise TypeError('offspring is not a genotypeArray')
@@ -82,7 +79,7 @@ def transition_probability(offspring, mothers, males, mu, inverse=False):
             pr_mothers[maternal_diploid != m] = mu
 
             prob_o[drop_m] = 1
-            prob_m[f] += (prob_o * pr_mothers * 1/3) 
+            prob_m[f] += (prob_o * pr_mothers * 1/3)
 
     prob_m = prob_m ** corr
 
@@ -112,6 +109,6 @@ def transition_probability(offspring, mothers, males, mu, inverse=False):
 
     prob_f = prob_f ** corr
     with np.errstate(divide='ignore'): prob_f = np.log(prob_f)
-    
-    output = [prob_f.sum(2), prob_a, np.log(prob_m)]
+
+    output = [prob_f.sum(2), prob_a]
     return output

@@ -5,7 +5,7 @@ from transition_probability import transition_probability
 from incompatibilities import incompatibilities
 from warnings import warn
 
-def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None, covariate=None, allele_freqs=None):
+def paternity_array(offspring, mothers, males, mu, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None, covariate=None):
     """
     Construct a paternityArray object for the offspring given known mothers
     and a set of candidate fathers using genotype data. Currently only SNP
@@ -17,24 +17,20 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
 
     Parameters
     ---------
-    offspring: genotypeArray, or list of genotypeArrays
-        Observed genotype data for the offspring.
-    mothers: genotypeArray, or list of genotypeArrays
-        Observed genotype data for the mothers. Data on mothers need to be
-        in the same order as those for the offspring, or a single mother should
-        be given.
+    offspring: genotypeArray, or dictionary of genotypeArrays
+        Observed genotype data for one or more arrays of offspring in a
+        single maternal family. To analyse multiple half-sib arrays in parallel,
+        give a dictionary containing multiple named genotypeArray objects.
+    mothers: genotypeArray, or dictionary of genotypeArrays
+        Observed genotype data for the mother of the half-sib array. If multiple
+        families of offspring are given, `mothers` should be a dictionary of
+        genotypeArray objects with the same key names as for the offspring.
     males: genotypeArray
         Observed genotype data for the candidate males.
     mu: float between zero and one
         Point estimate of the genotyping error rate. Clustering is unstable if
         mu_input is set to exactly zero. Any zero values will therefore be set
         to a very small number close to zero (10^-12).
-    return_by_locus: bool, optional
-        If True, the intermediate 3-d array for log likelihoods for each
-        offspring-candidate-locus combination are returned before the
-        multiplication step over loci. Defaults to True. In general, this
-        provides better inference when used in sibship clustering, but may use
-        large amounts of memory.
     purge: float between zero or one, int, array-like, optional
         Individuals who can be removed from the paternity array a priori. If
         a float is given, that proportion of individuals is removed from the
@@ -53,10 +49,10 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
         Vector of (log) probabilities of paternity based on non-genetic
         information, with one element for every candidate father. If this is a
         function of multiple sources they should be multiplied and included in
-        this vector. If a list of offspring arrays have been supplied, this
-        should be a list of vectors.
-    allele_freqs: Deprecated
-        Deprecated, but retained for backwards compatibility.
+        this vector. If a dictionary for multiple half-sib arrays for have been
+        supplied for offspring genotypes, `covariate` should likewise be a
+        dictionary with and entry for each half-sib family and key names that
+        match those given for the offspring.
 
     Returns
     -------
@@ -77,12 +73,14 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
     patlik = paternity_array(progeny, mother, adults, mu=0.0013)
 
     # Example with multiple half-sib families
-    progeny = make_offspring(parents = adults, dam_list=[7,7,1,8,8,0], sire_list=[2,4,6,3,0,7])
+    progeny = make_offspring(parents = adults,
+                             dam_list=[7,7,1,8,8,0],
+                             sire_list=[2,4,6,3,0,7])
     # Split mothers and progeny up by half-sib array.
     mothers = adults.split(progeny.mothers)
     progeny = progeny.split(progeny.mothers)
     # Create paternity array for each family
-    paternity_array(progeny, mothers, adults, mu)
+    paternity_array(progeny, mothers, adults, mu = 0.0013)
     """
     if mu == 0:
         mu = 10**-12
@@ -93,8 +91,18 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
         # array of opposing homozygous genotypes.
         incomp = incompatibilities(males, offspring)
         # take the log of transition probabilities, and assign dropout_masks.
-        prob_f, prob_a, prob_m = transition_probability(offspring, mothers, males, mu)
-        output = paternityArray(likelihood=prob_f, lik_absent=prob_a, by_locus=prob_m, offspring=offspring.names, mothers=offspring.mothers, fathers=offspring.fathers, candidates=males.names, mu=mu, purge=purge, missing_parents=missing_parents, selfing_rate=selfing_rate, clashes=incomp, max_clashes=max_clashes)
+        prob_f, prob_a = transition_probability(offspring, mothers, males, mu)
+        output = paternityArray(likelihood=prob_f,
+                                lik_absent=prob_a,
+                                offspring=offspring.names,
+                                mothers=offspring.mothers,
+                                fathers=offspring.fathers,
+                                candidates=males.names, mu=mu,
+                                purge=purge,
+                                missing_parents=missing_parents,
+                                selfing_rate=selfing_rate,
+                                clashes=incomp,
+                                max_clashes=max_clashes)
 
         if covariate is not None:
             output.add_covariate(covariate)
@@ -125,9 +133,20 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
             # array of opposing homozygous genotypes.
             incomp = incompatibilities(males, offspring[i])
             # take the log of transition probabilities, and assign dropout_masks.
-            prob_f, prob_a, by_locus = transition_probability(offspring[i], mothers[i], males, mu)
+            prob_f, prob_a = transition_probability(offspring[i], mothers[i], males, mu)
             # create paternityArray and send to output
-            patlik = paternityArray(likelihood=prob_f,lik_absent=prob_a, by_locus=by_locus, offspring=offspring[i].names, mothers=offspring[i].mothers, fathers=offspring[i].fathers, candidates=males.names, mu=mu, purge=purge, missing_parents=missing_parents, selfing_rate=selfing_rate, clashes=incomp, max_clashes=max_clashes)
+            patlik = paternityArray(likelihood=prob_f,
+                                    lik_absent=prob_a,
+                                    offspring=offspring[i].names,
+                                    mothers=offspring[i].mothers,
+                                    fathers=offspring[i].fathers,
+                                    candidates=males.names,
+                                    mu=mu,
+                                    purge=purge,
+                                    missing_parents=missing_parents,
+                                    selfing_rate=selfing_rate,
+                                    clashes=incomp,
+                                    max_clashes=max_clashes)
 
             patlik.add_covariate(cov[i])
             output[i] = patlik
@@ -135,5 +154,45 @@ def paternity_array(offspring, mothers, males, mu, return_by_locus = True, purge
 
         return output
 
+    # If a dictionary of genotype arrays for separate halfsib families are given:
+    elif isinstance(offspring, dict) & isinstance(mothers, dict):
+        if offspring.keys() != mothers.keys():
+            raise ValueError('Dictionaries of genotypeArray objects for offspring and mothers do not match')
+
+        # Set up input of covariates if necessary.
+        if isinstance(covariate, dict):
+            if offspring.keys() != covariate.keys():
+                raise ValueError("Key names of genotypeArrays of offspring genotypes and covariates do not match.")
+            cov = covariate
+        elif covariate is None:
+            # Create a dictionary of zero vectors.
+            cov = {k: np.zeros(adults.size) for k in progeny.keys()}
+        else:
+            raise TypeError("If offspring and maternal genotypes are supplied as dictionaries, covariates should either be a 1-d of log probabilities, or a dictionary with the same keys as those for genotypes.")
+
+        output = {}
+        for i in offspring.keys():
+            # array of opposing homozygous genotypes.
+            incomp = incompatibilities(males, offspring[i])
+            # take the log of transition probabilities, and assign dropout_masks.
+            prob_f, prob_a = transition_probability(offspring[i], mothers[i], males, mu)
+            # create paternityArray and send to output
+            patlik = paternityArray(likelihood=prob_f,
+                                    lik_absent=prob_a,
+                                    offspring=offspring[i].names,
+                                    mothers=offspring[i].mothers,
+                                    fathers=offspring[i].fathers,
+                                    candidates=males.names,
+                                    mu=mu,
+                                    purge=purge,
+                                    missing_parents=missing_parents,
+                                    selfing_rate=selfing_rate,
+                                    clashes=incomp,
+                                    max_clashes=max_clashes)
+
+            patlik.add_covariate(cov[i])
+            output[i] = patlik
+        return output
+
     else:
-        raise TypeError('offspring and mothers should be genotype arrays, or else lists thereof.')
+        raise TypeError("offspring and mothers should be genotypeArray objects for a single half-sib array and its mother, or else lists or dictionaries of half-sibships and mothers.")
