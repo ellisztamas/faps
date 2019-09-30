@@ -5,11 +5,9 @@ from warnings import warn
 
 class paternityArray(object):
     """
-    Likelihoods of that any of a set of candidate males is the true father of each
-    offspring individual, assuming the mother is known.
-
-    If you are constructing a paternityArray from genotypeArray objects, it is
-    easier to call the wrapper fucntion `paternity_array`.
+    Likelihoods of that any of a set of candidate males is the true father of
+    each offspring individual, assuming the mother is known. Call the wrapper
+    function `paternity_array`.
 
     Parameters
     ----------
@@ -124,11 +122,11 @@ class paternityArray(object):
 
         Parameters
         ----------
-        purge: float between zero or one, int, array-like, optional
+        purge: float, array, optional
             Individuals who can be removed from the paternity array a priori. If
-            a float is given, that proportion of individuals is removed from the
-            array at random. Alternatively an integer or vector of integers
-            indexing specific individuals can be supplied.
+            a float between zero and one is given, that proportion of individuals
+            is removed from the array at random. Alternatively, give a vector of
+            integers or names indexing candidate fathers to be removed.
         missing_parents : float between zero and one, or 'NA', optional
             Input value for the proportion of adults who are missing from the sample.
             This is used to weight the probabilties of paternity for each father
@@ -147,19 +145,51 @@ class paternityArray(object):
         candidate male, with an extra final column for the probability that the offspring
         is drawn from population allele frequencies. Each element is a log
         probability, and as such each row sums to one.
+
+        Examples
+        --------
+        from faps import *
+        import numpy as np
+
+        # Generate a population of adults
+        allele_freqs = np.random.uniform(0.3,0.5,50)
+        adults = make_parents(20, allele_freqs)
+
+        # Mate the first adult to the next three.
+        mother = adults.subset(0)
+        progeny = make_sibships(adults, 0, [1,2,3], 5, 'x')
+        # Create paternityArray
+        patlik = paternity_array(progeny, mother, adults, mu=0.0013)
+
+        # Set values for candidates 14 to 16 to zero.
+        purge = ['base_14', 'base_15', 'base_16']
+        patlik.prob_array = patlik.adjust_prob_array(purge=purge)
+        # All values in columns 14 to 16 now -Inf.
+        patlik.prob_array[:, 14:17]
+        # Other columns are unaffected.
+        patlik.prob_array[:, 17:20]
         """
         new_array = np.append(self.lik_array, self.lik_absent[:,np.newaxis], 1)
 
         # set log lik of individuals to be purged to -Inf
         if purge is not None:
             nc = len(self.candidates)
+            # If a float is given, remove candidates at random.
             if isinstance(purge, float):
                 if purge < 0 or purge > 1:
                     raise ValueError(" Error: purge must be between zero and one.")
+                # Random set of candidate indices to be purged.
                 ix = np.random.choice(range(nc), np.round(purge*nc).astype('int'), replace=False)
-                with(np.errstate(divide='ignore')): new_array[:, ix] = np.log(0)
+                with(np.errstate(divide='ignore')):
+                    new_array[:, ix] = np.log(0)
+
+            # If one or more integers is given, remove candidates at those indices
             elif isinstance(purge, list) or isinstance(purge, np.ndarray) or isinstance(purge, int):
-                with(np.errstate(divide='ignore')): new_array[:, purge] = np.log(0)
+                # If all entries are strings, find the names of the candidates.
+                if all([isinstance(x, str) for x in purge]):
+                    purge = [np.where(x == self.candidates)[0][0] for x in purge]
+                with(np.errstate(divide='ignore')):
+                    new_array[:, purge] = np.log(0)
             else:
                 raise TypeError("Error: purge should be a float or list of floats between zero and one.")
 
@@ -170,7 +200,7 @@ class paternityArray(object):
                 raise ValueError("missing_parents must be between 0 and 1!")
             # if missing_parents is between zero and one, correct the likelihoods.
             if missing_parents >0 and missing_parents <=1:
-                if missing_parents ==1: print "Warning: missing_parents set to 100%."
+                if missing_parents ==1: warn("Missing_parents set to 100%.")
                 new_array[:, -1] = new_array[:, -1] + np.log(  missing_parents)
                 new_array[:,:-1] = new_array[:,:-1] + np.log(1-missing_parents)
             # if missing_parents is 0, set the term for unrelated fathers to zero.
@@ -183,7 +213,8 @@ class paternityArray(object):
             if selfing_rate < 0 or selfing_rate >1:
                 raise ValueError("Error: selfing_rate must be between 0 and 1.")
             if selfing_rate >=0 and selfing_rate <=1:
-                if selfing_rate == 1: print "Warning: selfing_rate set to 100%."
+                if selfing_rate == 1: warn("Warning: selfing_rate set to 100%.")
+
                 ix = range(len(self.offspring))
                 with np.errstate(divide='ignore'):
                     maternal_pos = [np.where(np.array(self.candidates) == self.mothers[i])[0][0] for i in ix] # positions of the mothers
@@ -205,32 +236,6 @@ class paternityArray(object):
         new_array = new_array - alogsumexp(new_array, axis=1)[:,np.newaxis]
 
         return new_array
-
-    def split(self, by, purge=None, missing_parents=None, selfing_rate=None, max_clashes = None):
-        """
-        Split up a paternityArray into groups according to some grouping
-        factor. For example, divide an array containing genotype data for
-        multiple half-sibling arrays by the ID of their mothers.
-
-        Parameters
-        ----------
-        by: array-like
-            Vector containing grouping labels for each individual.
-
-        Returns
-        -------
-        A list of paternityArray objects.
-        """
-        groups = np.unique(by)
-        # indices for each family
-        ix = [np.where(by == i)[0] for i in groups]
-        # create new paternityArray objects for each family.
-        if self.clashes is None:
-            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, None, max_clashes) for i in ix]
-        else:
-            output = [paternityArray(self.lik_array[i], self.lik_absent[i], self.offspring[i], self.mothers[i], self.fathers[i], self.candidates, self.mu, purge, missing_parents, selfing_rate, self.clashes[i], max_clashes) for i in ix]
-
-        return output
 
     def write(self, path, decimals=3):
         """
