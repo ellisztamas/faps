@@ -67,7 +67,7 @@ def paternity_array(offspring, mothers, males, mu, purge=None, missing_parents=N
     adults = make_parents(100, allele_freqs)
 
     # Mate the first adult to the next three.
-    mother = males.subset(0)
+    mother = adults.subset(0)
     progeny = make_sibships(males, 0, [1,2,3], 5, 'x')
     # Create paternityArray
     patlik = paternity_array(progeny, mother, adults, mu=0.0013)
@@ -166,7 +166,7 @@ def paternity_array(offspring, mothers, males, mu, purge=None, missing_parents=N
             cov = covariate
         elif covariate is None:
             # Create a dictionary of zero vectors.
-            cov = {k: np.zeros(adults.size) for k in progeny.keys()}
+            cov = {k: np.zeros(males.size) for k in offspring.keys()}
         else:
             raise TypeError("If offspring and maternal genotypes are supplied as dictionaries, covariates should either be a 1-d of log probabilities, or a dictionary with the same keys as those for genotypes.")
 
