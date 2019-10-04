@@ -77,47 +77,58 @@ def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False)
     else:
         covar = 0
 
-    # Generate a sample of plausible partitions from the dendrogram.
-    partition_sample, z = sibship_partitions(paternity_array, exp=exp, use_covariates=use_covariates)
-    
-    #get a list of all unique families.
-    unique_families = [np.where(p == val)[0] for p in partition_sample for val in np.unique(p)]
-    unique_families = set([tuple(up) for up in unique_families]) # coerce to tuple to create set
-    unique_families = [np.array(up) for up in unique_families] # coerce back to numpy arrays
+    # If there is only one offspring in the paternityArray, there is no need to do any clustering.
+    if paternity_array.offspring.shape[0] == 1:
+        output = sibshipCluster(
+            paternity_array = paternity_array,
+            linkage_matrix  = 'Linkage matrix not available because there is only one offspring',
+            partitions      = np.array([[0]]),
+            lik_partitions  = np.array([[0]])
+        )
+        return output
 
-    # Calculate likelihoods of paternity for each family.
-    siblik = np.array([paternity_array.prob_array[uf].sum(0) for uf in unique_families])
-    siblik = siblik + covar
-    sibprob= siblik - alogsumexp(siblik, 1)[:, np.newaxis]
-    sibprob= np.exp(sibprob)
-    
-    # Draw ndraws fathers for each full sibship.
-    candidates = np.arange(paternity_array.prob_array.shape[1])
-    draw_dads = np.array([np.random.choice(candidates, ndraws, replace=True, p=s) for s in sibprob], dtype=np.int64)
-    
-    # Loop over each partition and pull out the rows in siblik for each full sibship within it.
-    # Then, remove duplicate and invalid configurations.
-    # Finally, extract probabilities for each candidate, multiply across families, and sum across valid paths.
-    up_str = np.array([str(up) for up in unique_families])
-    path_likelihoods = np.zeros(len(partition_sample))
-    for i in range(len(partition_sample)):
-        p = partition_sample[i]
-        these_families = np.array([str(np.where(p == val)[0]) for val in np.unique(p)]) # families in this partition.
-        # pull out the sublists in up_str for this partition
-        ix = np.array([np.where(f == up_str)[0][0] for f in these_families])
-        these_dads = draw_dads[ix]
-        # remove invalid partitions
-        these_dads = unique_rows(these_dads.T) # remove duplicates
-        these_dads = np.array([v for v in these_dads if len(set(v)) == len(v)]) # remove partitions with duplicate candidates
+    # Otherwise, generate a sample of plausible partitions from the dendrogram.
+    else:
+        partition_sample, z = sibship_partitions(paternity_array, exp=exp, use_covariates=use_covariates)
 
-        # If no valid partitions are found, return likelihood of zero.
-        if len(these_dads) == 0:
-            with np.errstate(divide='ignore'):
-                path_likelihoods[i] = np.log(0)
-        # Otherwise, pull out the likelihoods
-        else:
-            lik_partition = siblik[ix, these_dads].sum(1)
-            lik_partition = alogsumexp(lik_partition)
-            path_likelihoods[i] = lik_partition
-    
-    return sibshipCluster(paternity_array, z, partition_sample, path_likelihoods)
+        #get a list of all unique families.
+        unique_families = [np.where(p == val)[0] for p in partition_sample for val in np.unique(p)]
+        unique_families = set([tuple(up) for up in unique_families]) # coerce to tuple to create set
+        unique_families = [np.array(up) for up in unique_families] # coerce back to numpy arrays
+
+        # Calculate likelihoods of paternity for each family.
+        siblik = np.array([paternity_array.prob_array[uf].sum(0) for uf in unique_families])
+        siblik = siblik + covar
+        sibprob= siblik - alogsumexp(siblik, 1)[:, np.newaxis]
+        sibprob= np.exp(sibprob)
+
+        # Draw ndraws fathers for each full sibship.
+        candidates = np.arange(paternity_array.prob_array.shape[1])
+        draw_dads = np.array([np.random.choice(candidates, ndraws, replace=True, p=s) for s in sibprob], dtype=np.int64)
+
+        # Loop over each partition and pull out the rows in siblik for each full sibship within it.
+        # Then, remove duplicate and invalid configurations.
+        # Finally, extract probabilities for each candidate, multiply across families, and sum across valid paths.
+        up_str = np.array([str(up) for up in unique_families])
+        path_likelihoods = np.zeros(len(partition_sample))
+        for i in range(len(partition_sample)):
+            p = partition_sample[i]
+            these_families = np.array([str(np.where(p == val)[0]) for val in np.unique(p)]) # families in this partition.
+            # pull out the sublists in up_str for this partition
+            ix = np.array([np.where(f == up_str)[0][0] for f in these_families])
+            these_dads = draw_dads[ix]
+            # remove invalid partitions
+            these_dads = unique_rows(these_dads.T) # remove duplicates
+            these_dads = np.array([v for v in these_dads if len(set(v)) == len(v)]) # remove partitions with duplicate candidates
+
+            # If no valid partitions are found, return likelihood of zero.
+            if len(these_dads) == 0:
+                with np.errstate(divide='ignore'):
+                    path_likelihoods[i] = np.log(0)
+            # Otherwise, pull out the likelihoods
+            else:
+                lik_partition = siblik[ix, these_dads].sum(1)
+                lik_partition = alogsumexp(lik_partition)
+                path_likelihoods[i] = lik_partition
+
+        return sibshipCluster(paternity_array, z, partition_sample, path_likelihoods)
