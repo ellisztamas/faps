@@ -21,9 +21,10 @@ def sibship_clustering(paternity_array, ndraws=1000, use_covariates = False, exp
 
     Parameters
     ----------
-    paternity_array: paternityArray or list
-        Either a single paternityArray object, or a list of paternityArrays for
-        separate half-sibling arrays.
+    paternity_array: paternityArray or dict
+        Information on the likelihood of paternity for individuals in a maternal
+        family. To analyse multiple maternal families in parallel,
+        give a dictionary containing multiple named paternityArray objects.
     ndraws: int
         Number of Monte Carlo simulations to run for each partition.
     use_covariates: logical, optional

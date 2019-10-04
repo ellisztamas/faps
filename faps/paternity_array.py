@@ -189,7 +189,6 @@ def paternity_array(offspring, mothers, males, mu, purge=None, missing_parents=N
                                     selfing_rate=selfing_rate,
                                     clashes=incomp,
                                     max_clashes=max_clashes)
-
             patlik.add_covariate(cov[i])
             output[i] = patlik
         return output
