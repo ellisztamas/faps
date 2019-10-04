@@ -6,26 +6,25 @@ from matingEvents import matingEvents
 
 def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total_draws  = 10000, n_subsamples = 1000, subsample_size = None, null_probs = None, family_weights=None, use_covariates=False):
     """
-    Sample plausible mating events for a list of half-sibling arrays.
-    
+    Sample plausible mating events for multiple half-sibling arrays in parallel.
+
     This creates a single matingEvents object, where every half-sib family
     represents a unit, from which n=family_draws likely fathers are sampled.
     By default, the contribution of each half-sib family to the total sample
     is determined by the expected number of full-sib families in each array, but
     this can be changed by modifying family_weights.
-    
+
     This is essentially a wrapper to perform sibshipCluster.mating_events for
     multiple half-sibling arrays at once. See the documentation for that function
     for details on sampling individual families.
-    
+
     Parameters
     ----------
-    sibship_clusters: list
-        List sibshipCluster objects for each half-sib array.
-    paternity_arrays: list
-        List of paternityArray objects for each half-sib array. These should be the
-        same paternityArray objects used to construct the sibshipCluster objects,
-        or else results will be meaningless.
+    sibship_clusters: dict
+        Dictionary of sibshipCluster objects for multiple maternal families.
+    paternity_arrays: dict
+        Dictionary of paternityArray objects for multiple maternal families.
+        Keys should match those for sibship_clusters.
     family_draws: int
         Number of mating events to sample for each partition.
     total_draws: int
@@ -34,85 +33,117 @@ def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total
         Number of subsamples to draw from the total mating events.
     subsample_size: int, optional
         Number of mating events in each subsample. Defaults to 0.1*total_draws.
-    null_probs: list or array, optional
-        Array of probabilities for paternity if this were not based on marker
+    null_probs: vector or dict, optional
+        Array of (log) probabilities for paternity if this were not based on marker
         data. If the same probabilities apply to each half-sib array, this can
         be a vector with an element for each candidate father. Alternatively, if
-        the vector for each array is different, supply an array with a row for each
-        array, and a column for each candidate. If null_probs is supplied, genetic
-        information is ignored.
+        the vector for each array is different, supply an dictionary of 1-d
+        vectors, with keys that match those for sibship_clusters. Probabilities
+        in a given vector should sum to one.
     family_weights: array
-        Vector of weights to give to each half-sib array. Defaults to the weighted
-        mean number of families in the array. If values do not sum to one, they
-        will be normalised to do so.
+        1-dimensional vector of weights to give to each half-sib array. If None,
+        weights will be calculated as the mean number of full-sibships in each
+        maternal family over possible partitions, weighted by the probability
+        of each partition.
+
 
     Returns
     -------
     A matingEvents object. If null_probs is supplied samples for null mating are returned.
-    
+
     See also
     --------
     sibshipCluster.mating_events()
     matingEvents()
     """
-    if not isinstance(sibship_clusters, list) or not all([isinstance(x, sibshipCluster) for x in sibship_clusters]):
-        raise TypeError('sibship_clusters should be a list of sibshipCluster objects.')
-    if not isinstance(paternity_arrays, list) or not all([isinstance(x, paternityArray) for x in paternity_arrays]):
-        raise TypeError('paternity should be a list of paternityArray objects.')
+    if not isinstance(sibship_clusters, dict) or not all([isinstance(x, sibshipCluster) for x in sibship_clusters.values()]):
+        raise TypeError('sibship_clusters should be a dictionary of sibshipCluster objects.')
+    if not isinstance(paternity_arrays, dict) or not all([isinstance(x, paternityArray) for x in paternity_arrays.values()]):
+        raise TypeError('paternity should be a dictionary of paternityArray objects.')
     elif len(sibship_clusters) != len(paternity_arrays):
         raise ValueError('Lists of sibshipCluster and paternityArray objects are different lengths.')
     elif len(sibship_clusters) == 1:
         warnings.warn('Lists of sibshipCluster and paternityArray are of length 1. If there is only one array to analyse it is cleaner to call mating_events dircetly from the sibshipCluster object.')
-        
+
     # labels for each array, and each candidate
-    unit_names = np.array([x.mothers[0] for x in paternity_arrays])
-    candidates = np.append(paternity_arrays[0].candidates[0], 'father_missing')
-    
+    candidates = list(paternity_arrays.values())[0].candidates
+    candidates = np.append(candidates, 'father_missing')
+
     # Determine how to draw the correct number of samples for each half-sib array.
+    # For a user-supplied vector of weights check this is the right format
     if family_weights is np.ndarray:
         if len(family_weights.shape) > 1:
             raise ValueError("family_weights should be a 1-d vector, but has shape {}.".format(family_weights.shape))
         if len(family_weights) != len(sibship_clusters):
             raise ValueError('family_weights has length {}, but there are {} half-sib arrays sibship_clusters.'.format(len(family_weights), len(sibship_clusters)))
             family_weights = family_weights / family_weights.sum()
+    # If no vector is given, use the expected mean number of full sibships per
+    # maternal family.
     elif family_weights is None:
-        # weight each family by the expected number of mating events
-        family_weights = np.array([x.mean_nfamilies() for x in sibship_clusters]) # expected number of mating events for each array
-        family_weights = family_weights / family_weights.sum() # normalise to sum to one
-        family_weights = np.around(family_weights*total_draws).astype('int') # get integer value
+        family_weights = {k:v.mean_nfamilies() for k,v in sibship_clusters.items()} # expected number of mating events for each array
+        total_weight   = total_draws / np.array(family_weights.values()).sum() # correction factor to sum to total_draws
+        family_weights = {k : v * total_weight for k,v in family_weights.items()} # normalise to sum to total_draws
+        family_weights = {k : np.around(v).astype('int') for k,v in family_weights.items()}
     else:
         raise TypeError('family_weights is type {}. If supplied, it should be a NumPy array.').format(type(family_weights))
-        
+
+    # If nothing is given for null_probs
     if null_probs is None:
-        null_probs = [None] * len(sibship_clusters)
+        null_probs = {k: None for k in paternity_arrays.keys()}
+    # If a NumPy array is given, coerce to a dictionary
     elif isinstance(null_probs, np.ndarray):
-        if len(null_probs.shape) == 1:
-            null_probs = np.repeat(null_probs[np.newaxis], len(sc), 0)
-        if null_probs.shape[0] != len(sibship_clusters):
-            raise ValueError('null_probs has {} rows, but there are {} half-sib arrays; if null_probs is supplied it should have a row for each half-sib array, or be a 1-d to be applied to each half-sib array.'.format(null_probs.shape[0], len(sibship_clusters)))
+        # For 1-d vectors.
+        if(null_probs.ndim == 1):
+            if len(null_probs != len(candidates)-1):
+                ValueError("If null_probs is a 1-d vector it should have the same length as the number of candidate fathers.")
+            null_probs = {k:null_probs for k in paternity_arrays.keys()}
+        # Throw an error if there is more than 1 dimension.
+        elif(null_probs.ndim > 1):
+            ValueError("null_probs should be a 1-d array or a dictionary of 1-d arrays.")
+    # If a dictionary is given for null_probs, check it.
+    elif isinstance(null_probs, dict):
+        if any([k not in paternity_arrays.keys() for k in null_probs.keys()]):
+            ValueError("One or more entries in null_probs does not have a matching entry in paternity_arrays.")
+        if any([v.ndim > 1 for v in null_probs.values()]):
+            ValueError("One or more entries in null_probs has more than one dimension.")
+        if any([len(v) != len(candidates)-1 for v in null_probs.values()]):
+            ValueError("One or more entries in null_probs is a different length to the number of candidates")
+        if not all([isinstance(v, np.ndarray) for v in null_probs.values()]):
+            TypeError("If null_probs is a dictionary, all values should be 1-d NumPy arrays.")
     else:
-        raise TypeError("null_probs is type {}. If supplied, this should be a NumPy array.").format(type(null_probs))
-    
+        raise TypeError("null_probs is type {}.\nIf supplied, this should be a NumPy array, or dictionary.").format(type(null_probs))
+
     # draw events for each half-sib array
-    ix = range(len(sibship_clusters))
-    family_events = [sibship_clusters[x].mating_events(
-        paternity_array = paternity_arrays[x],
-        unit_draws=family_draws,
-        total_draws=total_draws,
-        n_subsamples=n_subsamples,
-        subsample_size=subsample_size,
-        null_probs=null_probs[x],
-        use_covariates=use_covariates)
-                     for x in ix]
-    family_events = np.array([x.total_events for x in family_events])
-    # resample me_list proportional to the prob of each unit.
-    total_events = [np.random.choice(family_events[i], family_weights[i], replace=True) for i in ix if len(family_events[i])>0]
-    total_events = [item for sublist in total_events for item in sublist]
+    family_events = {}
+    total_events  = {}
+    for id in sibship_clusters.keys():
+        me = sibship_clusters[id].mating_events(
+            paternity_array = paternity_arrays[id],
+            unit_draws=family_draws,
+            total_draws=total_draws,
+            n_subsamples=n_subsamples,
+            subsample_size=subsample_size,
+            null_probs=null_probs[id],
+            use_covariates=use_covariates
+        )
+        family_events[id] = me.total_events
+        # Random subset of fathers from each maternal family, with sample size in
+        # proportion to the weight of the family
+        total_events[id] = np.random.choice(me.total_events, family_weights[id], replace=True)
+    # Concatenate total_events into a single list.
+    total_events = [item for sublist in total_events.values() for item in sublist]
     total_events = np.array(total_events)
 
-    #create matingEvents object
-    me = matingEvents(unit_names, candidates, family_weights, family_events, total_events)
+    # Create a matingEvents object.
+    me = matingEvents(
+        unit_names = family_events.keys(),
+        candidates = candidates,
+        unit_weights = family_weights,
+        unit_events = family_events,
+        total_events = total_events
+    )
     # draw subsamples.
     me.subsamples = me.draw_subsample(n_subsamples, subsample_size)
-    
+
+
     return me
