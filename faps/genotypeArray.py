@@ -343,7 +343,7 @@ class genotypeArray(object):
         groups = np.unique(by)
         ix = [np.where(by == groups[i])[0] for i in range(len(groups))]
         if return_dict:
-            output = {k:self.subset(i) for k,i in zip(by, ix)}
+            output = {k:self.subset(i) for k,i in zip(groups, ix)}
         else:
             output = [self.subset(i) for i in ix]
         return output
