@@ -14,6 +14,10 @@ def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False)
     out every possible partition structure compatible with the dendrogram. The
     likelihood for each partition is also estimated by Monte Carlo simulations.
 
+    If the paternityArray object contains only a single individual, clustering
+    is meaningless, but an artifical sibshipCluster object is created with a
+    single partition with log likelihood of 0.
+
     Parameters
     ----------
     paternity_array: paternityArray
@@ -49,7 +53,7 @@ def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False)
     offspring= offspring.dropouts(0.01).mutations(mu)
 
     mothers = males.subset(offspring.parent_index('m', males.names))
-    patlik = paternity_array(offspring, mothers, males, allele_freqs, mu)
+    patlik = paternity_array(offspring, mothers, males, mu)
 
     # compare the effect of exponentiating likelihoods
     sc1 = do_clustering(patlik, exp=True)

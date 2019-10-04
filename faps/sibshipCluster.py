@@ -20,7 +20,7 @@ class sibshipCluster(object):
     paternity_array: paternityArray
         Object listing information on paternity of individuals.
     linkage_matrix: array
-        Z-matrix from scipy.cluster.hierarchy.
+        Z-matrix from fastcluster.linkage.
     partitions: 2-d array
         Array of possible partition structures from the linkage matrix.
     lik_partitions: 1d-array
@@ -155,7 +155,7 @@ class sibshipCluster(object):
             counts = counts / counts.sum() # normalise to sum to one.
             pprobs+= counts * np.exp(self.prob_partitions[j]) # multiply by likelihood of the partition.
         return pprobs
-        
+
     def mean_nfamilies(self):
         """
         Expected number of families given probabilities of each partition.
@@ -308,7 +308,7 @@ class sibshipCluster(object):
             probs = alogsumexp(probs, 0)
 
             return probs
-            
+
     def mating_events(self, paternity_array, unit_draws=1000, total_draws=10000, n_subsamples = None, subsample_size = None, null_probs=None, use_covariates=False):
         """
         Sample plausible mating events from a sibshipCluster. These can then be used
@@ -323,7 +323,7 @@ class sibshipCluster(object):
         You can also supply an array of probabilities that a given father is the sire
         based on some appropriare null model, which can then be compared with observed
         mating patterns. For example, to test whether observed patterns could be
-        explained by random mating but with spatial clustering, you could supply an 
+        explained by random mating but with spatial clustering, you could supply an
         array of probabilities derived from an appropriate dispersal function.
 
         Parameters
@@ -411,7 +411,7 @@ class sibshipCluster(object):
                 unit_events = [draw_fathers(i, null_probs=null_probs, ndraws=unit_draws) for i in valid_partitions]
         else:
             raise TypeError('null_probs is of type {}. If supplied, this should is supplied it should be an array.'.format(type(null_probs)))
-            
+
         # resample weighted by probability
         unit_weights = np.around(np.exp(self.prob_partitions[valid_ix]) * total_draws).astype('int')
         # resample unit_events proportional to the prob of each unit.
