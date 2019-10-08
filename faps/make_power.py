@@ -1,8 +1,8 @@
 import numpy as np
-from genotypeArray import genotypeArray
-from make_parents import make_parents
-from make_sibships import make_sibships
-from make_generation import make_generation
+from faps.genotypeArray import genotypeArray
+from faps.make_parents import make_parents
+from faps.make_sibships import make_sibships
+from faps.make_generation import make_generation
 from time import time, localtime, asctime
 from pandas import DataFrame as df
 from sys import stdout
@@ -93,7 +93,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
         11. input selfing rate
         12. time in seconds to create paternityArray
         13. time in seconds to perform clustering
-        14. binary indiciator for whether the true partition was included in the 
+        14. binary indiciator for whether the true partition was included in the
             sample of partitions.
         15. difference in log likelihood for the maximum likelihood partition
             identified and the true partition. Positive values indicate that the
@@ -108,7 +108,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
         21. mean probability that the sire had not been sampled for those
             individuals whose sire was truly absent (who had non-zero probability
             in the paternityArray).
-    
+
     If `return_paternities` is True, the array of paternity probabilities object
     is returned for each simulated array. If `return_clusters` is true, a list is
     returned containing the data frame described nabove and a list of sibshipClusters.
@@ -121,199 +121,182 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
     """
     if isinstance(replicates, int) and replicates > 0:
         if verbose:
-            print "{} of each parameter combination will be performed.".format(replicates)
+            print("{} of each parameter combination will be performed.".format(replicates))
     else:
         raise TypeError("R should be a positive integer giving the number of replicate simulations to be performed.")
         return None
 
     if isinstance(nloci, int):
-        if verbose: print "Simulating {} diploid loci.".format(nloci)
+        if verbose: print("Simulating {} diploid loci.".format(nloci))
         nloci = [nloci]
     elif isinstance(nloci, list) or isinstance(nloci, np.ndarray):
         if verbose:
-            print "Simulating arrays with multiple number of loci: {}.".format(nloci)
+            print("Simulating arrays with multiple number of loci: {}.".format(nloci))
     else:
         raise TypeError("nloci should be a positive integer, or a list of positive integer.")
-        return None
     if any([nloci[i] < 0 or not isinstance(nloci[i], int) for i in range(len(nloci))]):
         raise TypeError("nloci should be a positive integer, or a list of positive integer.")
-        return None
     stdout.flush()
 
     # set up allele frequencies
     if isinstance(allele_freqs, float):
         if allele_freqs <=0 or allele_freqs >=1:
             raise ValueError("Allele frequencies must be between 0 and 1.")
-            return None
         elif verbose:
-            print "Uniform minor allele frequency of {}.format(allele_freqs)."
+            print("Uniform minor allele frequency of {}.format(allele_freqs).")
     elif isinstance(allele_freqs, list) or isinstance(allele_freqs, np.ndarray):
         if any([allele_freqs[i] < 0 and allele_freqs[i] > 1 for i in range(len(allele_freqs))]):
             raise ValueError("Allele frequencies must be between 0 and 1.")
-            return None
         if len(allele_freqs) == 2 and verbose:
-                print "Drawing allele frequencies between {} and {}.".format(allele_freqs[0], allele_freqs[1])
+                print("Drawing allele frequencies between {} and {}.".format(allele_freqs[0], allele_freqs[1]))
         elif len(allele_freqs) == nloci and nloci is not 2:
             allele_freqs = allele_freqs
             if verbose:
-                print "Allele frequencies supplied by the user."
+                print("Allele frequencies supplied by the user.")
     else:
         raise ValueError("Allele frequencies must be given as a single value between 0 and 1, a list of two elements, or else a vector of frequencies for each locus.")
-        return None
     stdout.flush()
 
     # set up population parameters
     if isinstance(candidates, int):
         if verbose is True:
-            print "Simulating adult populations of {} individuals.".format(candidates)
+            print("Simulating adult populations of {} individuals.".format(candidates))
         candidates = [candidates]
     elif isinstance(candidates, list) or isinstance(candidates, np.ndarray):
         if verbose is True:
-            print "Simulating adult populations of multiple sizes: {}.".format(candidates)
+            print("Simulating adult populations of multiple sizes: {}.".format(candidates))
     else:
         raise TypeError("candidates should be an integer or list of integers.")
-        return None
     stdout.flush()
 
     # Generating the progeny
     if isinstance(sires, int):
         if isinstance(offspring, int):
             if verbose is True:
-                print "Simulating {} families of {} offspring.".format(sires, offspring)
+                print("Simulating {} families of {} offspring.".format(sires, offspring))
         else:
             raise TypeError("If a single integer is given for sires, then offspring must be a single integer.")
-            return None
     elif isinstance(sires, list) or isinstance(sires, np.ndarray):
         if isinstance(offspring, list) or isinstance(offspring, np.ndarray):
             if len(offspring) != len(sires):
                 raise ValueError("offspring should be the same length as sires.")
-                return None
             if verbose is True:
-                print "Simulating {} full-sib families.".format(len(sires))
+                print("Simulating {} full-sib families.".format(len(sires)))
         else:
             raise TypeError("sires and offspring should either both be an integer, or should be lists of identical length.")
-            return None
     stdout.flush()
 
     # dropout rates
     if isinstance(missing_loci, list) or isinstance(missing_loci, np.ndarray):
         if verbose:
-            print "Multiple real genotyping error rates: {}.".format(missing_loci)
+            print("Multiple real genotyping error rates: {}.".format(missing_loci))
     if isinstance(missing_loci, float) or missing_loci ==0:
         if verbose:
-            print "{}% of per-locus genotypes will be removed at random.".format(100*missing_loci)
+            print("{}% of per-locus genotypes will be removed at random.".format(100*missing_loci))
         missing_loci = [missing_loci]
     else:
         raise ValueError("missing_loci should be an float or list of floats between 0 and 1.")
-        return None
     stdout.flush()
 
     # Real genotype error rates
     if isinstance(mu_real, list) or isinstance(mu_real, np.ndarray):
         if verbose:
-            print "Multiple real genotyping error rates: {}.".format(mu_real)
+            print("Multiple real genotyping error rates: {}.".format(mu_real))
     elif isinstance(mu_real, float) or mu_real == 0:
         if verbose:
-            print "{}% of alleles will be mutated at random.".format(mu_real*100)
+            print("{}% of alleles will be mutated at random.".format(mu_real*100))
         mu_real = [mu_real]
     else:
         raise ValueError("mu_real should be an integer or list of integers.")
-        return None
     if any([mu_real[i] < 0 or mu_real[i] > 1 for i in range(len(mu_real))]):
         raise ValueError("All values for mu_real should be between zero and one.")
-        return None
     #if len(mu_real) > 1 and len(missing_parents) > 1 and len(mu_real) > 1 != len(missing_parents) > 1:
-        #print "ERROR: If multiple values are given for mu_real and missing_parents supply the same number of arguments for each.
+        #print("ERROR: If multiple values are given for mu_real and missing_parents supply the same number of arguments for each.
     stdout.flush()
 
     # input error rates
     if isinstance(mu_input, list) or isinstance(mu_input, np.ndarray):
         if verbose:
-            print "Constructing paternity arrays using multiple input values for assumed genotype-error rate: {}.".format(mu_input)
+            print("Constructing paternity arrays using multiple input values for assumed genotype-error rate: {}.".format(mu_input))
     elif isinstance(mu_input, float) or mu_input==0:
         if verbose:
-            print "Genotype error rate of {} will be used to construct paternity arrays.".format(mu_input)
+            print("Genotype error rate of {} will be used to construct paternity arrays.".format(mu_input))
         mu_input = [mu_input]
     elif mu_input is None:
         mu_input = mu_real
         if verbose is True:
-            print "Input error rates taken as the real error rates."
+            print("Input error rates taken as the real error rates.")
     else:
-        print "mu_input should be a float or list of floats between zero and one, or else None."
+        print("mu_input should be a float or list of floats between zero and one, or else None.")
     if len(mu_real) > 1 and len(mu_input) > 1 and len(mu_real) != len(mu_input):
         raise TypeError("If multiple values are given for mu_real and mu_input supply the same number of arguments for each.")
-        return None
     if any([mu_input[i] < 0 and mu_input[i] >= 1 for i in range(len(mu_input))]) and mu_input is not None:
         raise ValueError("All elements in mu_input must be greater or equal to zero and less than one.")
-        return None
+
     stdout.flush()
 
     # remove superfluous individuals
     if unsampled_real == 0 or unsampled_real == 0.0 or unsampled_real is None:
         if verbose is True:
-            print "No candidates to be removed."
+            print("No candidates to be removed.")
     elif isinstance(unsampled_real, float):
         if unsampled_real > 0 and unsampled_real <= 1:
             if verbose is True:
-                print "Removing {}% of the candidates at random.".format(np.round(unsampled_real*100, 2))
+                print("Removing {}% of the candidates at random.".format(np.round(unsampled_real*100, 2)))
         else:
             raise ValueError("If unsampled_real is a float it should be greater or equal to zero and less than one.")
-            return None
     elif isinstance(unsampled_real, list) or isinstance(unsampled_real, np.ndarray):
         if any([not isinstance(unsampled_real[i], int) or unsampled_real[i] < 0 for i in range(len(unsampled_real))]) :
             raise TypeError("If a list is given for unsampled_real, all values should be positive integers.")
         if verbose is True:
-            print "Removing candidates in positions {}.".format(unsampled_real)
+            print("Removing candidates in positions {}.".format(unsampled_real))
     else:
         raise TypeError("unsampled_real should either be a float between zero and one, or else a list indexing candidate individuals to unsampled_real.")
-        return None
     stdout.flush()
 
     # input candidate sampling rate
     if unsampled_input is None:
         if unsampled_real == 0 or unsampled_real is [0.0]:
             if verbose is True:
-                print "Constructing paternity arrays assuming complete sampling of candidates."
+                print("Constructing paternity arrays assuming complete sampling of candidates.")
             unsampled_input = [0.0]
         if isinstance(unsampled_real, float):
             unsampled_input = [unsampled_real]
             if verbose is True:
-                print "Constructing paternity arrays assuming sampling proportion is known to be {}.".format(1-unsampled_input)
+                print("Constructing paternity arrays assuming sampling proportion is known to be {}.".format(1-unsampled_input))
         if isinstance(unsampled_real, list) or isinstance(unsampled_real, np.ndarray):
             unsampled_input = [float(len(unsampled_real)) / candidates[i] for i in range(len(candidates))]
             if verbose is True:
-                print "Constructing paternity arrays assuming {} candidates are missing.".format(len(unsampled_real))
+                print("Constructing paternity arrays assuming {} candidates are missing.".format(len(unsampled_real)))
         else:
             unsampled_input = [unsampled_input]
-            print "No prior parameter used for the proportion of missing candidates."
+            print("No prior parameter used for the proportion of missing candidates.")
     elif isinstance(unsampled_input, int) and unsampled_input == -9:
         unsampled_input = [None]
         if verbose:
-            print "No prior parameter used for the proportion of missing candidates."
+            print("No prior parameter used for the proportion of missing candidates.")
     else:
         if isinstance(unsampled_input, list) or isinstance(unsampled_input, np.ndarray):
             if verbose is True:
-                print "Constructing paternity arrays assuming multiple values of proportions of missing candidates: {}.".format(unsampled_input)
+                print("Constructing paternity arrays assuming multiple values of proportions of missing candidates: {}.".format(unsampled_input))
         elif isinstance(unsampled_input, float):
             if verbose is True:
-                print "Proportion missing canidates set to {}.".format(unsampled_input)
+                print("Proportion missing canidates set to {}.".format(unsampled_input))
             unsampled_input = [unsampled_input]
         else:
             raise TypeError("unsampled_input should be an float or list of floats between zero and one.")
-            return None
         if any([unsampled_input[i] >1 or unsampled_input[i] < 0 for i in range(len(unsampled_input))]):
             raise TypeError("unsampled_input should be an float or list of floats between zero and one.")
-            return None
     stdout.flush()
 
     # input selfing rate
     if isinstance(selfing_rate, float) or selfing_rate == 0:
         if verbose is True:
-            print "Self-fertilisation rate of {}.".format(selfing_rate)
+            print("Self-fertilisation rate of {}.".format(selfing_rate))
         selfing_rate = [selfing_rate]
     elif isinstance(selfing_rate, list) or isinstance(selfing_rate, np.ndarray):
         if verbose is True:
-            print "Self-fertilisation rate of {}.".format(selfing_rate)
+            print("Self-fertilisation rate of {}.".format(selfing_rate))
     else:
         raise TypeError("selfing_rate should be an float or list of floats between zero and one.")
         return None
@@ -325,7 +308,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
     # check sibship parameters
     if isinstance(cluster_draws, int):
         if verbose is True:
-            print "Performing {} Monte Carlo draws for sibship inference.\n".format(cluster_draws)
+            print("Performing {} Monte Carlo draws for sibship inference.\n".format(cluster_draws))
     else:
         raise TypeError("Give an integer value for cluster_draws.")
     if not isinstance(exp_clusters, bool):
@@ -336,7 +319,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
         return None
     stdout.flush()
 
-    if verbose: print "Parameters set. Beginning simulations on {}.".format(asctime(localtime(time()) ))
+    if verbose: print("Parameters set. Beginning simulations on {}.".format(asctime(localtime(time()) )))
     stdout.flush()
     t0 = time()
     nreps = len(nloci)*len(candidates)*len(mu_real)*len(missing_loci)*len(unsampled_input)*len(selfing_rate)*replicates
@@ -358,7 +341,6 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
             for mr in range(len(mu_real)):
                 for ml in range(len(missing_loci)):
                     for th in range(len(unsampled_input)):
-                        for sr in range(len(selfing_rate)):
                             for r in range(replicates):
                                 # set up allele frequencies
                                 if isinstance(allele_freqs, float):
@@ -385,7 +367,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
                                     fp.value += 1 # signal to increment the progress bar
 
     if verbose:
-        print "Simulations completed after {} minutes.".format(round((time() - t0) / 60, 2))
+        print("Simulations completed after {} minutes.".format(round((time() - t0) / 60, 2)))
 
     cn =['rep','nloci','allele_freq','n_adults','n_sires','array_size',
          'missing_loci','mu_real','mu_input',
@@ -401,4 +383,3 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
         if return_clusters:    results = results + [clusters]
         return results
     else: return df(results, columns=cn)
-

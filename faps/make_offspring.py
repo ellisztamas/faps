@@ -1,5 +1,5 @@
 import numpy as np
-from genotypeArray import genotypeArray
+from faps.genotypeArray import genotypeArray
 
 def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, family_name='offs'):
     """

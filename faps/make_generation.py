@@ -1,13 +1,13 @@
 from time import time, localtime, asctime
 import numpy as np
-from make_parents import make_parents
-from make_sibships import make_sibships
-from paternityArray import paternityArray
-from paternity_array import paternity_array
-from sibshipCluster import sibshipCluster
-from sibship_clustering import sibship_clustering
-from lik_partition import lik_partition
-from relation_matrix import relation_matrix
+from faps.make_parents import make_parents
+from faps.make_sibships import make_sibships
+from faps.paternityArray import paternityArray
+from faps.paternity_array import paternity_array
+from faps.sibshipCluster import sibshipCluster
+from faps.sibship_clustering import sibship_clustering
+from faps.lik_partition import lik_partition
+from faps.relation_matrix import relation_matrix
 
 def make_generation(allele_freqs, candidates, sires, offspring, missing_loci=0, mu_real=0, mu_input=0, unsampled_real=None, unsampled_input=0, selfing_rate=0, cluster_draws=1000, exp_clusters=True, return_paternities=False, return_clusters=False, counter='NA'):
     """

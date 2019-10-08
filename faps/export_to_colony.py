@@ -11,18 +11,18 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
                      n_incompatibilies = 3):
     """
     Export genotypeArray objects to run in Colony2.
-    
+
     Variable descriptions are mostly copied from the manual for Colony2. See the Colony2
     manual for full descriptions of what they mean.
-    
+
     The output is rather crude.
-    
+
     Parameters
     ----------
     offspring, mothers, males: genotypeArray objects
         Genotype information on the the offspring, mothers, and
         candidate males.
-    allele_freqs: array 
+    allele_freqs: array
         A vector of population allele frequencies.
     file_path: str
         Folder to store analyses
@@ -59,7 +59,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
         maternal sibship size.
     known_allele_fr: int
         0/1=Unknown/Known population allele frequency
-    nruns: int 
+    nruns: int
         Number of runs
     run_length:
         1,2,3,4 =  short, medium, long, very long runs
@@ -76,7 +76,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
         1/2/3=low/medium/high Precision for Fulllikelihood
     parents_present:int
         prob. of dad/mum included in the candidates
-    
+
     Returns
     -------
     A .dat file suitable for using in Colony 2.
@@ -84,26 +84,26 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
     # Open a file
     fo = open(os.path.join(file_path, project_name) + '.dat', "wb")
     # write population parameters
-    fo.write(project_name+' !Dataset name \n' + 
+    fo.write(project_name+' !Dataset name \n' +
              output_name +' !Output file name \n' +
              str(offspring.size)+' ! Number of offspring in the sample \n' +
              str(offspring.nloci)+' ! Number of loci \n'+
-             str(seed)+' ! Seed for random number generator\n' + 
-             str(update_af)+' ! 0/1=Not updating/updating allele frequency \n' + 
-             str(two_sexes)+' ! 2/1=Dioecious/Monoecious species \n' + 
+             str(seed)+' ! Seed for random number generator\n' +
+             str(update_af)+' ! 0/1=Not updating/updating allele frequency \n' +
+             str(two_sexes)+' ! 2/1=Dioecious/Monoecious species \n' +
              str(inbreeding)+' ! 0/1=No inbreeding/inbreeding \n'+
-             str(haplodiploid)+' ! 0/1=Diploid species/HaploDiploid species \n' + 
+             str(haplodiploid)+' ! 0/1=Diploid species/HaploDiploid species \n' +
              str(polygamy[0])+'  '+str(polygamy[1]) + ' ! 0/1=Polygamy/Monogamy for males & females \n' +
-             str(infer_clones)+' ! 0/1=Clone inference =No/Yes \n' + 
-             str(size_scaling)+' ! 0/1=Full sibship size scaling =No/Yes \n' + 
-             str(sibship_prior[0])+ ' ' + str(sibship_prior[1])+ ' ' + str(sibship_prior[2])+ ' ' + ' ! 0,1,2,3=No,weak,medium,strong sibship size prior; mean paternal & maternal sibship size \n' +  
+             str(infer_clones)+' ! 0/1=Clone inference =No/Yes \n' +
+             str(size_scaling)+' ! 0/1=Full sibship size scaling =No/Yes \n' +
+             str(sibship_prior[0])+ ' ' + str(sibship_prior[1])+ ' ' + str(sibship_prior[2])+ ' ' + ' ! 0,1,2,3=No,weak,medium,strong sibship size prior; mean paternal & maternal sibship size \n' +
              str(known_allele_fr) + ' ! 0/1=Unknown/Known population allele frequency \n')
 
     # Number of alleles per locus
     a = ''
     for i in range(offspring.nloci):
         a += '2 '
-    fo.write(a + ' !Number of alleles per locus \n') 
+    fo.write(a + ' !Number of alleles per locus \n')
     # Allele frequencies
     for l in range(offspring.nloci):
         fo.write(str(9) + '\t' + str(10) + '\n')
@@ -111,12 +111,12 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
     fo.write('\n')
 
     # Analysis parameters
-    fo.write(str(nruns)+' ! Number of runs \n' + 
-             str(run_length)+' ! Length of run \n' + 
-             str(monitor_method) + ' ! 0/1=Monitor method by Iterate#/Time in second \n' + 
-             str(monitor_interval) + ' ! Monitor interval in Iterate# / in seconds \n' + 
-             str(windows_gui) + ' ! non-Windows version \n' + 
-             str(analysis_method) + ' ! Give an indicated value of 0, 1 or 2 to tell Colony to use the pairwise- likelihood score (PLS), full likelihood (FL), or the FL and PLS combined (FPLS) method \n' + 
+    fo.write(str(nruns)+' ! Number of runs \n' +
+             str(run_length)+' ! Length of run \n' +
+             str(monitor_method) + ' ! 0/1=Monitor method by Iterate#/Time in second \n' +
+             str(monitor_interval) + ' ! Monitor interval in Iterate# / in seconds \n' +
+             str(windows_gui) + ' ! non-Windows version \n' +
+             str(analysis_method) + ' ! Give an indicated value of 0, 1 or 2 to tell Colony to use the pairwise- likelihood score (PLS), full likelihood (FL), or the FL and PLS combined (FPLS) method \n' +
              str(precision) + ' ! 1/2/3=low/medium/high Precision for Fulllikelihood \n' +
              '\n')
 
@@ -182,8 +182,8 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
             t = t + '\n'
             fo.write(t)
     else:
-        print "two_sexes should be 1 for hermaphrodites or 2 for separate sexes."
-        return None
+        raise ValueError("two_sexes should be 1 for hermaphrodites or 2 for separate sexes.")
+
 
     fo.write('\n')
 
@@ -229,7 +229,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
     # set number of excluded fathers and mothers to zero.
     fo.write('0' + ' ! Number of offspring with known excluded paternity \n')
     fo.write('0' + ' ! Number of offspring with known excluded maternity \n')
-    
+
     # set number of excluded sibships to zero.
     fo.write('0' + ' ! Number of offspring with known excluded paternal sibships \n')
     fo.write('0' + ' ! Number of offspring with known excluded maternal sibships  \n')

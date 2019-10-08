@@ -1,5 +1,5 @@
 import numpy as np
-from paternityArray import paternityArray
+from faps.paternityArray import paternityArray
 
 def read_paternity_array(path, likelihood_col = 2, mothers_col=1, fathers_col=None, delimiter=","):
     """

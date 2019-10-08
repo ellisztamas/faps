@@ -1,5 +1,5 @@
 import numpy as np
-from genotypeArray import genotypeArray
+from faps.genotypeArray import genotypeArray
 
 def effective_nloci(progeny, mothers, adults):
     """
@@ -23,8 +23,8 @@ def effective_nloci(progeny, mothers, adults):
     # confirm data are genotypeArrays
     if isinstance(progeny, genotypeArray) and isinstance(mothers, genotypeArray) and isinstance(adults, genotypeArray):
         if progeny.nloci != mothers.nloci and progeny.nloci != adults.nloci:
-            print "ERROR: Numbers of loci in each genotypeArray do not match."
-            return None
+            raise ValueError("Numbers of loci in each genotypeArray do not match.")
+
         else:
             # Arrays indexing the positions of missing data in each genotypeArray
             prog_na = (progeny.geno[:,:,0] == -9)[np.newaxis]
@@ -36,5 +36,5 @@ def effective_nloci(progeny, mothers, adults):
             missing = progeny.nloci - (mat > 0).sum(2).T
             return missing
     else:
-        print "ERROR: progeny, mothers and adults should be of type genotypeArray."
+        raise TypeError("progeny, mothers and adults should be of type genotypeArray.")
         return None

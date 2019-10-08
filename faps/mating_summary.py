@@ -1,6 +1,6 @@
 import numpy as np
 from pandas import DataFrame
-from matingEvents import matingEvents
+from faps.matingEvents import matingEvents
 
 def mating_summary(mating_event1, mating_event2, phenotype, absent_label=np.nan, quantiles=[2.5, 9.75]):
     """
@@ -63,15 +63,15 @@ def mating_summary(mating_event1, mating_event2, phenotype, absent_label=np.nan,
     ratio = count1 / count2
 
     vals = np.unique(phenotype)
-    # phenotypes in each subsample 
+    # phenotypes in each subsample
     subcounts1 = phenotype[mating_event1.subsamples.flatten()].values.reshape(mating_event1.subsamples.shape)
     subcounts1 = np.array([(subcounts1 == i).mean(1) for i in vals])
-    
+
     subcounts2 = phenotype[mating_event2.subsamples.flatten()].values.reshape(mating_event2.subsamples.shape)
     subcounts2 = np.array([(subcounts2 == i).mean(1) for i in vals])
-    
+
     # ratio among subsamples.
-    sub_ratio = subcounts1 / subcounts2    
+    sub_ratio = subcounts1 / subcounts2
     # confidence intervals.
     SE1 = np.percentile(subcounts1, q=quantiles, axis=1)
     SE2 = np.percentile(subcounts2, q=quantiles, axis=1)

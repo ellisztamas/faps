@@ -1,9 +1,9 @@
 import numpy as np
-from alogsumexp import alogsumexp
-from unique_rows import unique_rows
-from paternityArray import paternityArray
-from sibshipCluster import sibshipCluster
-from sibship_partitions import sibship_partitions
+from faps.alogsumexp import alogsumexp
+from faps.unique_rows import unique_rows
+from faps.paternityArray import paternityArray
+from faps.sibshipCluster import sibshipCluster
+from faps.sibship_partitions import sibship_partitions
 from warnings import warn
 
 def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False):

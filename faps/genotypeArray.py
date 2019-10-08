@@ -1,4 +1,5 @@
 import numpy as np
+from warnings import warn
 
 class genotypeArray(object):
     """
@@ -77,8 +78,7 @@ class genotypeArray(object):
         elif by == 'individual' or by == 1:
             return (self.geno.sum(2) == 1).mean(1)
         else:
-            print "Input for `by` not recognised."
-            return None
+            raise ValueError("`by` should be either 'marker' or 'individual'.")
 
     def missing_data(self, by='marker'):
         """
@@ -101,8 +101,7 @@ class genotypeArray(object):
         elif by == 'individual' or by == 1:
             return (self.geno[:,:,0] == -9).mean(1)
         else:
-            print "Input for `by` not recognised."
-            return None
+            raise ValueError("`by` should be either 'marker' or 'individual'.")
 
     def parent_index(self, parent, parent_names):
         """
@@ -145,7 +144,7 @@ class genotypeArray(object):
         if parent is 'parents' or parent is 'p':
             return [np.where(parent_names == x)[0][0] for x in self.parents]
         else:
-            print "parent must be 'mother', 'father', or 'parents'."
+            raise ValueError("parent must be 'mother', 'father', or 'parents'.")
 
     def true_partition(self):
         """
@@ -162,8 +161,8 @@ class genotypeArray(object):
         according to their full sibling group.
         """
         if 'NA' in self.mothers or 'NA' in self.fathers:
-            print 'Warning: one or more individuals has at least one parent of unkown identity.'
-            print 'All such individuals will be assigned to the same sibship group.'
+            warn('Warning: one or more individuals has at least one parent of unkown identity.')
+            warn('All such individuals will be assigned to the same sibship group.')
 
         # concatenate mother and father names to create a vector of parent pairs.
         #parentage = np.array([str(self.mothers[o]) + '/' + str(self.fathers[o]) for o in range(noffs)])

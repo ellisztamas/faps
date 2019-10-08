@@ -1,5 +1,5 @@
 import numpy as np
-from genotypeArray import genotypeArray
+from faps.genotypeArray import genotypeArray
 
 def accuracy_paternity(progeny, parents, paternity_array, partition, target_parent = 'father'):
     """
@@ -7,25 +7,25 @@ def accuracy_paternity(progeny, parents, paternity_array, partition, target_pare
     probability of paternity of true sires. For individuals whose fathers have not been
     sampled, the probability that the father is drawn from population allele frequencies
     is returned.
-    
+
     Deprecated in favour of a function within sibshipCluster.
-    
+
     Parameters
     ----------
     progeny: genotypeArray
         Genotype information on offspring individuals included in paternity_array.
-    
+
     parents: genotypeArray
         Genotype information on the candidate parents included in paternity_array.
-    
+
     paternity_array: A matrix of probabilities that each candidate parent is the true
         parent of each individual. This array can be generated with paternity_array, or
         else supplied independently. Rows show index offspring, and columns parents.
-    
+
     target_parent: String denoting whether the paternity_array indexes fathers, mothers,
         or parents pairs. Valid arguments are 'mother', 'father' and 'parents',  or
             equivalently 'm' and 'f' respectively.
-    
+
     Returns
     -------
     A list of two elements:
@@ -47,11 +47,9 @@ def accuracy_paternity(progeny, parents, paternity_array, partition, target_pare
         parent_present = [progeny.parents[x]     in parents.names for x in range(progeny.size)]
         parent_missing = [progeny.parents[x] not in parents.names for x in range(progeny.size)]
     else:# target_parent not in ['mother', 'father', 'parent', 'm', 'f', 'p']:
-        print "target_parent must be 'mother', 'father', or 'parents'."
-        print "This should be whichever is indexed in the columns of paternity_array."
-        return None
-    
-    # If there are no individuals with fathers present, return 
+        raise ValueError("target_parent must be 'mother', 'father', or 'parents'.\nThis should be whichever is indexed in the columns of paternity_array.")
+
+    # If there are no individuals with fathers present, return
     if sum(parent_present) == 0:
         mean_patprob = -9
     if sum(parent_present) >= 1:
@@ -70,7 +68,7 @@ def accuracy_paternity(progeny, parents, paternity_array, partition, target_pare
             # get the value for the true sire
             pat_probs[x] = this_gamma[father_pos[x]]
         mean_patprob = pat_probs.mean()
-    
+
     # POSTERIOR PROBABILITIES THAT A SIRE WAS NOT SAMPLED.
     # If there are no individuals with missing fathers, return -9
     if sum(parent_missing) == 0:
@@ -89,5 +87,5 @@ def accuracy_paternity(progeny, parents, paternity_array, partition, target_pare
             # The probability of an unsampled father is given in the final column
             abs_probs[x] = this_gamma[-1]
         mean_absprob = abs_probs.mean()
-    
+
     return [mean_patprob, mean_absprob]

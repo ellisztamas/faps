@@ -1,5 +1,5 @@
 import numpy as np
-from genotypeArray import genotypeArray
+from faps.genotypeArray import genotypeArray
 
 def make_parents(size, allele_freqs, family_name = 'base'):
     """

@@ -1,6 +1,6 @@
 import numpy as np
-from paternityArray import paternityArray
-from genotypeArray import genotypeArray
+from faps.paternityArray import paternityArray
+from faps.genotypeArray import genotypeArray
 
 def transition_probability(offspring, mothers, males, mu, inverse=False):
     """

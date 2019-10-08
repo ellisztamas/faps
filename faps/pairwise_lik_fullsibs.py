@@ -1,6 +1,6 @@
 import numpy as np
-from paternityArray import paternityArray
-from alogsumexp import alogsumexp
+from faps.paternityArray import paternityArray
+from faps.alogsumexp import alogsumexp
 
 def pairwise_lik_fullsibs(paternity_array, use_covariates = False, exp = False):
     """
@@ -25,7 +25,7 @@ def pairwise_lik_fullsibs(paternity_array, use_covariates = False, exp = False):
     exp: bool, optional
         If True, probabilities of paternity are exponentiated before calculating
         pairwise probabilities of sibships. This gives a speed boost if this is
-        to be repeated many times, but there may be a cost to accuracy (this is 
+        to be repeated many times, but there may be a cost to accuracy (this is
         untested!).
     use_covariates: logical, optional
         If True, information on prbabilities associated with covariates stored
@@ -61,7 +61,7 @@ def pairwise_lik_fullsibs(paternity_array, use_covariates = False, exp = False):
     # pull out the number of offspring and parents
     noffs     = paternity_probs.shape[0]
     nparents  = paternity_probs.shape[1]
-    
+
     if exp is False:
         # Set up use of covariates
         if use_covariates is True:
@@ -71,7 +71,7 @@ def pairwise_lik_fullsibs(paternity_array, use_covariates = False, exp = False):
 
         # this section of code calculates the matrix in log space, but I found it quicker to exponentiate (below).
         paternity_probs = paternity_probs[:,:, np.newaxis]
-        # take all pairwise products of sharing fathers.        
+        # take all pairwise products of sharing fathers.
         pairwise_lik = np.array([alogsumexp(i + paternity_probs.T + covar, 1) for i in paternity_probs]).squeeze()
 
         return pairwise_lik

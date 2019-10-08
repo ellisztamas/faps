@@ -1,6 +1,6 @@
 import numpy as np
-from pr_transition import pr_transition
-from genotypeArray import genotypeArray
+from faps.pr_transition import pr_transition
+from faps.genotypeArray import genotypeArray
 
 def lik_sampled_fathers(offspring, mothers, males, mu, mother_index=None):
     """

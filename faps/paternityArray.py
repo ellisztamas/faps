@@ -1,5 +1,5 @@
-from genotypeArray import genotypeArray
-from alogsumexp import alogsumexp
+from faps.genotypeArray import genotypeArray
+from faps.alogsumexp import alogsumexp
 import numpy as np
 from warnings import warn
 

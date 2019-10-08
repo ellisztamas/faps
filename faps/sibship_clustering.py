@@ -1,7 +1,7 @@
 import numpy as np
-from paternityArray import paternityArray
-from sibshipCluster import sibshipCluster
-from do_clustering import do_clustering
+from faps.paternityArray import paternityArray
+from faps.sibshipCluster import sibshipCluster
+from faps.do_clustering import do_clustering
 from warnings import warn
 
 def sibship_clustering(paternity_array, ndraws=1000, use_covariates = False, exp=False):

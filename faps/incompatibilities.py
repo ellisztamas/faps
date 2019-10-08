@@ -1,5 +1,5 @@
 import numpy as np
-from genotypeArray import genotypeArray
+from faps.genotypeArray import genotypeArray
 
 def incompatibilities(parents, progeny):
     """

@@ -1,9 +1,9 @@
 import numpy as np
 from warnings import warn
-from alogsumexp import alogsumexp
-from unique_rows import unique_rows
-from squash_siblings import squash_siblings
-from paternityArray import paternityArray
+from faps.alogsumexp import alogsumexp
+from faps.unique_rows import unique_rows
+from faps.squash_siblings import squash_siblings
+from faps.paternityArray import paternityArray
 
 
 def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000, use_covariates=False):
@@ -57,7 +57,7 @@ def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000
                 raise TypeError("If use_covariates is set to True, the covraiate attribute of the paternityArray object should be a 1-d array.")
         else:
             covar = 0
-        
+
         nfathers  = len(paternity_array.candidates)+1
         # multiply likelihoods for individuals within each full sibship, then normalise rows to sum to 1.
         prob_array = squash_siblings(paternity_array.prob_array, partition)
@@ -66,7 +66,7 @@ def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000
 
     elif isinstance(null_probs, np.ndarray):
         if len(null_probs.shape) > 1:
-            raise ValueError("null_probs is supplied should be a one dimensional vector for a single half-sibs array, but has shape {}.format(null_probs.shape}.") 
+            raise ValueError("null_probs is supplied should be a one dimensional vector for a single half-sibs array, but has shape {}.format(null_probs.shape}.")
         if not all(null_probs <= 0):
             warn("Not all values in null_probs are less or equal to zero. Is it possible probabilities have not been log transformed?")
         nfathers   = null_probs.shape[0]
@@ -77,7 +77,7 @@ def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000
         raise TypeError("Supply an array for either paternity_probs or null_probs.")
     if paternity_array is not None and null_probs is not None:
         warn('Values supplied for both paternity_probs and null_probs. null_probs will be ignored.')
-    
+
     # generate a sample of possible paths through the matrix of candidate fathers.
     path_samples = np.array([np.random.choice(range(nfathers), ndraws, replace=True, p = prob_array[i]) for i in range(nfamilies)])
     path_samples = path_samples.T

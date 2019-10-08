@@ -1,10 +1,10 @@
 import numpy as np
-from paternityArray import paternityArray
-from matingEvents import matingEvents
-from alogsumexp import alogsumexp
-from relation_matrix import relation_matrix
-from draw_fathers import draw_fathers
-from lik_partition import lik_partition
+from faps.paternityArray import paternityArray
+from faps.matingEvents import matingEvents
+from faps.alogsumexp import alogsumexp
+from faps.relation_matrix import relation_matrix
+from faps.draw_fathers import draw_fathers
+from faps.lik_partition import lik_partition
 
 
 class sibshipCluster(object):
@@ -227,7 +227,7 @@ class sibshipCluster(object):
         """
 
         if len(reference) != self.noffspring:
-            print "Reference partition should be the same length as the number of offspring."
+            raise ValueError("Reference partition should be the same length as the number of offspring.")
             return None
 
         obs = self.full_sib_matrix()
@@ -238,7 +238,7 @@ class sibshipCluster(object):
         elif rtype is 'fs':  ix = np.triu(rm, 1)
         elif rtype is 'hs':  ix = np.triu(1-rm, 1)
         else:
-            print "rtype must be one of 'all', 'fs' or 'hs'."
+            raise ValueError("rtype must be one of 'all', 'fs' or 'hs'.")
             return None
 
         # Get accuracy scores
@@ -280,23 +280,17 @@ class sibshipCluster(object):
             # If a vector of candidates has been supplied.
             if isinstance(reference, list) or isinstance(reference, np.ndarray):
                 if len(reference) != self.noffspring:
-                    print "If the set of reference candidates is given as a list or numpy vector"
-                    print "this must be of the same length as the number of offspring."
-                    return None
+                    raise ValueError("If the set of reference candidates is given as a list or numpy vector this must be of the same length as the number of offspring.")
                 if any([reference[i] > self.paternity_array.shape[1] for i in range(len(reference))]):
-                    print "One or more indices in reference are greater than the number of candidates."
-                    return None
+                    raise ValueError("One or more indices in reference are greater than the number of candidates.")
             # If a single candidate has been supplied
             elif isinstance(reference, int):
                 if reference > self.paternity_array.shape[1]:
-                    print "The index for the reference candidate is greater than the number of candidates."
-                    return None
+                    raise ValueError("The index for the reference candidate is greater than the number of candidates.")
                 else:
                     reference = [reference] * self.noffspring
             else:
-                print "reference should be given as a list or array of the same length as the number of offspring,"
-                print "or else a single integer."
-                return None
+                raise TypeError("reference should be given as a list or array of the same length as the number of offspring, or else a single integer.")
 
             probs = np.zeros([self.npartitions, self.noffspring]) # empty matrix to store probs for each partitions
             for j in range(self.npartitions): # loop over partitions

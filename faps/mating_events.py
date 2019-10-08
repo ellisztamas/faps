@@ -1,7 +1,7 @@
 import numpy as np
-from paternityArray import paternityArray
-from sibshipCluster import sibshipCluster
-from matingEvents import matingEvents
+from faps.paternityArray import paternityArray
+from faps.sibshipCluster import sibshipCluster
+from faps.matingEvents import matingEvents
 
 
 def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total_draws  = 10000, n_subsamples = 1000, subsample_size = None, null_probs = None, family_weights=None, use_covariates=False):
@@ -81,7 +81,7 @@ def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total
     # maternal family.
     elif family_weights is None:
         family_weights = {k:v.mean_nfamilies() for k,v in sibship_clusters.items()} # expected number of mating events for each array
-        total_weight   = total_draws / np.array(family_weights.values()).sum() # correction factor to sum to total_draws
+        total_weight   = total_draws / np.array(list(family_weights.values())).sum() # correction factor to sum to total_draws
         family_weights = {k : v * total_weight for k,v in family_weights.items()} # normalise to sum to total_draws
         family_weights = {k : np.around(v).astype('int') for k,v in family_weights.items()}
     else:
@@ -106,9 +106,9 @@ def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total
             ValueError("One or more entries in null_probs does not have a matching entry in paternity_arrays.")
         if any([v.ndim > 1 for v in null_probs.values()]):
             ValueError("One or more entries in null_probs has more than one dimension.")
-        if any([len(v) != len(candidates)-1 for v in null_probs.values()]):
+        if any([len(v) != len(candidates)-1 for k,v in null_probs.items()]):
             ValueError("One or more entries in null_probs is a different length to the number of candidates")
-        if not all([isinstance(v, np.ndarray) for v in null_probs.values()]):
+        if not all([isinstance(v, np.ndarray) for k,v in null_probs.items()]):
             TypeError("If null_probs is a dictionary, all values should be 1-d NumPy arrays.")
     else:
         raise TypeError("null_probs is type {}.\nIf supplied, this should be a NumPy array, or dictionary.").format(type(null_probs))
@@ -131,7 +131,7 @@ def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total
         # proportion to the weight of the family
         total_events[id] = np.random.choice(me.total_events, family_weights[id], replace=True)
     # Concatenate total_events into a single list.
-    total_events = [item for sublist in total_events.values() for item in sublist]
+    total_events = [item for sublist in list(total_events.values()) for item in sublist]
     total_events = np.array(total_events)
 
     # Create a matingEvents object.

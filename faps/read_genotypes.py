@@ -1,6 +1,6 @@
 import numpy as np
-from convert_genotypes import convert_genotypes
-from genotypeArray import genotypeArray
+from faps.convert_genotypes import convert_genotypes
+from faps.genotypeArray import genotypeArray
 
 def read_genotypes(path, genotype_col = 1, mothers_col=None, fathers_col=None, delimiter=","):
     """

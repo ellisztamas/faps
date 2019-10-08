@@ -1,33 +1,33 @@
 from pkg_resources import get_distribution
 __version__ = get_distribution('faps').version
 
-from alogsumexp import alogsumexp
+from faps.alogsumexp import alogsumexp
 # data import and export
-from genotypeArray import genotypeArray
-from read_genotypes import read_genotypes
-from convert_genotypes import convert_genotypes
-from read_paternity_array import read_paternity_array
-from export_to_colony import export_to_colony
+from faps.genotypeArray import genotypeArray
+from faps.read_genotypes import read_genotypes
+from faps.convert_genotypes import convert_genotypes
+from faps.read_paternity_array import read_paternity_array
+from faps.export_to_colony import export_to_colony
 #from write_paternity_array import write_paternity_array
 # Simulation
-from make_parents import make_parents
-from make_offspring import make_offspring
-from make_sibships import make_sibships
-from make_generation import make_generation
-from make_power import make_power
+from faps.make_parents import make_parents
+from faps.make_offspring import make_offspring
+from faps.make_sibships import make_sibships
+from faps.make_generation import make_generation
+from faps.make_power import make_power
 # paternity arrays
-from effective_nloci import effective_nloci
-from incompatibilities import incompatibilities
-from paternityArray import paternityArray
-from transition_probability import transition_probability
-from paternity_array import paternity_array
-from draw_fathers import draw_fathers
+from faps.effective_nloci import effective_nloci
+from faps.incompatibilities import incompatibilities
+from faps.paternityArray import paternityArray
+from faps.transition_probability import transition_probability
+from faps.paternity_array import paternity_array
+from faps.draw_fathers import draw_fathers
 # clustering
-from pairwise_lik_fullsibs import pairwise_lik_fullsibs
-from sibshipCluster import sibshipCluster
-from lik_partition import lik_partition
-from sibship_clustering import sibship_clustering
+from faps.pairwise_lik_fullsibs import pairwise_lik_fullsibs
+from faps.sibshipCluster import sibshipCluster
+from faps.lik_partition import lik_partition
+from faps.sibship_clustering import sibship_clustering
 # mating events
-from matingEvents import matingEvents
-from mating_events import mating_events
-from mating_summary import mating_summary
+from faps.matingEvents import matingEvents
+from faps.mating_events import mating_events
+from faps.mating_summary import mating_summary

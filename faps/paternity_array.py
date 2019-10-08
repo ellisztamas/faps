@@ -1,8 +1,8 @@
 import numpy as np
-from paternityArray import paternityArray
-from genotypeArray import genotypeArray
-from transition_probability import transition_probability
-from incompatibilities import incompatibilities
+from faps.paternityArray import paternityArray
+from faps.genotypeArray import genotypeArray
+from faps.transition_probability import transition_probability
+from faps.incompatibilities import incompatibilities
 from warnings import warn
 
 def paternity_array(offspring, mothers, males, mu, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None, covariate=None):

@@ -1,7 +1,7 @@
 import numpy as np
-from alogsumexp import alogsumexp
-from squash_siblings import squash_siblings
-from unique_rows import unique_rows
+from faps.alogsumexp import alogsumexp
+from faps.squash_siblings import squash_siblings
+from faps.unique_rows import unique_rows
 
 def lik_partition(paternity_probs, partitions, includes_null=True, ndraws=1000):
     """
@@ -35,8 +35,7 @@ def lik_partition(paternity_probs, partitions, includes_null=True, ndraws=1000):
     """
     # check the partition is the correct length!
     if paternity_probs.shape[0] != len(partitions):
-        print "Error in lik_partition: paternity_probs and partition are of uneven length."
-        return None
+        raise ValueError("paternity_probs and partition are of uneven length.")
 
     siblik = squash_siblings(paternity_probs, partitions) # multiply likelihoods within sibships
     # If all offspring go into a single partition

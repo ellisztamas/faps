@@ -1,8 +1,8 @@
 import numpy as np
-from unique_rows import unique_rows
+from faps.unique_rows import unique_rows
 import fastcluster
 from scipy.cluster.hierarchy import fcluster
-from pairwise_lik_fullsibs import pairwise_lik_fullsibs
+from faps.pairwise_lik_fullsibs import pairwise_lik_fullsibs
 
 def sibship_partitions(paternity_array, exp=False, method='average', criterion = 'distance', use_covariates=False):
     """
@@ -12,7 +12,7 @@ def sibship_partitions(paternity_array, exp=False, method='average', criterion =
     This performs hierarchical clustering using the fastcluster and scipy
     libraries. The default algorithm is UPGMA, but linkage and clustering
     functions can be tweaked using the method and criterion functions.
-    
+
     Parameters
     ----------
     paternity_array: paternityArray
@@ -26,7 +26,7 @@ def sibship_partitions(paternity_array, exp=False, method='average', criterion =
     use_covariates: logical, optional
         If True, information on prbabilities associated with covariates stored
         in paternityArray objects are incorporated into sibship clustering.
-    
+
     Returns
     -------
     An array of plausible partitions that group individuals into full sibships.
@@ -63,5 +63,5 @@ def sibship_partitions(paternity_array, exp=False, method='average', criterion =
     # store all possible partitions from the dendrogram
     partition_sample = [fcluster(z, t, criterion) for t in thresholds]
     partition_sample = unique_rows(partition_sample)
-    
+
     return partition_sample, z
