@@ -38,7 +38,8 @@ class sibshipCluster(object):
     npartitions: int
         Number of partitions recovered from the dendrogram.
     """
-    def __init__(self, paternity_array, linkage_matrix, partitions, lik_partitions):
+    def __init__(self, paternity_array, linkage_matrix, partitions, lik_partitions, paths):
+        self.candidates     = paternity_array.candidates
         self.paternity_array= paternity_array.prob_array
         self.partitions     = partitions
         self.linkage_matrix = linkage_matrix
@@ -47,6 +48,7 @@ class sibshipCluster(object):
         self.mlpartition    = self.partitions[np.where(self.lik_partitions == self.lik_partitions.max())[0][0]]
         self.noffspring     = len(self.mlpartition)
         self.npartitions    = len(self.lik_partitions)
+        self.paths          = paths
 
     def accuracy(self, progeny, adults):
         """
@@ -303,10 +305,70 @@ class sibshipCluster(object):
 
             return probs
 
-    def mating_events(self, paternity_array, unit_draws=1000, total_draws=10000, n_subsamples = None, subsample_size = None, null_probs=None, use_covariates=False):
+    def sires(self, labels='names'):
         """
-        Sample plausible mating events from a sibshipCluster. These can then be used
-        to infer mating patterns using and array of phenotypes for each male.
+        For every candidate drawn as a father in any partition, calculate the
+        (log) probability that each sired at least one offspring.
+
+        Probabilities are calculated as the sum of probabilties of each
+        partition in which a candidate appears.
+
+        Parameters
+        ----------
+        labels: array, optional
+            Labels for candidates. By default, the names of candidates are used.
+            If `labels=None`, the index positions in the list of candidates are
+            used; this can be useful if you want to use indices to subset
+            another dataset and link that to probabilities  of paternity.
+
+        Returns
+        -------
+        A dictionary of log probabilties that each candidate has sired at least
+        one offspring, with keys corresponding to labels.
+
+        Examples
+        --------
+        from faps import *
+        import numpy as np
+
+        # Generate a population of adults
+        allele_freqs = np.random.uniform(0.3,0.5,50)
+        adults = make_parents(20, allele_freqs)
+
+        # Ecample with a single family
+        # Mate the first adult to the next three.
+        mother = adults.subset(0)
+        progeny = make_sibships(adults, 0, [1,2,3], 5, 'x')
+        patlik = paternity_array(progeny, mother, adults, mu=0.0013)
+        sc = sibship_clustering(patlik)
+
+        sc.sires # returns candidate names by default
+        sc.sires(labels=None) # return indices as keys
+        sc.sires(labels=['steve', 'terry', 'paul', 'dave','bob']) # arbitrary labels.
+        """
+        if labels is 'names':
+            labels = self.candidates
+
+        # Get list of the unique set of fathers drawn for any partition.
+        sires = np.unique([i for j in [x for y in self.paths.values() for x in y] for i in j])
+        # For each sire drawn, find the partitions he is found in, and get the
+        # probability for that partition.
+        output = {}
+        for s in sires:
+            sx = [s in x for x in self.paths.values()]
+            output[s] = self.prob_partitions[sx]
+        # Sum probabilities for each father over partitions.
+        output = {k: alogsumexp(v) for k,v in output.items()}
+        # If a vector of labels is given, use these as keys.
+        if labels is not None:
+            output = {labels[k] : v for k,v in output.items()}
+        # Return a dictionary
+        return output
+
+    def mating_events(self, paternity_array, unit_draws=1000, total_draws=10000, n_subsamples = 0, subsample_size = None, null_probs=None, use_covariates=False, return_names=True):
+        """
+        Sample plausible mating events from a sibshipCluster. These can then be
+        used to infer mating patterns using and array of phenotypes for each male.
 
         Indices for possible fathers are drawn based on genetic data, other pertinent
         information (such as distance between parents), or a combination of these
@@ -331,16 +393,22 @@ class sibshipCluster(object):
         total_draws: int
             Total number of mating events to resample for each partition.
         n_subsamples: int, optional
-            Number of subsamples to draw from the total mating events.
+            Number of subsamples to draw from the total mating events. Defaults
+            to zero.
         subsample_size: int, optional
-            Number of mating events in each subsample. Defaults to 0.1*total_draws.
+            Number of mating events in each subsample. Defaults to
+            0.1*total_draws.
         null_probs: array, optional
-            1-d Array of probabilities for paternity if this were not based on marker
-            data. This should have an element for every candidate father.
+            1-d Array of probabilities for paternity if this were not based on
+            marker data. This should have an element for every candidate father.
         use_covariates: logical, optional
-            If True, information on prbabilities associated with covariates stored
-            in paternityArray objects are incorporated into weights for drawing likely
-            fathers.
+            If True, information on prbabilities associated with covariates
+            stored in paternityArray objects are incorporated into weights for
+            drawing likely fathers.
+        return_names: logical, optional
+            If True, unit_events and total_events are returned as the names of
+            the candidates drawn for each partition. If False, their integer
+            positions in the list of candidates is returned.
 
         Returns
         -------
@@ -381,54 +449,65 @@ class sibshipCluster(object):
             raise ValueError('unit_draws should be an integer.')
         if not isinstance(total_draws, int):
             raise ValueError('total_draws should be an integer.')
-        if not isinstance(n_subsamples, int) and n_subsamples is not None:
-            raise ValueError('n_subsamples should be an integer.')
-        if not isinstance(subsample_size, int) and subsample_size is not None:
-            raise ValueError('subsample_size should be an integer.')
-        if subsample_size is not None and subsample_size >= total_draws:
-            raise ValueError('Number of subsamples must be smaller than total_draws')
 
         # only consider partitions that would account for at least one mating event.
         valid_ix = np.around(total_draws * np.exp(self.prob_partitions)) >= 1
         valid_partitions = self.partitions[valid_ix]
+        # Get names for those
+        unit_names =  ['partition_' + str(x) for x in np.where(valid_ix)[0]]
 
+        # mating_events draws a sample of fathers from either genetic data,
+        # or else from some array of probabilties based on non-genetic data.
+        # Draw fathers from genetic data:
         if null_probs is None:
+            #print("null_probs is none")
             # draw mating events for each partition.
-            unit_events = [draw_fathers(i, paternity_array=paternity_array, ndraws=unit_draws, use_covariates=use_covariates)
-                           for i in valid_partitions]
+            unit_events = {}
+            for k,v in zip(unit_names, valid_partitions):
+                d = draw_fathers(v, paternity_array=paternity_array, ndraws=unit_draws, use_covariates=use_covariates)
+                unit_events[k] = d
+            print(unit_events)
+        # Draw fathers from non-genetic data.
         elif isinstance(null_probs, np.ndarray):
             if len(null_probs.shape) != 1:
                 raise ValueError("null_probs should be a 1-d vector, but has shape {}".format("null_probs.shape"))
             elif len(null_probs) != len(paternity_array.candidates):
                 raise ValueError("null_probs should have an element for every candidate father, but has length {}.".format(len(null_probs)))
             else:
-                unit_events = [draw_fathers(i, null_probs=null_probs, ndraws=unit_draws) for i in valid_partitions]
+                unit_events = {}
+                for k,v in zip(unit_names):
+                    unit_events[k] = draw_fathers(v, null_probs=null_probs, ndraws=unit_draws)
         else:
             raise TypeError('null_probs is of type {}. If supplied, this should is supplied it should be an array.'.format(type(null_probs)))
-
-        # resample weighted by probability
+        #print(np.array( list(unit_events.values()))[:10])
+        # Resample mating events for each partition weighted by the probability
+        # for that partition.
+        # First, get an set of integer number of draws for each partition.
         unit_weights = np.around(np.exp(self.prob_partitions[valid_ix]) * total_draws).astype('int')
-        # resample unit_events proportional to the prob of each unit.
-        total_events = [np.random.choice(unit_events[i], unit_weights[i], replace=True)
-                        for i in range(len(unit_events)) if len(unit_events[i])>0]
+        unit_weights = {k:v for k,v in zip(unit_names, unit_weights)}
+        #print(unit_events)
+        # Resample unit_events proportional to the prob of each unit.
+        total_events = [np.random.choice(a=v, size=unit_weights[k], replace=True) for k,v in unit_events.items()]
         total_events = [item for sublist in total_events for item in sublist]
         total_events = np.array(total_events)
 
-        # subsample mating events.
-        if n_subsamples is None:
-            sub_events = "Mating events not subsampled. Call draw_subsamples on this object to do so."
-        else:
+        # Subsample mating events.
+        if isinstance(n_subsamples, int):
             if subsample_size is None:
                 subsample_size = np.around(total_draws*0.1).astype('int')
+            elif not isinstance(subsample_size, int):
+                raise TypeError("subsample_size should be an integer or None.")
+            if subsample_size >= total_draws:
+                raise ValueError('Number of subsamples must be smaller than total_draws')
             sub_events = np.random.choice(total_events, n_subsamples*subsample_size, replace=True)
             sub_events = sub_events.reshape([n_subsamples, subsample_size])
+        else:
+            raise ValueError('n_subsamples should be an integer.')
 
-        #unit_names = paternity_array.offspring[valid_ix]
-        unit_names =  np.where(valid_ix)[0]
 
         return matingEvents(unit_names=unit_names,
                             candidates=paternity_array.candidates,
-                            unit_weights=unit_weights/total_draws,
+                            unit_weights=unit_weights,
                             unit_events=unit_events,
                             total_events=total_events,
                             subsamples=sub_events)

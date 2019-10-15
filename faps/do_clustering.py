@@ -115,6 +115,8 @@ def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False)
         # Finally, extract probabilities for each candidate, multiply across families, and sum across valid paths.
         up_str = np.array([str(up) for up in unique_families])
         path_likelihoods = np.zeros(len(partition_sample))
+        paths = {}
+
         for i in range(len(partition_sample)):
             p = partition_sample[i]
             these_families = np.array([str(np.where(p == val)[0]) for val in np.unique(p)]) # families in this partition.
@@ -124,7 +126,7 @@ def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False)
             # remove invalid partitions
             these_dads = unique_rows(these_dads.T) # remove duplicates
             these_dads = np.array([v for v in these_dads if len(set(v)) == len(v)]) # remove partitions with duplicate candidates
-
+            paths[i] = these_dads
             # If no valid partitions are found, return likelihood of zero.
             if len(these_dads) == 0:
                 with np.errstate(divide='ignore'):
@@ -135,4 +137,10 @@ def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False)
                 lik_partition = alogsumexp(lik_partition)
                 path_likelihoods[i] = lik_partition
 
-        return sibshipCluster(paternity_array, z, partition_sample, path_likelihoods)
+        output = sibshipCluster(
+            paternity_array = paternity_array,
+            linkage_matrix  = z,
+            partitions      = partition_sample,
+            lik_partitions  = path_likelihoods,
+            paths           = paths)
+        return output
