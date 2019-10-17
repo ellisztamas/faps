@@ -4,7 +4,7 @@ from faps.sibshipCluster import sibshipCluster
 from faps.matingEvents import matingEvents
 
 
-def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total_draws  = 10000, n_subsamples = 1000, subsample_size = None, null_probs = None, family_weights=None, use_covariates=False):
+def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total_draws  = 10000, n_subsamples = 0, subsample_size = None, null_probs = None, family_weights=None, use_covariates=False, return_names=True):
     """
     Sample plausible mating events for multiple half-sibling arrays in parallel.
 
@@ -26,9 +26,9 @@ def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total
         Dictionary of paternityArray objects for multiple maternal families.
         Keys should match those for sibship_clusters.
     family_draws: int
-        Number of mating events to sample for each partition.
+        Number of mating events to sample for each maternal family.
     total_draws: int
-        Total number of mating events to resample for each partition.
+        Total number of mating events to draw across maternal families.
     n_subsamples: int, optional
         Number of subsamples to draw from the total mating events.
     subsample_size: int, optional
@@ -45,11 +45,15 @@ def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total
         weights will be calculated as the mean number of full-sibships in each
         maternal family over possible partitions, weighted by the probability
         of each partition.
-
+    return_names: logical, optional
+        If True, unit_events and total_events are returned as the names of
+        the candidates drawn for each maternal family. If False, their integer
+        positions in the list of candidates is returned.
 
     Returns
     -------
-    A matingEvents object. If null_probs is supplied samples for null mating are returned.
+    A matingEvents object. If null_probs is supplied samples for null mating are
+    returned.
 
     See also
     --------
@@ -124,7 +128,8 @@ def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total
             n_subsamples=n_subsamples,
             subsample_size=subsample_size,
             null_probs=null_probs[id],
-            use_covariates=use_covariates
+            use_covariates=use_covariates,
+            return_names = return_names
         )
         family_events[id] = me.total_events
         # Random subset of fathers from each maternal family, with sample size in
@@ -136,10 +141,10 @@ def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total
 
     # Create a matingEvents object.
     me = matingEvents(
-        unit_names = family_events.keys(),
-        candidates = candidates,
+        unit_names   = np.array(list(family_events.keys())),
+        candidates   = candidates,
         unit_weights = family_weights,
-        unit_events = family_events,
+        unit_events  = family_events,
         total_events = total_events
     )
     # draw subsamples.

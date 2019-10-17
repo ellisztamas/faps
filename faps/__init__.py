@@ -30,4 +30,4 @@ from faps.sibship_clustering import sibship_clustering
 # mating events
 from faps.matingEvents import matingEvents
 from faps.mating_events import mating_events
-from faps.mating_summary import mating_summary
+#from faps.mating_summary import mating_summary

@@ -45,13 +45,13 @@ class matingEvents(object):
         self.unit_events  = unit_events
         self.total_events = total_events
         self.subsamples   = subsamples
-    
+
     #if len(self.unit_weights) != len(self.unit_events):
     #    raise ValueError('Length of unit_weights ({}) does not match that of unit_events ({}).'.format(len(self.unit_weights), len(self.unit_events)))
 
     def draw_subsample(self, n_subsamples = 1000, subsample_size = None):
         """
-        Subsample total_events.
+        Draw many subsamples from `total_events` at random, with replacement.
 
         Parameters
         ----------
@@ -76,3 +76,102 @@ class matingEvents(object):
         sub_events = sub_events.reshape([n_subsamples, subsample_size])
 
         return sub_events
+
+    def as_trait(self, trait):
+        """
+        Recast a matingEvents object to return the phenotype values of the
+        candidates drawn.
+
+        Parameters
+        ----------
+        trait: 1-d array or dict
+            Phenotypes are usually a 1-d vector of the phenotypes of each candidate
+            father. Alternatively, if the phenotype depends on both the mother and the
+            father, for example a Euclidean distance between the pair, then this can
+            be supplied as a dictionary of 1-d vectors.
+
+        Returns
+        -------
+        A matingEvents object with entries for unit_events, total_events and
+        subsamples given as the phenotype of each candidate. Other attributes are
+        unchanged.
+        """
+        if self.total_events.dtype != int:
+            raise TypeError("Values in matingEvents should be integers indexing candidate fathers, but are type {}.".format(self.total_events.dtype))
+
+        # For a vector of phenotypes with an entry for each mother.
+        if isinstance(trait, np.ndarray):
+            if trait.ndim != 1:
+                raise ValueError("`trait` should be a 1-d vector, or else a dictionary, but has shape {}".format(trait.shape))
+            output = matingEvents(
+                unit_names   = self.unit_names,
+                candidates   = self.candidates,
+                unit_weights = self.unit_weights,
+                unit_events  = {k: trait[v] for k,v in self.unit_events.items()},
+                total_events = trait[self.total_events],
+                subsamples   = trait[self.subsamples]
+            )
+
+        # For dictionaries of trait values with an key for each mother.
+        elif isinstance(trait, dict):
+            if not all([x in self.unit_events.keys() for x in trait.keys()]):
+                raise ValueError("Not all keys for traits have a matching key in unit_events of the matingEvents object.")
+            if not all([x in trait.keys() for x in self.unit_events.keys()]):
+                raise ValueError("Not all keys for unit_events have a matching key in traits.")
+
+            # Apply phenotypes to unit_events
+            unit_events  = {k: trait[k][v] for k,v in self.unit_events.items()}
+            # Resample total_events
+            total_events = []
+            for i in self.unit_events.keys():
+                total_events = total_events + [np.random.choice(
+                    a    = unit_events[i],
+                    size = self.unit_weights[0][i], # For some reason, unit_weights is returned as a tuple. Index [0] allows for that.
+                    replace=False
+                )]
+            # Flatten and coerce to array
+            total_events = [x for y in total_events for x in y]
+            total_events = np.array(total_events)
+
+            # Recreate matingEvents object.
+            output = matingEvents(
+                unit_names   = self.unit_names,
+                candidates   = self.candidates,
+                unit_weights = self.unit_weights,
+                unit_events  = unit_events,
+                total_events = total_events,
+                subsamples   = None
+            )
+            # Add subsamples
+            output.subsamples = output.draw_subsample(
+                n_subsamples=self.subsamples.shape[0],
+                subsample_size=self.subsamples.shape[1]
+            )
+        else:
+            raise TypeError("`trait` should be a 1-d vector, or else a dictionary.")
+
+        return output
+
+    # def reweight_units(self):
+    #     """
+    #     Draw a single subsample without replacement from each element in
+    #     `unit_events` in proportion to its weight. This is equivalent to
+    #     recreating `total_events`, but without concatenating the output.
+    #
+    #     Parameters
+    #     ----------
+    #     None.
+    #
+    #     Returns
+    #     -------
+    #     A dictionary of vectors indexing candidate fathers that were drawn as
+    #     mates for each unit.
+    #     """
+    #     output = {}
+    #     for i in self.unit_events.keys():
+    #         output[i] = np.random.choice(
+    #             a    = self.unit_events[i],
+    #             size = self.unit_weights[0][i], # For some reason, unit_weights is returned as a tuple. Index [0] allows for that.
+    #             replace=False
+    #         )
+    #     return(output)
