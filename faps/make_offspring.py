@@ -51,8 +51,8 @@ def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, family_na
     offs_genotypes= np.zeros([noffs, nloci, 2]) # empty array to store offspring genotypes.
 
     # pull out arrays of genotype data for the dams and sires.
-    dam_genotypes  = parents.geno[dam_list]
-    sire_genotypes = parents.geno[sire_list]
+    dam_genotypes  = parents.subset(dam_list).geno
+    sire_genotypes = parents.subset(sire_list).geno
 
     # draw an array of indices for whether the first or second allele should be drawn.
     dam_alleles  = np.random.binomial(1, 0.5, nloci*noffs).reshape([noffs, nloci])
@@ -65,7 +65,13 @@ def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, family_na
 
     # extra information on names.
     offspring_names   = np.array([family_name+'_'+str(a) for a in np.arange(noffs)])
-    maternal_names    = parents.names[dam_list]
-    paternal_names    = parents.names[sire_list]
+    maternal_names    = parents.subset(dam_list).names
+    paternal_names    = parents.subset(sire_list).names
 
-    return genotypeArray(offs_genotypes, offspring_names, maternal_names, paternal_names, np.arange(nloci))
+    return genotypeArray(
+        geno = offs_genotypes,
+        names = offspring_names,
+        mothers = maternal_names,
+        fathers = paternal_names,
+        markers = np.arange(nloci)
+    )
