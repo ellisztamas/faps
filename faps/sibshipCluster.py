@@ -323,8 +323,12 @@ class sibshipCluster(object):
 
         Returns
         -------
-        A dictionary of log probabilties that each candidate has sired at least
-        one offspring, with keys corresponding to labels.
+        A dictionary with three values for each drawn father:
+        'position': Integer position in the list of candidate fathers.
+        'label'   : Value of the father in the list of labels. By default,
+            the candidates name is returned.
+        'log_prob': Log probability that the candidate is the true sire of
+            at least one offspring in the maternal family.
 
         Examples
         --------
@@ -347,7 +351,7 @@ class sibshipCluster(object):
         sc.sires(labels=['steve', 'terry', 'paul', 'dave','bob']) # arbitrary labels.
         """
         if labels is 'names':
-            labels = self.candidates
+            labels = np.append(self.candidates, np.nan)
 
         # Get list of the unique set of fathers drawn for any partition.
         sires = np.unique([i for j in [x for y in self.paths.values() for x in y] for i in j])
@@ -359,9 +363,12 @@ class sibshipCluster(object):
             output[s] = self.prob_partitions[sx]
         # Sum probabilities for each father over partitions.
         output = {k: alogsumexp(v) for k,v in output.items()}
-        # If a vector of labels is given, use these as keys.
-        if labels is not None:
-            output = {labels[k] : v for k,v in output.items()}
+        # Flip into data.frame
+        output = {
+            'position' : list(output.keys()),
+            'label'    : [labels[k] for k in output.keys()],
+            'log_prob' : list(output.values())
+        }
         # Return a dictionary
         return output
 
