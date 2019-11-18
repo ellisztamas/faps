@@ -9,4 +9,5 @@ setup(name='faps',
       license='MIT',
       packages=['faps'],
       install_requires=['numpy','fastcluster','scipy','ipywidgets'],
+      include_package_data=True,
       zip_safe=False)

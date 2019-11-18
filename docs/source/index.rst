@@ -9,6 +9,7 @@ Welcome to faps's documentation!
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
+   usage/002_genotype_data.rst
 
 
 
