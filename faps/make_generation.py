@@ -109,7 +109,7 @@ def make_generation(allele_freqs, candidates, sires, offspring, missing_loci=0, 
     adults = make_parents(candidates, allele_freqs) # parents
     # Generate the progeny
     if isinstance(sires, int):
-        progeny = make_sibships(adults, 0, range(1,sires+1), offspring)
+        progeny = make_sibships(adults, 0, np.arange(1,sires+1), offspring)
     elif isinstance(sires, list) or isinstance(sires, np.ndarray):
         progeny = make_sibships(adults, 0, sires, offspring)
     # introduce genotyping errors
@@ -124,7 +124,11 @@ def make_generation(allele_freqs, candidates, sires, offspring, missing_loci=0, 
     patlik.prob_array = patlik.adjust_prob_array(unsampled_real, unsampled_input, selfing_rate)
     #Sibship clustering
     t2      = time()
-    sc      = sibship_clustering(patlik, cluster_draws, exp_clusters)
+    sc      = sibship_clustering(
+                  paternity_array = patlik,
+                  ndraws = cluster_draws,
+                  exp=exp_clusters,
+                  use_covariates=False)
     t3      = time()
     # Determine whether the true partition is among those inferred by clustering.
     # For each partition count up how many pairwise relationships were inferred correct.

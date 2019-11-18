@@ -66,7 +66,7 @@ def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False)
         TypeError("paternity_array should be a paternityArray object.")
 
     if use_covariates is True:
-        if paternity_array.covariate.shape == 0:
+        if paternity_array.covariate is None:
             covar = 0
         elif isinstance(paternity_array.covariate, np.ndarray):
             if len(paternity_array.covariate.shape) > 1:

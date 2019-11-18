@@ -184,7 +184,9 @@ class paternityArray(object):
                     new_array[:, ix] = np.log(0)
 
             # If one or more integers is given, remove candidates at those indices
-            elif isinstance(purge, list) or isinstance(purge, np.ndarray) or isinstance(purge, int):
+            elif isinstance(purge, (list, np.ndarray, int, str)):
+                if isinstance(purge, (int, str)):
+                    purge = [purge]
                 # If all entries are strings, find the names of the candidates.
                 if all([isinstance(x, str) for x in purge]):
                     purge = [np.where(x == self.candidates)[0][0] for x in purge]

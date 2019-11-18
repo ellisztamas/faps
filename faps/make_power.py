@@ -336,26 +336,38 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
         fp = FloatProgress(min=0, max=nreps) # instantiate the bar
         display(fp) # display the bar
 
-    for l in range(len(nloci)):
-        for c in range(len(candidates)):
-            for mr in range(len(mu_real)):
-                for ml in range(len(missing_loci)):
-                    for th in range(len(unsampled_input)):
+    for l in nloci:
+        for c in candidates:
+            for mr in mu_real:
+                for ml in missing_loci:
+                    for th in unsampled_input:
+                        for sr in selfing_rate:
                             for r in range(replicates):
                                 # set up allele frequencies
                                 if isinstance(allele_freqs, float):
-                                    af = np.repeat(allele_freqs, nloci[l])
+                                    af = np.repeat(allele_freqs, l)
                                 elif len(allele_freqs) == 2:
-                                    af = np.random.uniform(allele_freqs[0], allele_freqs[1], nloci[l])
+                                    af = np.random.uniform(allele_freqs[0], allele_freqs[1], l)
                                 elif isinstance(allele_freqs, list) or isinstance(allele_freqs, np.ndarray):
                                     af = allele_freqs
                                 # run the simulation.
-                                rx = make_generation(af, candidates[c], sires, offspring, # family parameters
-                                                     missing_loci[ml], mu_real[mr], mu_input[mr], # genotyping parameters
-                                                     unsampled_real, unsampled_input[th], # missing individuals
-                                                     selfing_rate[sr], # selfing rate
-                                                     cluster_draws, exp_clusters, True, True, # clustering parameters
-                                                     counter)
+                                rx = make_generation(
+                                    allele_freqs= af,
+                                    candidates = c,
+                                    sires = sires,
+                                    offspring = offspring,
+                                    missing_loci = ml,
+                                    mu_real = mr,
+                                    mu_input = mr,
+                                    unsampled_real=unsampled_real,
+                                    unsampled_input= th,
+                                    selfing_rate=sr,
+                                    cluster_draws = cluster_draws,
+                                    exp_clusters = exp_clusters,
+                                    return_paternities=True,
+                                    return_clusters=True,
+                                    counter=counter
+                                )
                                 # send output to tables
                                 results[counter] = rx[0]
                                 if return_paternities: patarrays = patarrays + [rx[1]]

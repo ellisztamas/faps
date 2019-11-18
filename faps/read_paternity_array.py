@@ -62,9 +62,8 @@ def read_paternity_array(path, likelihood_col = 2, mothers_col=1, fathers_col=No
     covar = np.zeros(likelihood.shape[0])
     return paternityArray(likelihood = likelihood,
         lik_absent= lik_absent,
-        by_locus = None,
         offspring = offspring,
         mothers = mothers,
         fathers = fathers,
         candidates = candidates,
-        covariate= covar)
+        covariate = 0)
