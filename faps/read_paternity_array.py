@@ -66,7 +66,7 @@ def read_paternity_array(path, mothers_col=1, likelihood_col = 2, fathers_col=No
     df = read_csv(path, delimiter=delimiter)
 
     # Create a new paternityArray object.
-    pat_array = fp.paternityArray(
+    pat_array = paternityArray(
         likelihood = df[df.columns[likelihood_col:-1]].to_numpy(),
         lik_absent = df[df.columns[-1]].to_numpy(),
         offspring  = df[df.columns[0]].to_numpy(),
