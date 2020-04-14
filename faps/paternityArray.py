@@ -239,6 +239,104 @@ class paternityArray(object):
 
         return new_array
 
+    def subset(self, indices):
+        """
+        Subset offspring in a paternity array.
+
+        Parameters
+        ----------
+        indices: List or array of integers
+            Positions of individuals to subset.
+
+        Returns
+        -------
+        A paternityArray object for the individuals indexed by `indices`.
+
+        Examples
+        --------
+        from faps import *
+        import numpy as np
+
+        # Generate a population of adults
+        allele_freqs = np.random.uniform(0.3,0.5,50)
+        adults = make_parents(20, allele_freqs)
+
+        # Mate the first adult to the next three.
+        mother = adults.subset(0)
+        progeny = make_sibships(adults, 0, [1,2,3], 5, 'x')
+        # Create paternityArray
+        patlik = paternity_array(progeny, mother, adults, mu=0.0013)
+
+        # Pull out data for only the first family
+        patlik.subset([0,1,2,3,4])
+        """
+        # If index is for a single individual, make it a list anyway.
+        if isinstance(indices, int):
+            individuals = [indices]
+        # Subset original data.
+        new_array = paternityArray(
+            likelihood = self.lik_array[indices],
+            lik_absent = self.lik_absent[indices],
+            offspring  = self.offspring[indices],
+            mothers    = self.mothers[indices],
+            fathers    = self.fathers[indices],
+            candidates = self.candidates
+        )
+        # Add additional attributes is these exist
+        if self.mu           is not None: new_array.clashes      = self.mu
+        if self.clashes      is not None: new_array.clashes      = self.clashes
+        if self.covariate    is not None: new_array.covariate    = self.covariate
+
+        # Return substted paternityArray
+        return new_array
+
+    def split(self, by, return_dict=True):
+        """
+        Split up a paternityArray into groups according to some grouping
+        factor. For example, divide an array for multiple half-sibling
+        arrays by the ID of their mothers.
+
+        Parameters
+        ----------
+        by: array-like
+            Vector containing grouping labels for each individual.
+        return_dict: logical
+            If True, the output is returned as a dictionary of paternityArray
+            objects indexed by entries in `by`. If False, a list is returned.
+            Defaults to True.
+
+        Returns
+        -------
+        A dictionary of paternityArray objects.
+
+        Examples
+        --------
+        from faps import *
+        import numpy as np
+
+        # Generate a population of adults
+        allele_freqs = np.random.uniform(0.3,0.5,50)
+        adults = make_parents(20, allele_freqs)
+
+        # Mate the first adult to the next three.
+        mother = adults.subset(0)
+        progeny = make_sibships(adults, 0, [1,2,3], 5, 'x')
+        # Create paternityArray
+        patlik = paternity_array(progeny, mother, adults, mu=0.0013)
+
+        # Pull out data for only the first family
+        patlik.split(by=progeny.fathers)
+        """
+        groups = np.unique(by)
+        ix = [np.where(by == i)[0] for i in groups]
+        # Split into separate arrays.
+        if return_dict:
+            output = {k:self.subset(i) for k,i in zip(groups, ix)}
+        else:
+            output = [self.subset(i) for i in ix]
+        #return output
+        return output
+
     def write(self, path, decimals=3):
         """
         Write a matrix of (unnormalised) likelihoods of paternity to disk.

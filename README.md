@@ -36,11 +36,9 @@ Download the .zip or tarball file, and unpack it. In a command line move into th
 Download the package from the repository by hitting 'clone or download'. Copy the contents of the folder FAPS to the directory where you are running your analyses, then import the package in your Python script.
 
 ### Dependencies
-If you install with pip, dependencies should be installed automatically.
+FAPS is built using the Numpy library with additional tools from Scipy and Pandas. If you install with pip, dependencies should be installed automatically.
 
-FAPS is built using the `Numpy` library, and Pandas. These can be accessed together through the bundles of packages available from [Anaconda](https://www.continuum.io/downloads). 
-
-For simulations, it also makes use of `Pandas` dataframes, and [iPython widgets](https://github.com/jupyter-widgets/ipywidgets). iPython widgets can be a little more troublesome to get working, but are only needed for simulations, and can be switched off. See [here](https://github.com/jupyter-widgets/ipywidgets/blob/master/docs/source/user_install.md) for installation instructions.
+For simulations, it also makes use of [iPython widgets](https://github.com/jupyter-widgets/ipywidgets). iPython widgets can be a little more troublesome to get working, but are only needed for simulations, and can be switched off. See [here](https://github.com/jupyter-widgets/ipywidgets/blob/master/docs/source/user_install.md) for installation instructions.
 
 ## Using FAPS
 A user's guide is provided in this repository. This provides a fairly step-by-step guide to importing data, clustering offspring into sibship groups, and using those clusters to investigate the underlying biological processes. This was written with users in mind who have little experience of working with Python. These documents are written in [iPython](https://ipython.org/), which I highly recommend as an interactive environment for running analyses in Python.
