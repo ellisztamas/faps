@@ -5,7 +5,7 @@ from faps.alogsumexp import alogsumexp
 from faps.relation_matrix import relation_matrix
 from faps.draw_fathers import draw_fathers
 from faps.lik_partition import lik_partition
-
+from pandas import DataFrame
 
 class sibshipCluster(object):
     """
@@ -364,12 +364,13 @@ class sibshipCluster(object):
         # Sum probabilities for each father over partitions.
         output = {k: alogsumexp(v) for k,v in output.items()}
         # Flip into data.frame
-        output = {
-            'position' : list(output.keys()),
-            'label'    : [labels[k] for k in output.keys()],
-            'log_prob' : list(output.values())
-        }
-        # Return a dictionary
+        output = DataFrame({
+                    'position' : list(output.keys()),
+                    'label'    : [labels[k] for k in output.keys()],
+                    'log_prob' : list(output.values())
+                })
+        output['prob'] = np.exp(output['log_prob'])
+        # Return DataFrame of information on sires
         return output
 
     def mating_events(self, paternity_array, unit_draws=1000, total_draws=10000, n_subsamples = 0, subsample_size = None, null_probs=None, use_covariates=False, return_names=True):

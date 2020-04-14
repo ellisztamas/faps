@@ -332,12 +332,30 @@ class genotypeArray(object):
         ----------
         by: array-like
             Vector containing grouping labels for each individual
-        output_format = str
-            String indic
+        return_dict: logical
+            If True, the output is returned as a dictionary of genotypeArray
+            objects indexed by entries in `by`. If False, a list is returned.
+            Defaults to True.
 
         Returns
         -------
         A dictionary of genotypeArray objects.
+
+        Examples
+        --------
+        from faps import *
+        import numpy as np
+
+        # Generate a population of adults
+        allele_freqs = np.random.uniform(0.3,0.5,50)
+        adults = make_parents(20, allele_freqs)
+
+        # Mate the first adult to the next three.
+        mother = adults.subset(0)
+        progeny = make_sibships(adults, 0, [1,2,3], 5, 'x')
+
+        # Split by fathers
+        progeny.split(progeny.fathers)
         """
         groups = np.unique(by)
         ix = [np.where(by == groups[i])[0] for i in range(len(groups))]
