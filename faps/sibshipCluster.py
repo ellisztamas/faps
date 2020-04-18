@@ -346,9 +346,7 @@ class sibshipCluster(object):
         patlik = paternity_array(progeny, mother, adults, mu=0.0013)
         sc = sibship_clustering(patlik)
 
-        sc.sires # returns candidate names by default
-        sc.sires(labels=None) # return indices as keys
-        sc.sires(labels=['steve', 'terry', 'paul', 'dave','bob']) # arbitrary labels.
+        sc.sires() # returns candidate names by default
         """
         if labels is 'names':
             labels = np.append(self.candidates, np.nan)
