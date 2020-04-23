@@ -38,17 +38,19 @@ class sibshipCluster(object):
     npartitions: int
         Number of partitions recovered from the dendrogram.
     """
-    def __init__(self, paternity_array, linkage_matrix, partitions, lik_partitions, paths):
-        self.candidates     = paternity_array.candidates
-        self.paternity_array= paternity_array.prob_array
-        self.partitions     = partitions
-        self.linkage_matrix = linkage_matrix
-        self.lik_partitions = lik_partitions
-        self.prob_partitions= self.lik_partitions - alogsumexp(self.lik_partitions)
-        self.mlpartition    = self.partitions[np.where(self.lik_partitions == self.lik_partitions.max())[0][0]]
-        self.noffspring     = len(self.mlpartition)
-        self.npartitions    = len(self.lik_partitions)
-        self.paths          = paths
+    def __init__(self, paternity_array, linkage_matrix, partitions, lik_partitions, paths, path_likelihoods, path_probs):
+        self.candidates       = paternity_array.candidates
+        self.paternity_array  = paternity_array.prob_array
+        self.partitions       = partitions
+        self.linkage_matrix   = linkage_matrix
+        self.lik_partitions   = lik_partitions
+        self.prob_partitions  = self.lik_partitions - alogsumexp(self.lik_partitions)
+        self.mlpartition      = self.partitions[np.where(self.lik_partitions == self.lik_partitions.max())[0][0]]
+        self.noffspring       = len(self.mlpartition)
+        self.npartitions      = len(self.lik_partitions)
+        self.paths            = paths
+        self.path_likelihoods = path_likelihoods
+        self.path_probs       = path_probs
 
     def accuracy(self, progeny, adults):
         """
@@ -106,6 +108,7 @@ class sibshipCluster(object):
             sire_probs = self.prob_paternity(sire_ix)
             sire_probs = sire_probs[dad_present]
             sire_probs = alogsumexp(sire_probs) - np.log(len(np.array(sire_probs))) # take mean
+            sire_probs = sire_probs.squeeze()
         else:
             sire_probs = np.nan
 
@@ -114,12 +117,12 @@ class sibshipCluster(object):
 
         output = np.array([true_found,
                            delta_lik,
-                           round(nfamilies, 3),
-                           round(full_sibs, 3),
-                           round(half_sibs, 3),
-                           round(all_sibs,  3),
-                           round(np.exp(sire_probs),3),
-                           round(abs_probs,3)])
+                           np.round(nfamilies, 3),
+                           np.round(full_sibs, 3),
+                           np.round(all_sibs,  3),
+                           np.round(half_sibs, 3),
+                           np.round(np.exp(sire_probs),3),
+                           np.round(abs_probs,3)])
         return output
 
     def nfamilies(self):
@@ -353,14 +356,17 @@ class sibshipCluster(object):
 
         # Get list of the unique set of fathers drawn for any partition.
         sires = np.unique([i for j in [x for y in self.paths.values() for x in y] for i in j])
-        # For each sire drawn, find the partitions he is found in, and get the
-        # probability for that partition.
+
+        # Flatten lists of paths and their likelihoods
+        flat_paths    = [x for y in self.paths.values() for x in y]
+        flat_pathliks = [x for y in self.path_probs.values() for x in y if np.isfinite(x)]
+        # For each sire drawn, find all paths he is involved in and sum their likelihoods.
         output = {}
         for s in sires:
-            sx = [s in x for x in self.paths.values()]
-            output[s] = self.prob_partitions[sx]
-        # Sum probabilities for each father over partitions.
-        output = {k: alogsumexp(v) for k,v in output.items()}
+            sx = [s in x for x in flat_paths]
+            these_liks = np.array(flat_pathliks)[sx]
+            output[s] = alogsumexp(these_liks)
+
         # Flip into data.frame
         output = DataFrame({
                     'position' : list(output.keys()),

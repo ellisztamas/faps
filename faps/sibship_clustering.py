@@ -94,7 +94,7 @@ def sibship_clustering(paternity_array, ndraws=1000, use_covariates = False, exp
         output = {}
         for pa in paternity_array.keys():
             if paternity_array[pa].offspring.shape[0] == 1:
-                warn("Family {} has only one individual. A sibship array will be returned, but without a linkage matrix.".format(pa))
+                warn("Family {} has only one individual. A sibship array will be returned, but without a linkage matrix.".format(pa), stacklevel=2)
             sc = do_clustering(paternity_array = paternity_array[pa],
                                ndraws=ndraws,
                                use_covariates=use_covariates,

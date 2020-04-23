@@ -54,14 +54,19 @@ def sibship_partitions(paternity_array, exp=False, method='average', criterion =
     # Generate possible sets of partitions
     partition_sample = sibship_partitions(patlik)
     """
-    fullpairs = pairwise_lik_fullsibs(paternity_array, use_covariates=use_covariates, exp = exp)
-    # Clustering matrix z.
-    z= fastcluster.linkage(abs(fullpairs[np.triu_indices(fullpairs.shape[0], 1)]), method)
-    z = np.clip(z, 0, 10**12)
-    # A list of thresholds to slice through the dendrogram
-    thresholds = np.append(0,z[:,2])
-    # store all possible partitions from the dendrogram
-    partition_sample = [fcluster(z, t, criterion) for t in thresholds]
-    partition_sample = unique_rows(partition_sample)
+    if len(paternity_array.offspring) == 1:
+        partition_sample = np.array([[0]])
+        z = 'Linkage matrix not available because there is only one offspring'
+
+    else:
+        fullpairs = pairwise_lik_fullsibs(paternity_array, use_covariates=use_covariates, exp = exp)
+        # Clustering matrix z.
+        z= fastcluster.linkage(abs(fullpairs[np.triu_indices(fullpairs.shape[0], 1)]), method)
+        z = np.clip(z, 0, 10**12)
+        # A list of thresholds to slice through the dendrogram
+        thresholds = np.append(0,z[:,2])
+        # store all possible partitions from the dendrogram
+        partition_sample = [fcluster(z, t, criterion) for t in thresholds]
+        partition_sample = unique_rows(partition_sample)
 
     return partition_sample, z
