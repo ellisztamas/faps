@@ -472,13 +472,11 @@ class sibshipCluster(object):
         # or else from some array of probabilties based on non-genetic data.
         # Draw fathers from genetic data:
         if null_probs is None:
-            #print("null_probs is none")
             # draw mating events for each partition.
             unit_events = {}
             for k,v in zip(unit_names, valid_partitions):
                 d = draw_fathers(v, paternity_array=paternity_array, ndraws=unit_draws, use_covariates=use_covariates)
                 unit_events[k] = d
-            print(unit_events)
         # Draw fathers from non-genetic data.
         elif isinstance(null_probs, np.ndarray):
             if len(null_probs.shape) != 1:
@@ -487,17 +485,15 @@ class sibshipCluster(object):
                 raise ValueError("null_probs should have an element for every candidate father, but has length {}.".format(len(null_probs)))
             else:
                 unit_events = {}
-                for k,v in zip(unit_names):
+                for k,v in zip(unit_names, valid_partitions):
                     unit_events[k] = draw_fathers(v, null_probs=null_probs, ndraws=unit_draws)
         else:
             raise TypeError('null_probs is of type {}. If supplied, this should is supplied it should be an array.'.format(type(null_probs)))
-        #print(np.array( list(unit_events.values()))[:10])
         # Resample mating events for each partition weighted by the probability
         # for that partition.
         # First, get an set of integer number of draws for each partition.
         unit_weights = np.around(np.exp(self.prob_partitions[valid_ix]) * total_draws).astype('int')
         unit_weights = {k:v for k,v in zip(unit_names, unit_weights)}
-        #print(unit_events)
         # Resample unit_events proportional to the prob of each unit.
         total_events = [np.random.choice(a=v, size=unit_weights[k], replace=True) for k,v in unit_events.items()]
         total_events = [item for sublist in total_events for item in sublist]
