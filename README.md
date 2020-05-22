@@ -55,7 +55,8 @@ Topics covered:
 8. [Case study: data preparation in *Antirrhinum majus*](https://github.com/ellisztamas/faps/blob/master/docs/08%20Data%20cleaning%20in%20A.%20majus.ipynb)
 
 ## Citing FAPS
-If you use FAPS in any puiblished work please cite:
+
+If you use FAPS in any published work please cite:
 
 > Ellis, TJ, Field DL, Barton, NH (2018) Efficient inference of paternity and sibship inference given known maternity via hierarchical clustering. Molecular Ecology Resources 18:988–999. https://doi.org/10.1111/1755-0998.12782
 
@@ -78,10 +79,8 @@ Here is the relevant bibtex reference:
 
 Please report any bugs or requests that you have using the GitHub issue tracker! But before you do that, please check the user's guide folder in the docs folder to see if your question is answered there.
 
-This project was part of my PhD work. Since I have now moved on to a different institution, I am not actively working on this any more, but I will still try to respond to questions.
-
 ## Authors and license information
 
-Tom Ellis (thomas[dot]ellis[at]ebc[dot]uu[dot]se)
+Tom Ellis (thomas.ellis@gmi.oeaw.ac.at)
 
 FAPS is available under the MIT license. See LICENSE.txt for more information
