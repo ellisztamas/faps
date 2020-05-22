@@ -41,20 +41,7 @@ FAPS is built using the Numpy library with additional tools from Scipy and Panda
 For simulations, it also makes use of [iPython widgets](https://github.com/jupyter-widgets/ipywidgets). iPython widgets can be a little more troublesome to get working, but are only needed for simulations, and can be switched off. See [here](https://github.com/jupyter-widgets/ipywidgets/blob/master/docs/source/user_install.md) for installation instructions.
 
 ## Using FAPS
-For the impatient, a lightning quickstart guide is available [here](https://github.com/ellisztamas/faps/blob/master/docs/00_Quickstart%20guide.ipynb).
-
 A user's guide is available [here](https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/). This provides a fairly step-by-step guide to importing data, clustering offspring into sibship groups, and using those clusters to investigate the underlying biological processes. This was written with users in mind who have little experience of working with Python.
-
-Topics covered:
-
-1. [Introduction](https://github.com/ellisztamas/faps/blob/master/docs/01%20Introduction.ipynb)
-2. [Genotype data](https://github.com/ellisztamas/faps/blob/master/docs/02%20Genotype%20data.ipynb)
-3. [Paternity arrays](https://github.com/ellisztamas/faps/blob/master/docs/03%20Paternity%20arrays.ipynb)
-4. [Sibship clustering](https://github.com/ellisztamas/faps/blob/master/docs/04%20Sibship%20clustering.ipynb)
-5. Inference about mating patterns - under construction!
-6. [Simulating data](https://github.com/ellisztamas/faps/blob/master/docs/06%20Simulating%20data.ipynb)
-7. [Dealing with multiple families](https://github.com/ellisztamas/faps/blob/master/docs/07%20Dealing%20with%20multiple%20half-sib%20families.ipynb)
-8. [Case study: data preparation in *Antirrhinum majus*](https://github.com/ellisztamas/faps/blob/master/docs/08%20Data%20cleaning%20in%20A.%20majus.ipynb)
 
 ## Citing FAPS
 

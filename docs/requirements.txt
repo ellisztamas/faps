@@ -1,6 +1,6 @@
-faps==2.2.1
-fastcluster==1.1.25
-ipywidgets==7.5.1
-numpy==1.17.2
-pandas==0.25.1
-scipy==1.3.1
+faps>=2.2.1
+fastcluster>=1.1.25
+ipywidgets>=7.5.1
+numpy>=1.17.2
+pandas>=0.25.1
+scipy>=1.3.1
