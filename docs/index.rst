@@ -9,24 +9,12 @@ Welcome to faps's documentation!
 .. toctree::
    :maxdepth: 2
 
-   tutorials/00_Quickstart guide
-   tutorials/01 Introduction
-   tutorials/02 Genotype data.rst
-   tutorials/03 Paternity arrays.rst
-   tutorials/04 Sibship clustering.rst
-   tutorials/05 Inference about mating patterns.rst
-   tutorials/06 Simulating data.rst
-   tutorials/07 Dealing with multiple half-sib families.rst
-   tutorials/08 Data cleaning in A. majus.rst
-
-
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   tutorials/00_quickstart_guide.rst
+   tutorials/01_introduction.rst
+   tutorials/02_genotype_data.rst
+   tutorials/03_paternity_arrays.rst
+   tutorials/04_sibship_clustering.rst
+   tutorials/05_inference_about_mating_patterns.rst
+   tutorials/06_simulating_data.rst
+   tutorials/07_dealing_with_multiple_half-sib_families.rst
+   tutorials/08_data_cleaning_in_Amajus.rst
