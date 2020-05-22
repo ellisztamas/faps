@@ -5,7 +5,7 @@
 # Some values are default to the project config (settings from the web panel).
 
 # The version of the spec to be use
-version: enum('2')
+version: 2
 
 # Formats of the documentation to be built
 # Default: []
