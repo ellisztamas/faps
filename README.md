@@ -41,6 +41,8 @@ FAPS is built using the Numpy library with additional tools from Scipy and Panda
 For simulations, it also makes use of [iPython widgets](https://github.com/jupyter-widgets/ipywidgets). iPython widgets can be a little more troublesome to get working, but are only needed for simulations, and can be switched off. See [here](https://github.com/jupyter-widgets/ipywidgets/blob/master/docs/source/user_install.md) for installation instructions.
 
 ## Using FAPS
+For the impatient, a lightning quickstart guide is available [here](https://github.com/ellisztamas/faps/blob/master/docs/00_Quickstart%20guide.ipynb).
+
 A user's guide is provided in this repository. This provides a fairly step-by-step guide to importing data, clustering offspring into sibship groups, and using those clusters to investigate the underlying biological processes. This was written with users in mind who have little experience of working with Python.
 
 Topics covered:
