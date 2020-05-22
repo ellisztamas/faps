@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Quickstart guide to FAPS &#8212; faps 2.2.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="quickstart-guide-to-faps">
+<h1>Quickstart guide to FAPS<a class="headerlink" href="#quickstart-guide-to-faps" title="Permalink to this headline">¶</a></h1>
+<p>Tom Ellis, May 2020.</p>
+<p>If you are impatient to do an analyses as quickly as possible without
+reading the rest of the documentation, this page provides a minimal
+example. The work flow is as follows:</p>
+<ol class="arabic simple">
+<li><p>Import marker data on offspring and parents</p></li>
+<li><p>Create a matrix of paternity of each individual offspring</p></li>
+<li><p>Cluster offspring into full sibships.</p></li>
+<li></li>
+<li><p>Profit.</p></li>
+</ol>
+<p>It goes without saying that to understand what the code is doing and get
+the most out of the data, you should read the
+<a class="reference external" href="https://github.com/ellisztamas/faps#using-faps">tutorials</a>.</p>
+<p>Import the package.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">faps</span> <span class="k">as</span> <span class="nn">fp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+</pre></div>
+</div>
+<p>Import genotype data. These are CSV files with:</p>
+<ol class="arabic simple">
+<li><p>A column giving the name of each individual</p></li>
+<li><p>For the offspring, the second column gives the name of the known
+mother.</p></li>
+<li><p>Subsequent columns give genotype data for each marker, with column
+headers giving marker names.</p></li>
+</ol>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">adults</span>  <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read_genotypes</span><span class="p">(</span><span class="s1">&#39;../data/parents_2012_genotypes.csv&#39;</span><span class="p">,</span> <span class="n">genotype_col</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">progeny</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read_genotypes</span><span class="p">(</span><span class="s1">&#39;../data/offspring_2012_genotypes.csv&#39;</span><span class="p">,</span> <span class="n">genotype_col</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mothers_col</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="c1"># Mothers are a subset of the adults.</span>
+<span class="n">mothers</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">individuals</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">mothers</span><span class="p">))</span>
+</pre></div>
+</div>
+<p>In this example, the data are for multiple maternal families, each
+containing a mixture of full- and half-siblings. We need to divide the
+offspring and mothers into maternal families.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">progeny</span> <span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">mothers</span><span class="p">)</span>
+<span class="n">mothers</span> <span class="o">=</span> <span class="n">mothers</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">mothers</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>I expect that multiple maternal families will be the most common
+scenario, but if you happen to only have a sigle maternal family, you
+can skip this.</p>
+<p>Calculate paternity of individuals. This is equivalent to the <strong>G</strong>
+matrix in <a class="reference external" href="https://doi.org/10.1111/1755-0998.12782">Ellis *et al*
+(2018)</a>.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">paternity_array</span><span class="p">(</span><span class="n">progeny</span><span class="p">,</span> <span class="n">mothers</span><span class="p">,</span> <span class="n">adults</span><span class="p">,</span> <span class="n">mu</span> <span class="o">=</span> <span class="mf">0.0015</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Cluster offspring in each family into full-sibling families.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sibships</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can pull out <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/04%20Sibship%20clustering.ipynb">various kinds of
+information</a>
+about the each clustered maternal family. For example, get the
+most-likely number of full-sib families in maternal family J1246.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sibships</span><span class="p">[</span><span class="s2">&quot;J1246&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">mean_nfamilies</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">5.605375868371062</span>
+</pre></div>
+</div>
+<p>Or do this for all families with a dict comprehension:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">mean_nfamilies</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">sibships</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;J1246&#39;</span><span class="p">:</span> <span class="mf">5.605375868371062</span><span class="p">,</span>
+ <span class="s1">&#39;K0451&#39;</span><span class="p">:</span> <span class="mf">12.679100830502975</span><span class="p">,</span>
+ <span class="s1">&#39;K0632&#39;</span><span class="p">:</span> <span class="mf">5.098186791267536</span><span class="p">,</span>
+ <span class="s1">&#39;K0635&#39;</span><span class="p">:</span> <span class="mf">6.222576977121563</span><span class="p">,</span>
+ <span class="s1">&#39;K1768&#39;</span><span class="p">:</span> <span class="mf">5.95279321064476</span><span class="p">,</span>
+ <span class="s1">&#39;K1809&#39;</span><span class="p">:</span> <span class="mf">12.317762689872342</span><span class="p">,</span>
+ <span class="s1">&#39;K2036&#39;</span><span class="p">:</span> <span class="mf">4.518681729473807</span><span class="p">,</span>
+ <span class="s1">&#39;L0057&#39;</span><span class="p">:</span> <span class="mf">18.53519892725761</span><span class="p">,</span>
+ <span class="s1">&#39;L0221&#39;</span><span class="p">:</span> <span class="mf">7.523719666781066</span><span class="p">,</span>
+ <span class="s1">&#39;L0911&#39;</span><span class="p">:</span> <span class="mf">21.579949302519644</span><span class="p">,</span>
+ <span class="s1">&#39;L0935&#39;</span><span class="p">:</span> <span class="mf">21.584456885870384</span><span class="p">,</span>
+ <span class="s1">&#39;L1264&#39;</span><span class="p">:</span> <span class="mf">10.973166572630031</span><span class="p">,</span>
+ <span class="s1">&#39;L1847&#39;</span><span class="p">:</span> <span class="mf">12.064523674941354</span><span class="p">,</span>
+ <span class="s1">&#39;L1872&#39;</span><span class="p">:</span> <span class="mf">9.048439399512647</span><span class="p">,</span>
+ <span class="s1">&#39;L1882&#39;</span><span class="p">:</span> <span class="mf">16.113027728381027</span><span class="p">,</span>
+ <span class="s1">&#39;L1892&#39;</span><span class="p">:</span> <span class="mf">7.147054942431994</span><span class="p">,</span>
+ <span class="s1">&#39;M0002&#39;</span><span class="p">:</span> <span class="mf">1.047888622290101</span><span class="p">,</span>
+ <span class="s1">&#39;M0009&#39;</span><span class="p">:</span> <span class="mf">23.11360020574565</span><span class="p">,</span>
+ <span class="s1">&#39;M0018&#39;</span><span class="p">:</span> <span class="mf">7.051482492713087</span><span class="p">,</span>
+ <span class="s1">&#39;M0022&#39;</span><span class="p">:</span> <span class="mf">7.450274317790799</span><span class="p">,</span>
+ <span class="s1">&#39;M0025&#39;</span><span class="p">:</span> <span class="mf">10.454372677003231</span><span class="p">,</span>
+ <span class="s1">&#39;M0028&#39;</span><span class="p">:</span> <span class="mf">4.239820497584428</span><span class="p">,</span>
+ <span class="s1">&#39;M0034&#39;</span><span class="p">:</span> <span class="mf">12.435549448178843</span><span class="p">,</span>
+ <span class="s1">&#39;M0042&#39;</span><span class="p">:</span> <span class="mf">6.088524327650887</span><span class="p">,</span>
+ <span class="s1">&#39;M0043&#39;</span><span class="p">:</span> <span class="mf">4.87419977417076</span><span class="p">,</span>
+ <span class="s1">&#39;M0045&#39;</span><span class="p">:</span> <span class="mf">6.000782412960964</span><span class="p">,</span>
+ <span class="s1">&#39;M0047&#39;</span><span class="p">:</span> <span class="mf">12.719548559166366</span><span class="p">,</span>
+ <span class="s1">&#39;M0054&#39;</span><span class="p">:</span> <span class="mf">18.984647576874096</span><span class="p">,</span>
+ <span class="s1">&#39;M0069&#39;</span><span class="p">:</span> <span class="mf">21.02305110499397</span><span class="p">,</span>
+ <span class="s1">&#39;M0078&#39;</span><span class="p">:</span> <span class="mf">23.42550345266462</span><span class="p">,</span>
+ <span class="s1">&#39;M0130&#39;</span><span class="p">:</span> <span class="mf">17.069045572015895</span><span class="p">,</span>
+ <span class="s1">&#39;M0137&#39;</span><span class="p">:</span> <span class="mf">15.029407573170278</span><span class="p">,</span>
+ <span class="s1">&#39;M0202&#39;</span><span class="p">:</span> <span class="mf">11.48844273728524</span><span class="p">,</span>
+ <span class="s1">&#39;M0209&#39;</span><span class="p">:</span> <span class="mf">8.819699122141314</span><span class="p">,</span>
+ <span class="s1">&#39;M0210&#39;</span><span class="p">:</span> <span class="mf">10.999293014192693</span><span class="p">,</span>
+ <span class="s1">&#39;M0225&#39;</span><span class="p">:</span> <span class="mf">7.045833239484286</span><span class="p">,</span>
+ <span class="s1">&#39;M0238&#39;</span><span class="p">:</span> <span class="mf">10.247537341131476</span><span class="p">,</span>
+ <span class="s1">&#39;M0251&#39;</span><span class="p">:</span> <span class="mf">9.39369696108596</span><span class="p">,</span>
+ <span class="s1">&#39;M0254&#39;</span><span class="p">:</span> <span class="mf">13.997079852966515</span><span class="p">,</span>
+ <span class="s1">&#39;M0258&#39;</span><span class="p">:</span> <span class="mf">9.828694751876757</span><span class="p">,</span>
+ <span class="s1">&#39;M0259&#39;</span><span class="p">:</span> <span class="mf">12.199493597014733</span><span class="p">,</span>
+ <span class="s1">&#39;M0267&#39;</span><span class="p">:</span> <span class="mf">13.999934870300056</span><span class="p">,</span>
+ <span class="s1">&#39;M0283&#39;</span><span class="p">:</span> <span class="mf">12.76441063459917</span><span class="p">,</span>
+ <span class="s1">&#39;M0310&#39;</span><span class="p">:</span> <span class="mf">7.9950925640201405</span><span class="p">,</span>
+ <span class="s1">&#39;M0323&#39;</span><span class="p">:</span> <span class="mf">10.031892269392502</span><span class="p">,</span>
+ <span class="s1">&#39;M0329&#39;</span><span class="p">:</span> <span class="mf">15.65033087966963</span><span class="p">,</span>
+ <span class="s1">&#39;M0333&#39;</span><span class="p">:</span> <span class="mf">15.988483638068129</span><span class="p">,</span>
+ <span class="s1">&#39;M0344&#39;</span><span class="p">:</span> <span class="mf">9.946009544142706</span><span class="p">,</span>
+ <span class="s1">&#39;M0345&#39;</span><span class="p">:</span> <span class="mf">20.309316369318616</span><span class="p">,</span>
+ <span class="s1">&#39;M0484&#39;</span><span class="p">:</span> <span class="mf">18.495245747794613</span><span class="p">,</span>
+ <span class="s1">&#39;M0494&#39;</span><span class="p">:</span> <span class="mf">8.05463069910333</span><span class="p">,</span>
+ <span class="s1">&#39;M0773&#39;</span><span class="p">:</span> <span class="mf">6.824167457325241</span><span class="p">,</span>
+ <span class="s1">&#39;M0884&#39;</span><span class="p">:</span> <span class="mf">28.620466685852023</span><span class="p">,</span>
+ <span class="s1">&#39;M1000&#39;</span><span class="p">:</span> <span class="mf">7.923972617146549</span><span class="p">,</span>
+ <span class="s1">&#39;M1335&#39;</span><span class="p">:</span> <span class="mf">19.898885496992698</span><span class="p">,</span>
+ <span class="s1">&#39;M1454&#39;</span><span class="p">:</span> <span class="mf">12.853870585838022</span><span class="p">,</span>
+ <span class="s1">&#39;M1460&#39;</span><span class="p">:</span> <span class="mf">7.055349431265118</span><span class="p">,</span>
+ <span class="s1">&#39;M1463&#39;</span><span class="p">:</span> <span class="mf">13.841229954609007</span><span class="p">,</span>
+ <span class="s1">&#39;M1466&#39;</span><span class="p">:</span> <span class="mf">23.197797611570273</span><span class="p">,</span>
+ <span class="s1">&#39;M1846&#39;</span><span class="p">:</span> <span class="mf">12.055278800405954</span><span class="p">}</span>
+</pre></div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">faps</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Tom Ellis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/tutorials/00_quickstart_guide.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

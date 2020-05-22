@@ -1,0 +1,696 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Simulating data and power analysis &#8212; faps 2.2.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="simulating-data-and-power-analysis">
+<h1>Simulating data and power analysis<a class="headerlink" href="#simulating-data-and-power-analysis" title="Permalink to this headline">¶</a></h1>
+<p>Tom Ellis, August 2017</p>
+<p>Before committing to the time and cost of genotyping samples for a
+paternity study, it is always sensible to run simulations to test the
+likely statistical power of your data set. This can help with important
+questions regaridng study design, such as finding an appropriate balance
+between the number of families vs offspring per family, or identifying a
+minimum number of loci to type. Simulated data can also be useful in
+verifying the results of an analysis.</p>
+<p>FAPS provides tools to run such simulations. In this notebook we look
+look at:</p>
+<ol class="arabic simple">
+<li><p>Basic tools for simulating genotype data.</p></li>
+<li><p>Automated tools for power analysis.</p></li>
+<li><p>Crafting custom simulations for specialised purposes.</p></li>
+<li><p>Simulations using emprical datasets (under construction).</p></li>
+</ol>
+<p>It is worth noting that I relied on loops for a lot of these tools, for
+the purely selfish reason that it was easy to code. Loops are of course
+slow, so if you work with these tools a lot there is ample scope for
+speeding things up (see especially the functions <code class="docutils literal notranslate"><span class="pre">make_offspring</span></code>,
+<code class="docutils literal notranslate"><span class="pre">make_sibships</span></code> and <code class="docutils literal notranslate"><span class="pre">make_power</span></code>).</p>
+<div class="section" id="simulation-building-blocks">
+<h2>Simulation building blocks<a class="headerlink" href="#simulation-building-blocks" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="creating-genotypearray-objects">
+<h3>Creating <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> objects<a class="headerlink" href="#creating-genotypearray-objects" title="Permalink to this headline">¶</a></h3>
+<p>Simulations are built using <code class="docutils literal notranslate"><span class="pre">genotypeArrays</span></code>. See the section on these
+<a class="reference external" href="http://localhost:8889/notebooks/docs/02%20Genotype%20data.ipynb">here</a>
+for more information.</p>
+<p><code class="docutils literal notranslate"><span class="pre">make_parents</span></code> generates a population of reproductive adults from
+population allele frequencies. This example creates ten individuals.
+Note that this population will be in Hardy-Weinberg equilibrium, but
+yours may not.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">faps</span> <span class="k">as</span> <span class="nn">fp</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pylab</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">localtime</span><span class="p">,</span> <span class="n">asctime</span>
+
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">37</span><span class="p">)</span>
+<span class="n">allele_freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">adults</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_parents</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span>  <span class="n">allele_freqs</span><span class="p">,</span> <span class="n">family_name</span><span class="o">=</span><span class="s1">&#39;adult&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>There are multiple ways to mate adults to generate offspring. If you
+supply a set of adults and an integer number of offspring,
+<code class="docutils literal notranslate"><span class="pre">make_offspring</span></code> mates adults at random.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">family1</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_offspring</span><span class="p">(</span><span class="n">parents</span> <span class="o">=</span> <span class="n">adults</span><span class="p">,</span> <span class="n">noffs</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">family1</span><span class="o">.</span><span class="n">parents</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;adult_7/adult_2&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_1/adult_6&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_8/adult_3&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_8/adult_0&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_7&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&lt;U15&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can also supply an explicit list of dams and sires, in which case
+the adults are paired in the order they appear in each list.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">family2</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_offspring</span><span class="p">(</span><span class="n">parents</span> <span class="o">=</span> <span class="n">adults</span><span class="p">,</span> <span class="n">dam_list</span><span class="o">=</span><span class="p">[</span><span class="mi">7</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">sire_list</span><span class="o">=</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">7</span><span class="p">])</span>
+<span class="n">family2</span><span class="o">.</span><span class="n">parents</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;adult_7/adult_2&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_1/adult_6&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_8/adult_3&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_8/adult_0&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_7&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&lt;U15&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Usually we really want to simulate half sib arrays. This can be done
+using <code class="docutils literal notranslate"><span class="pre">make_sibships</span></code>, which mates a single mother to a set of males.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">family3</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_sibships</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">adults</span><span class="p">,</span> <span class="n">dam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sires</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">family_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">family3</span><span class="o">.</span><span class="n">parents</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;adult_0/adult_1&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_1&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_1&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_0/adult_1&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_1&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_2&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_0/adult_2&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_2&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_2&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_0/adult_2&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_3&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_3&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_0/adult_3&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_3&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_3&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_0/adult_4&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_4&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_4&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_0/adult_4&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_4&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&lt;U15&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>For uneven sibship sizes, give a list of sizes for each family of the
+same length as <code class="docutils literal notranslate"><span class="pre">sires</span></code>.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">family4</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_sibships</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">adults</span><span class="p">,</span> <span class="n">dam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sires</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">family_size</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">family4</span><span class="o">.</span><span class="n">parents</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;adult_0/adult_1&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_1&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_1&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_0/adult_1&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_1&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_2&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_0/adult_2&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_2&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_2&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_0/adult_3&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_3&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_3&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;adult_0/adult_4&#39;</span><span class="p">,</span> <span class="s1">&#39;adult_0/adult_4&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&lt;U15&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="adding-errors">
+<h3>Adding errors<a class="headerlink" href="#adding-errors" title="Permalink to this headline">¶</a></h3>
+<p>Real data almost always contains errors. For SNP data, these take the
+form of:</p>
+<ul class="simple">
+<li><p>Missing data, where a locus fails to amplify for some reason</p></li>
+<li><p>Genotyping errors, when the observed genotype at a locus is not the
+actual genotype.</p></li>
+</ul>
+<p>These are straightforward to include in simulated data. First generate
+some clean data again, and mate the parents.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">85</span><span class="p">)</span>
+<span class="n">allele_freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">adults</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_parents</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span>  <span class="n">allele_freqs</span><span class="p">,</span> <span class="n">family_name</span><span class="o">=</span><span class="s1">&#39;adult&#39;</span><span class="p">)</span>
+<span class="n">progeny</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_sibships</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">adults</span><span class="p">,</span> <span class="n">dam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sires</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">family_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It is best to create the progeny before adding errors. Set the error
+rates and add errors at random.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">d</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.0015</span> <span class="c1"># values for dropout and error rate.</span>
+<span class="c1"># add genotyping errors</span>
+<span class="n">adults_mu</span>  <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">mutations</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+<span class="n">progeny_mu</span> <span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">mutations</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+
+<span class="c1"># add dropouts (to the mutated data)</span>
+<span class="n">adults_mu</span>  <span class="o">=</span> <span class="n">adults_mu</span><span class="o">.</span><span class="n">dropouts</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+<span class="n">progeny_mu</span> <span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">dropouts</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">mutations</span></code> and <code class="docutils literal notranslate"><span class="pre">dropouts</span></code> make copies of the <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code>, so
+the original data remains unchanged. For example:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">adults_mu</span><span class="o">.</span><span class="n">missing_data</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">0.0</span>
+<span class="mf">0.018000000000000002</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="paternity-and-sibships">
+<h3>Paternity and sibships<a class="headerlink" href="#paternity-and-sibships" title="Permalink to this headline">¶</a></h3>
+<p>Create a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> and cluster into sibships as usual (more
+information on these objects can be found
+<a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/03%20Paternity%20arrays.ipynb">here</a>
+and
+<a class="reference external" href="http://localhost:8889/notebooks/docs/04%20Sibship%20clustering.ipynb">here</a>.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">85</span><span class="p">)</span>
+<span class="n">allele_freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+<span class="n">adults</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_parents</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span>  <span class="n">allele_freqs</span><span class="p">,</span> <span class="n">family_name</span><span class="o">=</span><span class="s1">&#39;adult&#39;</span><span class="p">)</span>
+<span class="n">progeny</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_sibships</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="n">adults</span><span class="p">,</span> <span class="n">dam</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sires</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="n">family_size</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+<span class="n">mothers</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">parent_index</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+<span class="n">patlik</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">paternity_array</span><span class="p">(</span><span class="n">progeny</span><span class="p">,</span> <span class="n">mothers</span><span class="p">,</span> <span class="n">adults</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.0015</span><span class="p">)</span>
+<span class="n">sc</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>A very useful tool is the <code class="docutils literal notranslate"><span class="pre">accuracy</span></code> subfunction for
+<code class="docutils literal notranslate"><span class="pre">sibshipCluster</span></code> objects. When the paternity and sibship structure are
+know (seldom the case in real life, but true for simulated data) this
+returns an array of handy information about the analysis:</p>
+<ol class="arabic simple" start="0">
+<li><p>Binary indiciator for whether the true partition was included in the
+sample of partitions.</p></li>
+<li><p>Difference in log likelihood for the maximum likelihood partition
+identified and the true partition. Positive values indicate that the
+ML partition had greater support than the true partition.</p></li>
+<li><p>Posterior probability of the true number of families.</p></li>
+<li><p>Mean probabilities that a pair of true full sibs are identified as
+full sibs.</p></li>
+<li><p>Mean probabilities that a pair of true half sibs are identified as
+half sibs.</p></li>
+<li><p>Mean probabilities that a pair of true half or full sibs are
+correctly assigned as such (i.e. overall accuracy of sibship
+reconstruction.</p></li>
+<li><p>Mean (log) probability of paternity of the true sires for those sires
+who had been sampled (who had non-zero probability in the
+paternityArray).</p></li>
+<li><p>Mean (log) probability that the sire had not been sampled for those
+individuals whose sire was truly absent.</p></li>
+</ol>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">accuracy</span><span class="p">(</span><span class="n">progeny</span><span class="p">,</span> <span class="n">adults</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>In this example, accuracy is high, but the probability of a missing sire
+is NaN because all the sires are present, and this number of calculated
+only for offspring whose sire was absent.</p>
+<p>We can adjust the <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> to see how much this effects the
+results. For example, if we remove the sire of the first family (i.e.
+the male indexed by 1), there is a drop in the accuracy for full-sibling
+relationships, although half-sibling relationships are unaffected.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span> <span class="o">=</span> <span class="n">patlik</span><span class="o">.</span><span class="n">adjust_prob_array</span><span class="p">(</span><span class="n">purge</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">missing_parents</span><span class="o">=</span><span class="mf">0.25</span><span class="p">)</span>
+<span class="n">sc</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">accuracy</span><span class="p">(</span><span class="n">progeny</span><span class="p">,</span> <span class="n">adults</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span> <span class="mf">1.</span>   <span class="p">,</span> <span class="mf">28.26</span> <span class="p">,</span>  <span class="mf">0.</span>   <span class="p">,</span>  <span class="mf">0.766</span><span class="p">,</span>  <span class="mf">1.</span>   <span class="p">,</span>  <span class="mf">0.951</span><span class="p">,</span>  <span class="mf">1.</span>   <span class="p">,</span>  <span class="mf">0.093</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>In contrast, imagine we had an idea that selfing was strong. How would
+this affect things?</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span> <span class="o">=</span> <span class="n">patlik</span><span class="o">.</span><span class="n">adjust_prob_array</span><span class="p">(</span><span class="n">selfing_rate</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">sc</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">)</span>
+<span class="n">sc</span><span class="o">.</span><span class="n">accuracy</span><span class="p">(</span><span class="n">progeny</span><span class="p">,</span> <span class="n">adults</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>The results are identical to the unmodified case; FAPS has correctly
+identifed the correct partition structure in spite of the (incorrect)
+strong prior for high selfing.</p>
+</div>
+</div>
+<div class="section" id="automation">
+<h2>Automation<a class="headerlink" href="#automation" title="Permalink to this headline">¶</a></h2>
+<p>It can be tedious to put together your own simulation for every
+analysis. FAPS has an automated function that repeatedly creates
+genotype data, clusters into siblings and calls the <code class="docutils literal notranslate"><span class="pre">accuracy</span></code>
+function. You can supply lists of variables and it will evaluate each
+combination.</p>
+<p>For example, this code creates four families of five full siblings with
+a genotyping error rate of 0.0015. It considers 30, 40 and 50 loci for
+100, 250 or 500 candidate fathers. Each parameter combination is
+replicated 10 times. In reality you would want to do more than this; I
+have found that results tend to asymptote with 300 simulations.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Common simulation parameters</span>
+<span class="n">r</span>            <span class="o">=</span> <span class="mi">10</span> <span class="c1"># number of replicates</span>
+<span class="n">nloci</span>        <span class="o">=</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span><span class="mi">40</span><span class="p">,</span><span class="mi">50</span><span class="p">]</span> <span class="c1"># number of loci</span>
+<span class="n">allele_freqs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span> <span class="c1"># draw allele frequencies</span>
+<span class="n">nadults</span>      <span class="o">=</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span><span class="mi">250</span><span class="p">,</span><span class="mi">500</span><span class="p">]</span> <span class="c1"># size of the adults population</span>
+<span class="n">mu</span>           <span class="o">=</span> <span class="mf">0.0015</span> <span class="c1">#genotype error rates</span>
+<span class="n">sires</span>        <span class="o">=</span> <span class="mi">4</span>
+<span class="n">offspring</span>    <span class="o">=</span> <span class="mi">5</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">614</span><span class="p">)</span>
+<span class="n">eventab</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_power</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">nloci</span><span class="p">,</span> <span class="n">allele_freqs</span><span class="p">,</span> <span class="n">nadults</span><span class="p">,</span> <span class="n">sires</span><span class="p">,</span> <span class="n">offspring</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mu</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">10</span> <span class="n">of</span> <span class="n">each</span> <span class="n">parameter</span> <span class="n">combination</span> <span class="n">will</span> <span class="n">be</span> <span class="n">performed</span><span class="o">.</span>
+<span class="n">Simulating</span> <span class="n">arrays</span> <span class="k">with</span> <span class="n">multiple</span> <span class="n">number</span> <span class="n">of</span> <span class="n">loci</span><span class="p">:</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">]</span><span class="o">.</span>
+<span class="n">Drawing</span> <span class="n">allele</span> <span class="n">frequencies</span> <span class="n">between</span> <span class="mf">0.25</span> <span class="ow">and</span> <span class="mf">0.5</span><span class="o">.</span>
+<span class="n">Simulating</span> <span class="n">adult</span> <span class="n">populations</span> <span class="n">of</span> <span class="n">multiple</span> <span class="n">sizes</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">500</span><span class="p">]</span><span class="o">.</span>
+<span class="n">Simulating</span> <span class="mi">4</span> <span class="n">families</span> <span class="n">of</span> <span class="mi">5</span> <span class="n">offspring</span><span class="o">.</span>
+<span class="mi">0</span><span class="o">%</span> <span class="n">of</span> <span class="n">per</span><span class="o">-</span><span class="n">locus</span> <span class="n">genotypes</span> <span class="n">will</span> <span class="n">be</span> <span class="n">removed</span> <span class="n">at</span> <span class="n">random</span><span class="o">.</span>
+<span class="mf">0.15</span><span class="o">%</span> <span class="n">of</span> <span class="n">alleles</span> <span class="n">will</span> <span class="n">be</span> <span class="n">mutated</span> <span class="n">at</span> <span class="n">random</span><span class="o">.</span>
+<span class="n">Input</span> <span class="n">error</span> <span class="n">rates</span> <span class="n">taken</span> <span class="k">as</span> <span class="n">the</span> <span class="n">real</span> <span class="n">error</span> <span class="n">rates</span><span class="o">.</span>
+<span class="n">No</span> <span class="n">candidates</span> <span class="n">to</span> <span class="n">be</span> <span class="n">removed</span><span class="o">.</span>
+<span class="n">No</span> <span class="n">prior</span> <span class="n">parameter</span> <span class="n">used</span> <span class="k">for</span> <span class="n">the</span> <span class="n">proportion</span> <span class="n">of</span> <span class="n">missing</span> <span class="n">candidates</span><span class="o">.</span>
+<span class="n">Self</span><span class="o">-</span><span class="n">fertilisation</span> <span class="n">rate</span> <span class="n">of</span> <span class="mf">0.</span>
+<span class="n">Performing</span> <span class="mi">1000</span> <span class="n">Monte</span> <span class="n">Carlo</span> <span class="n">draws</span> <span class="k">for</span> <span class="n">sibship</span> <span class="n">inference</span><span class="o">.</span>
+
+<span class="n">Parameters</span> <span class="nb">set</span><span class="o">.</span> <span class="n">Beginning</span> <span class="n">simulations</span> <span class="n">on</span> <span class="n">Mon</span> <span class="n">Nov</span> <span class="mi">18</span> <span class="mi">15</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">45</span> <span class="mf">2019.</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FloatProgress</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">90.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">GMI</span><span class="o">/</span><span class="n">thomas</span><span class="o">.</span><span class="n">ellis</span><span class="o">/</span><span class="n">miniconda3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">faps</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">faps</span><span class="o">/</span><span class="n">sibshipCluster</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">249</span><span class="p">:</span> <span class="ne">RuntimeWarning</span><span class="p">:</span> <span class="n">invalid</span> <span class="n">value</span> <span class="n">encountered</span> <span class="ow">in</span> <span class="n">double_scalars</span>
+  <span class="n">dev</span> <span class="o">=</span> <span class="n">dev</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">/</span> <span class="n">ix</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Simulations</span> <span class="n">completed</span> <span class="n">after</span> <span class="mf">0.03</span> <span class="n">minutes</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>For convenience, <code class="docutils literal notranslate"><span class="pre">make_power</span></code> provides a summary of the input
+parameters. This can be turned off by setting <code class="docutils literal notranslate"><span class="pre">verbose</span></code> to <code class="docutils literal notranslate"><span class="pre">False</span></code>.
+Similarly, the progress bar can be removed by setting <code class="docutils literal notranslate"><span class="pre">progress</span></code> to
+<code class="docutils literal notranslate"><span class="pre">False</span></code>. This bar uses iPython widgets, and probably won’t work
+outside of iPython, so it may be necessary to turn them off.</p>
+<p>The results of make_power are basically the output from the
+<code class="docutils literal notranslate"><span class="pre">accuracy</span></code> function we saw before, but include information on
+simulation parameters, and the time taken to create the
+<code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> and <code class="docutils literal notranslate"><span class="pre">sibshipCluster</span></code> objects. View them by
+inspecting <code class="docutils literal notranslate"><span class="pre">eventab</span></code>.</p>
+<p>Arguments to set up the population work much like those to create
+<code class="docutils literal notranslate"><span class="pre">genotypeArrays</span></code>, and are quite flexible. Have a look into the help
+file (run <code class="docutils literal notranslate"><span class="pre">make_power?</span></code> in Python) for more. You can also take a look
+at the <a class="reference external" href="http://localhost:8889/notebooks/manuscript_faps/analysis/A.%20majus%20data%20for%202012.ipynb">simulations in support of the main FAPS
+paper</a>,
+which considered a range of contrasting demographic scenarios; the
+example above is adapted from there.</p>
+<p>Error rates and missing candidates are important topics to get a handle
+on. We can estimate these parameters (e.g. by genotyping some
+individuals twice and counting how many loci are different), but we can
+never completely be sure how close to reality we are. With that in mind
+<code class="docutils literal notranslate"><span class="pre">make_power</span></code> allows you to simulate true values mu and the proportion
+of missing sires, but run the analysis with different values. The idea
+is to estimate how wrong you could be before the analysis fails. For
+example, this code would simulate the case where you thought that the
+error rate was 0.0015, and 5% of the candidates went unsampled, but in
+reality both parameters were double that amount.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fp</span><span class="o">.</span><span class="n">make_power</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">nloci</span><span class="p">,</span> <span class="n">allele_freqs</span><span class="p">,</span> <span class="n">nadults</span><span class="p">,</span> <span class="n">sires</span><span class="p">,</span> <span class="n">offspring</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span>
+           <span class="n">mu_input</span><span class="o">=</span> <span class="mf">0.003</span><span class="p">,</span>
+           <span class="n">mu_real</span><span class="o">=</span><span class="mf">0.0015</span><span class="p">,</span>
+           <span class="n">unsampled_real</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+           <span class="n">unsampled_input</span> <span class="o">=</span> <span class="mf">0.05</span><span class="p">);</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">10</span> <span class="n">of</span> <span class="n">each</span> <span class="n">parameter</span> <span class="n">combination</span> <span class="n">will</span> <span class="n">be</span> <span class="n">performed</span><span class="o">.</span>
+<span class="n">Simulating</span> <span class="n">arrays</span> <span class="k">with</span> <span class="n">multiple</span> <span class="n">number</span> <span class="n">of</span> <span class="n">loci</span><span class="p">:</span> <span class="p">[</span><span class="mi">30</span><span class="p">,</span> <span class="mi">40</span><span class="p">,</span> <span class="mi">50</span><span class="p">]</span><span class="o">.</span>
+<span class="n">Drawing</span> <span class="n">allele</span> <span class="n">frequencies</span> <span class="n">between</span> <span class="mf">0.25</span> <span class="ow">and</span> <span class="mf">0.5</span><span class="o">.</span>
+<span class="n">Simulating</span> <span class="n">adult</span> <span class="n">populations</span> <span class="n">of</span> <span class="n">multiple</span> <span class="n">sizes</span><span class="p">:</span> <span class="p">[</span><span class="mi">100</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">500</span><span class="p">]</span><span class="o">.</span>
+<span class="n">Simulating</span> <span class="mi">4</span> <span class="n">families</span> <span class="n">of</span> <span class="mi">5</span> <span class="n">offspring</span><span class="o">.</span>
+<span class="mi">0</span><span class="o">%</span> <span class="n">of</span> <span class="n">per</span><span class="o">-</span><span class="n">locus</span> <span class="n">genotypes</span> <span class="n">will</span> <span class="n">be</span> <span class="n">removed</span> <span class="n">at</span> <span class="n">random</span><span class="o">.</span>
+<span class="mf">0.15</span><span class="o">%</span> <span class="n">of</span> <span class="n">alleles</span> <span class="n">will</span> <span class="n">be</span> <span class="n">mutated</span> <span class="n">at</span> <span class="n">random</span><span class="o">.</span>
+<span class="n">Genotype</span> <span class="n">error</span> <span class="n">rate</span> <span class="n">of</span> <span class="mf">0.003</span> <span class="n">will</span> <span class="n">be</span> <span class="n">used</span> <span class="n">to</span> <span class="n">construct</span> <span class="n">paternity</span> <span class="n">arrays</span><span class="o">.</span>
+<span class="n">Removing</span> <span class="mf">10.0</span><span class="o">%</span> <span class="n">of</span> <span class="n">the</span> <span class="n">candidates</span> <span class="n">at</span> <span class="n">random</span><span class="o">.</span>
+<span class="n">Proportion</span> <span class="n">missing</span> <span class="n">canidates</span> <span class="nb">set</span> <span class="n">to</span> <span class="mf">0.05</span><span class="o">.</span>
+<span class="n">Self</span><span class="o">-</span><span class="n">fertilisation</span> <span class="n">rate</span> <span class="n">of</span> <span class="mf">0.</span>
+<span class="n">Performing</span> <span class="mi">1000</span> <span class="n">Monte</span> <span class="n">Carlo</span> <span class="n">draws</span> <span class="k">for</span> <span class="n">sibship</span> <span class="n">inference</span><span class="o">.</span>
+
+<span class="n">Parameters</span> <span class="nb">set</span><span class="o">.</span> <span class="n">Beginning</span> <span class="n">simulations</span> <span class="n">on</span> <span class="n">Mon</span> <span class="n">Nov</span> <span class="mi">18</span> <span class="mi">15</span><span class="p">:</span><span class="mi">32</span><span class="p">:</span><span class="mi">47</span> <span class="mf">2019.</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FloatProgress</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">90.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Simulations</span> <span class="n">completed</span> <span class="n">after</span> <span class="mf">0.03</span> <span class="n">minutes</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>If you want to perform downstream analysis, you can tell <code class="docutils literal notranslate"><span class="pre">make_power</span></code>
+to also export each <code class="docutils literal notranslate"><span class="pre">paternity_Array</span></code> and/or <code class="docutils literal notranslate"><span class="pre">sibshipCluster</span></code>
+object. This is done by setting <code class="docutils literal notranslate"><span class="pre">return_paternities</span></code> and
+<code class="docutils literal notranslate"><span class="pre">return_clusters</span></code> to <code class="docutils literal notranslate"><span class="pre">True</span></code>. For example, this code pulls out the
+distribution of family sizes from each <code class="docutils literal notranslate"><span class="pre">sibshipArray</span></code>, and plots it.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">eventab</span><span class="p">,</span> <span class="n">evenclusters</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_power</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">nloci</span><span class="p">,</span> <span class="n">allele_freqs</span><span class="p">,</span> <span class="n">nadults</span><span class="p">,</span> <span class="n">sires</span><span class="p">,</span> <span class="n">offspring</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">return_clusters</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">even_famsizes</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">evenclusters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">family_size</span><span class="p">()</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">evenclusters</span><span class="p">))])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">even_famsizes</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">No</span> <span class="n">prior</span> <span class="n">parameter</span> <span class="n">used</span> <span class="k">for</span> <span class="n">the</span> <span class="n">proportion</span> <span class="n">of</span> <span class="n">missing</span> <span class="n">candidates</span><span class="o">.</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">FloatProgress</span><span class="p">(</span><span class="n">value</span><span class="o">=</span><span class="mf">0.0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="mf">90.0</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="../_images/06_simulating_data_41_2.png" src="../_images/06_simulating_data_41_2.png" />
+</div>
+<div class="section" id="custom-simulations">
+<h2>Custom simulations<a class="headerlink" href="#custom-simulations" title="Permalink to this headline">¶</a></h2>
+<p>Once you are familiar with the basic building blocks for generating data
+and running analysis, creating your own simulations if largely a case of
+setting up combinations of parameters, and looping over them. Given the
+vast array of possible scenarios you could want to simulate, it is
+impossible to be comprehensive here, so it must suffice to given a
+couple of examples for inspiration.</p>
+<div class="section" id="likelihood-for-missing-sires">
+<h3>Likelihood for missing sires<a class="headerlink" href="#likelihood-for-missing-sires" title="Permalink to this headline">¶</a></h3>
+<p>In this example is was interested in the performance of the likelihood
+estimator for a sire being absent. This is the likelihood of generating
+the offspring genotype if paternal alleles come from population allele
+frequencies. This is what the attribute <code class="docutils literal notranslate"><span class="pre">lik_abset</span></code> in a
+<code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> tells you.</p>
+<p>Ideally this likelihood should be below the likelihood of paternity for
+the true sire, but higher than that of the other candidates. I suspected
+this would not be the case when minor allele frequency is low and there
+are many candidates.</p>
+<p>This cell sets up the simulation. I’m considering 50 loci, and
+mu=0.0015, but varying sample size and allele frequency.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Common simulation parameters</span>
+<span class="n">nreps</span>        <span class="o">=</span> <span class="mi">10</span> <span class="c1"># number of replicates</span>
+<span class="n">nloci</span>        <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">]</span> <span class="c1"># number of loci</span>
+<span class="n">allele_freqs</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.1</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span> <span class="c1"># draw allele frequencies</span>
+<span class="n">nadults</span>      <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">250</span><span class="p">,</span> <span class="mi">500</span><span class="p">,</span> <span class="mi">750</span><span class="p">,</span> <span class="mi">1000</span><span class="p">]</span> <span class="c1"># size of the adults population</span>
+<span class="n">mu_list</span>      <span class="o">=</span> <span class="p">[</span><span class="mf">0.0015</span><span class="p">]</span> <span class="c1">#genotype error rates</span>
+<span class="n">nsims</span>        <span class="o">=</span> <span class="n">nreps</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">nloci</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">allele_freqs</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">nadults</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span> <span class="c1"># total number of simulations to run</span>
+<span class="n">dt</span>           <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">nsims</span><span class="p">,</span> <span class="mi">7</span><span class="p">])</span> <span class="c1"># empty array to store data</span>
+</pre></div>
+</div>
+<p>This cell simulates genotype data and clusters the offspring into full
+sibships. The code pulls out the mean probability that each sire is
+absent, and the rank of the likelihood for a missing sire among the
+likelihoods of paternity for the candidates.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">t0</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+<span class="n">counter</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Beginning simulations on </span><span class="si">{}</span><span class="s2">.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">asctime</span><span class="p">(</span><span class="n">localtime</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="p">)))</span>
+
+<span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nreps</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nloci</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">allele_freqs</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">nadults</span><span class="p">)):</span>
+                <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mu_list</span><span class="p">)):</span>
+                    <span class="n">af</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">allele_freqs</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">nloci</span><span class="p">[</span><span class="n">l</span><span class="p">])</span>
+                    <span class="n">adults</span>  <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_parents</span><span class="p">(</span><span class="n">nadults</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">af</span><span class="p">)</span>
+                    <span class="n">progeny</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_offspring</span><span class="p">(</span><span class="n">adults</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+                    <span class="n">mi</span>      <span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">parent_index</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">)</span> <span class="c1"># maternal index</span>
+                    <span class="n">mothers</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">mi</span><span class="p">)</span>
+                    <span class="n">patlik</span>  <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">paternity_array</span><span class="p">(</span><span class="n">progeny</span><span class="p">,</span> <span class="n">mothers</span><span class="p">,</span> <span class="n">adults</span><span class="p">,</span> <span class="n">mu_list</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
+                    <span class="c1"># Find the rank of the missing term within the array.</span>
+                    <span class="n">rank</span>    <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">==</span> <span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">size</span><span class="p">)]</span>
+                    <span class="n">rank</span>    <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rank</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span> <span class="o">/</span> <span class="n">nadults</span><span class="p">[</span><span class="n">n</span><span class="p">]</span>
+                    <span class="c1"># get the posterior probabilty fir the missing term.</span>
+                    <span class="n">prob_misisng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">[:,</span> <span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+                    <span class="c1">#export data</span>
+                    <span class="n">dt</span><span class="p">[</span><span class="n">counter</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">r</span><span class="p">,</span> <span class="n">nloci</span><span class="p">[</span><span class="n">l</span><span class="p">],</span> <span class="n">allele_freqs</span><span class="p">[</span><span class="n">a</span><span class="p">],</span> <span class="n">nadults</span><span class="p">[</span><span class="n">n</span><span class="p">],</span> <span class="n">mu</span><span class="p">[</span><span class="n">m</span><span class="p">],</span> <span class="n">rank</span><span class="p">,</span> <span class="n">prob_misisng</span><span class="p">])</span>
+                    <span class="c1"># update counters</span>
+                    <span class="n">counter</span> <span class="o">+=</span> <span class="mi">1</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Completed in </span><span class="si">{}</span><span class="s2"> hours.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span><span class="o">/</span><span class="mi">3600</span><span class="p">,</span><span class="mi">2</span><span class="p">)))</span>
+
+<span class="n">head</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rep&#39;</span><span class="p">,</span> <span class="s1">&#39;nloci&#39;</span><span class="p">,</span> <span class="s1">&#39;allele_freqs&#39;</span><span class="p">,</span> <span class="s1">&#39;nadults&#39;</span><span class="p">,</span> <span class="s1">&#39;mu&#39;</span><span class="p">,</span> <span class="s1">&#39;rank&#39;</span><span class="p">,</span> <span class="s1">&#39;prob_missing&#39;</span><span class="p">]</span>
+<span class="n">dt</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">dt</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">head</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Beginning</span> <span class="n">simulations</span> <span class="n">on</span> <span class="n">Mon</span> <span class="n">Nov</span> <span class="mi">18</span> <span class="mi">15</span><span class="p">:</span><span class="mi">35</span><span class="p">:</span><span class="mi">15</span> <span class="mf">2019.</span>
+<span class="n">Completed</span> <span class="ow">in</span> <span class="mf">0.01</span> <span class="n">hours</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>There is a strong dependency on minor allele frequency. As MAF goes from
+zero to 0.5, the effectiveness of identifying a missing sire using this
+likelihood estimator goes from ‘basically useless’ to ‘useful’.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dt</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;allele_freqs&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+</div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>rep</th>
+      <th>nloci</th>
+      <th>nadults</th>
+      <th>mu</th>
+      <th>rank</th>
+      <th>prob_missing</th>
+    </tr>
+    <tr>
+      <th>allele_freqs</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>0.1</td>
+      <td>4.5</td>
+      <td>50.0</td>
+      <td>435.0</td>
+      <td>0.0015</td>
+      <td>0.000000</td>
+      <td>5.374345e-40</td>
+    </tr>
+    <tr>
+      <td>0.2</td>
+      <td>4.5</td>
+      <td>50.0</td>
+      <td>435.0</td>
+      <td>0.0015</td>
+      <td>0.025398</td>
+      <td>1.876553e-22</td>
+    </tr>
+    <tr>
+      <td>0.3</td>
+      <td>4.5</td>
+      <td>50.0</td>
+      <td>435.0</td>
+      <td>0.0015</td>
+      <td>0.502693</td>
+      <td>3.586925e-15</td>
+    </tr>
+    <tr>
+      <td>0.4</td>
+      <td>4.5</td>
+      <td>50.0</td>
+      <td>435.0</td>
+      <td>0.0015</td>
+      <td>0.873260</td>
+      <td>2.947405e-12</td>
+    </tr>
+    <tr>
+      <td>0.5</td>
+      <td>4.5</td>
+      <td>50.0</td>
+      <td>435.0</td>
+      <td>0.0015</td>
+      <td>0.933174</td>
+      <td>1.354819e-11</td>
+    </tr>
+  </tbody>
+</table>
+</div><p>In contrast, there is no effect of the number of adults.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">dt</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;nadults&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+</pre></div>
+</div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>rep</th>
+      <th>nloci</th>
+      <th>allele_freqs</th>
+      <th>mu</th>
+      <th>rank</th>
+      <th>prob_missing</th>
+    </tr>
+    <tr>
+      <th>nadults</th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>10.0</td>
+      <td>4.5</td>
+      <td>50.0</td>
+      <td>0.3</td>
+      <td>0.0015</td>
+      <td>0.393540</td>
+      <td>1.012936e-12</td>
+    </tr>
+    <tr>
+      <td>100.0</td>
+      <td>4.5</td>
+      <td>50.0</td>
+      <td>0.3</td>
+      <td>0.0015</td>
+      <td>0.471824</td>
+      <td>3.654791e-12</td>
+    </tr>
+    <tr>
+      <td>250.0</td>
+      <td>4.5</td>
+      <td>50.0</td>
+      <td>0.3</td>
+      <td>0.0015</td>
+      <td>0.484231</td>
+      <td>3.479662e-12</td>
+    </tr>
+    <tr>
+      <td>500.0</td>
+      <td>4.5</td>
+      <td>50.0</td>
+      <td>0.3</td>
+      <td>0.0015</td>
+      <td>0.482020</td>
+      <td>4.200998e-12</td>
+    </tr>
+    <tr>
+      <td>750.0</td>
+      <td>4.5</td>
+      <td>50.0</td>
+      <td>0.3</td>
+      <td>0.0015</td>
+      <td>0.487319</td>
+      <td>2.906586e-12</td>
+    </tr>
+    <tr>
+      <td>1000.0</td>
+      <td>4.5</td>
+      <td>50.0</td>
+      <td>0.3</td>
+      <td>0.0015</td>
+      <td>0.482497</td>
+      <td>4.544048e-12</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">faps</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Tom Ellis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/tutorials/06_simulating_data.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
