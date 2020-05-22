@@ -1,0 +1,485 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sibship clustering &#8212; faps 2.2.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Inference about mating patterns" href="05 Inference about mating patterns.html" />
+    <link rel="prev" title="Paternity arrays" href="03 Paternity arrays.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="sibship-clustering">
+<h1>Sibship clustering<a class="headerlink" href="#sibship-clustering" title="Permalink to this headline">¶</a></h1>
+<p>Tom Ellis, March 2017</p>
+<p>FAPS uses information in a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> to generate plausible
+full-sibship configurations. This information is stored as a
+<code class="docutils literal notranslate"><span class="pre">sibshipCluster</span></code> object, and is the basis for almost all inference
+about biological processes in FAPS.</p>
+<p>This notebook will examine how to:</p>
+<ol class="arabic simple">
+<li><p>Use a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> to cluster offspring into plausible
+full-sibships.</p></li>
+<li><p>Compare the relative support for different partitions structures</p></li>
+<li><p>Make some basic inferences about the size and number of full
+sibships, and who is related to whom.</p></li>
+</ol>
+<p>If the goal of your study is to say something about how specific
+phenotypes or geography influence patterns of mating, you can then use
+your <code class="docutils literal notranslate"><span class="pre">sibshipArray</span></code> to <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/05%20Inference%20about%20mating%20patterns.ipynb">sample likely mating
+events</a>,
+accounting fo uncertainty in sibship structure.</p>
+<div class="section" id="generating-a-sibshipcluster-object">
+<h2>Generating a <code class="docutils literal notranslate"><span class="pre">sibshipCluster</span></code> object<a class="headerlink" href="#generating-a-sibshipcluster-object" title="Permalink to this headline">¶</a></h2>
+<p>We will begin by generating a population of 100 adults with 50 loci.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">faps</span> <span class="k">as</span> <span class="nn">fp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">867</span><span class="p">)</span>
+<span class="n">allele_freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
+<span class="n">adults</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_parents</span><span class="p">(</span><span class="mi">100</span><span class="p">,</span> <span class="n">allele_freqs</span><span class="p">,</span> <span class="n">family_name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We take the first individal as the mother and mate her to four males, to
+create three full sibships of five offspring. We then generate a
+<code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> based on the genotype data.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">progeny</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_sibships</span><span class="p">(</span><span class="n">adults</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span>
+<span class="n">mothers</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">parent_index</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+<span class="n">patlik</span>  <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">paternity_array</span><span class="p">(</span><span class="n">progeny</span><span class="p">,</span> <span class="n">mothers</span><span class="p">,</span> <span class="n">adults</span><span class="p">,</span> <span class="n">mu</span> <span class="o">=</span> <span class="mf">0.0015</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>It is straightforward to cluster offspring into full sibships. For now
+we’ll stick with the default number of Monte Carlo draws.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">,</span> <span class="n">ndraws</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Sibship clustering calculates likelihoods that each pair of offspring
+are full siblings, then builds a dendrogram from this. We can visualise
+this dendrogram if we so wish, although the output is not pretty.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="k">import</span> <span class="n">dendrogram</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">dendrogram</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">linkage_matrix</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/04%20Sibship%20clustering_files/04%20Sibship%20clustering_11_0.png" src="tutorials/04%20Sibship%20clustering_files/04%20Sibship%20clustering_11_0.png" />
+<p>Offspring individuals are labelled by their <em>index</em> in the array. Since
+full sibships are of size five we should expect to see clusters of
+{0,1,2,3,4}, {5,6,7,8,9} and {10,11,12,13,14}. This is indeed what we do
+see. What is difficult to see on the dendrogram are the branches
+connecting full siblings at the very bottom of the plot. If we bisect
+this dendrogram at different places on the y-axis we can infer different
+ways to partition the offspring into full siblings.</p>
+<p><code class="docutils literal notranslate"><span class="pre">sc</span></code> is an object of class <code class="docutils literal notranslate"><span class="pre">sibshipCluster</span></code> that contains various
+information about the array. Of primary interest are the set of
+partition structures inferred from the dendrogram. There are sixteen
+partitions - one for each individual in the array (i.e. one for each
+bifurcation in the dendrogram).</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">partitions</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span> <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">3</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">2</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">3</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">5</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">5</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">6</span><span class="p">,</span>  <span class="mi">7</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">4</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">7</span><span class="p">,</span>  <span class="mi">8</span><span class="p">,</span>  <span class="mi">7</span><span class="p">,</span>  <span class="mi">7</span><span class="p">,</span>  <span class="mi">7</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">5</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">8</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span>  <span class="mi">8</span><span class="p">,</span>  <span class="mi">8</span><span class="p">,</span>  <span class="mi">8</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">7</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span>  <span class="mi">8</span><span class="p">,</span>  <span class="mi">8</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">7</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span>  <span class="mi">8</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">7</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">],</span>
+       <span class="p">[</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">7</span><span class="p">,</span>  <span class="mi">8</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">8</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">7</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span> <span class="mi">11</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">7</span><span class="p">,</span>  <span class="mi">8</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">11</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">14</span><span class="p">,</span> <span class="mi">13</span><span class="p">,</span> <span class="mi">12</span><span class="p">,</span>  <span class="mi">1</span><span class="p">,</span>  <span class="mi">2</span><span class="p">,</span>  <span class="mi">5</span><span class="p">,</span>  <span class="mi">3</span><span class="p">,</span>  <span class="mi">4</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span>  <span class="mi">6</span><span class="p">,</span>  <span class="mi">7</span><span class="p">,</span>  <span class="mi">8</span><span class="p">]],</span>
+      <span class="n">dtype</span><span class="o">=</span><span class="n">int32</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>What is key about partition structures is that each symbol represents a
+<em>unique but arbitrary</em> family identifier. For example in the third row
+we see the true partition structure, with individuals grouped into three
+groups of five individuals.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">partitions</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int32</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Beyond denoting who is in a family with whom, the labels are arbitrary,
+with no meaningful order. This partition would be identical to
+<code class="docutils literal notranslate"><span class="pre">[0,0,0,0,0,1,1,1,1,1,2,2,2,2,2]</span></code> or
+<code class="docutils literal notranslate"><span class="pre">[10,10,10,10,10,7,7,7,7,7,22,22,22,22,22]</span></code> for example.</p>
+<p>Each partition is associated with a log likelihood and equivalent log
+probability. We can see from both scores that the third partition is
+most consistent with the data. This is of course the true partition.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">lik_partitions</span><span class="p">)</span> <span class="c1"># log likelihood of each partition</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">prob_partitions</span><span class="p">))</span> <span class="c1"># probabilities of each partition</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">-</span><span class="mf">4.23560188e+02</span> <span class="o">-</span><span class="mf">1.94067281e+02</span> <span class="o">-</span><span class="mf">2.70500804e-04</span> <span class="o">-</span><span class="mf">8.55784873e+00</span>
+            <span class="o">-</span><span class="n">inf</span>            <span class="o">-</span><span class="n">inf</span>            <span class="o">-</span><span class="n">inf</span>            <span class="o">-</span><span class="n">inf</span>
+            <span class="o">-</span><span class="n">inf</span>            <span class="o">-</span><span class="n">inf</span>            <span class="o">-</span><span class="n">inf</span>            <span class="o">-</span><span class="n">inf</span>
+            <span class="o">-</span><span class="n">inf</span>            <span class="o">-</span><span class="n">inf</span>            <span class="o">-</span><span class="n">inf</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">1.12248824e-184</span> <span class="mf">5.22016966e-085</span> <span class="mf">9.99807953e-001</span> <span class="mf">1.92047026e-004</span>
+ <span class="mf">0.00000000e+000</span> <span class="mf">0.00000000e+000</span> <span class="mf">0.00000000e+000</span> <span class="mf">0.00000000e+000</span>
+ <span class="mf">0.00000000e+000</span> <span class="mf">0.00000000e+000</span> <span class="mf">0.00000000e+000</span> <span class="mf">0.00000000e+000</span>
+ <span class="mf">0.00000000e+000</span> <span class="mf">0.00000000e+000</span> <span class="mf">0.00000000e+000</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>We also see that the first and second partitions have non-zero, but
+small likelihoods. Parititons 5-8 have negative infinity log likelihood
+- they are incompatible with the data. These partitions split up true
+full siblings, and there is no way to reconcile this with the data. In
+real world situations such partitions might have non-zero likelihoods if
+they were an unrelated candidate male compatible with one or more
+offspring through chance alone.</p>
+<p>In some cases there can be rounding error when log probabilities are
+exponentiated and probabilities do not sum to one. This is classic
+machine error, and the reason it is good to work with log values
+wherever possible. We can check:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sc</span><span class="o">.</span><span class="n">prob_partitions</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">0.9999999999999999</span>
+</pre></div>
+</div>
+<p>You can directly call the most likely partition. This is somewhat
+against the spirit of fractional analyses though…</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">mlpartition</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="n">int32</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="how-many-monte-carlo-draws">
+<h2>How many Monte Carlo draws?<a class="headerlink" href="#how-many-monte-carlo-draws" title="Permalink to this headline">¶</a></h2>
+<p>Calculating the likelihood of a partition structure is challenging in a
+fractional framework because we need to allow for the possibility of
+every candidate to be the sire of every putative full sibship, but also
+disallow the possibility that two full sibships share a single father.
+In the absence of a simple closed form estimator, FAPS uses Monte Carlo
+simulations to draw possible fathers for each sibship proportional to
+rows in the <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code>, removes cases where multiple sibships
+share a father, and calculates likelihoods for the remaining cases.</p>
+<p>The downside of this is that when the number of candidate fathers
+becomes large, many Monte Carlo draws are needed to properly sample the
+space of possible fathers. In the example above with 100 candidates,
+increasing the number of draws makes no difference. If we make a much
+larger example with 5000 candidates, 40 SNP loci, and fairly high
+genotype-error rates, then increasing the number of draws means we are
+able to find valid configurations for more partition structures.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">625</span><span class="p">)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="mf">0.003</span> <span class="c1"># genotype error rate</span>
+<span class="n">allele_freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">40</span><span class="p">)</span>
+<span class="n">adults</span>  <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_parents</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="n">allele_freqs</span><span class="p">,</span> <span class="n">family_name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mutations</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+<span class="n">progeny</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_sibships</span><span class="p">(</span><span class="n">adults</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;x&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mutations</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+<span class="n">mothers</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">parent_index</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+<span class="n">patlik</span>  <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">paternity_array</span><span class="p">(</span><span class="n">progeny</span><span class="p">,</span> <span class="n">mothers</span><span class="p">,</span> <span class="n">adults</span><span class="p">,</span> <span class="n">mu</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">,</span> <span class="n">ndraws</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">lik_partitions</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">,</span> <span class="n">ndraws</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">lik_partitions</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">,</span> <span class="n">ndraws</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span><span class="o">.</span><span class="n">lik_partitions</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">,</span> <span class="n">ndraws</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span><span class="o">.</span><span class="n">lik_partitions</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">-</span><span class="mf">300.14878498</span> <span class="o">-</span><span class="mf">223.32087212</span> <span class="o">-</span><span class="mf">114.4050134</span>    <span class="o">-</span><span class="mf">4.11643151</span>   <span class="o">-</span><span class="mf">3.71512582</span>
+   <span class="o">-</span><span class="mf">3.75496706</span>   <span class="o">-</span><span class="mf">4.55420875</span>   <span class="o">-</span><span class="mf">5.66053219</span>   <span class="o">-</span><span class="mf">7.20170101</span>          <span class="o">-</span><span class="n">inf</span>
+          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>
+          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mf">300.14878498</span> <span class="o">-</span><span class="mf">223.32087212</span> <span class="o">-</span><span class="mf">114.4050134</span>    <span class="o">-</span><span class="mf">4.11643151</span>   <span class="o">-</span><span class="mf">3.63203028</span>
+   <span class="o">-</span><span class="mf">3.64187977</span>   <span class="o">-</span><span class="mf">4.32445671</span>   <span class="o">-</span><span class="mf">5.49924599</span>   <span class="o">-</span><span class="mf">6.34217909</span>   <span class="o">-</span><span class="mf">8.7652386</span>
+  <span class="o">-</span><span class="mf">12.6240141</span>   <span class="o">-</span><span class="mf">18.72828861</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>
+          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mf">300.14878498</span> <span class="o">-</span><span class="mf">223.32087212</span> <span class="o">-</span><span class="mf">114.4050134</span>    <span class="o">-</span><span class="mf">4.11643151</span>   <span class="o">-</span><span class="mf">3.62330471</span>
+   <span class="o">-</span><span class="mf">3.60846699</span>   <span class="o">-</span><span class="mf">4.23459848</span>   <span class="o">-</span><span class="mf">5.35178042</span>   <span class="o">-</span><span class="mf">6.16195154</span>   <span class="o">-</span><span class="mf">7.87753285</span>
+   <span class="o">-</span><span class="mf">9.99059002</span>  <span class="o">-</span><span class="mf">17.09906634</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>
+          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mf">300.14878498</span> <span class="o">-</span><span class="mf">223.32087212</span> <span class="o">-</span><span class="mf">114.4050134</span>    <span class="o">-</span><span class="mf">4.11643151</span>   <span class="o">-</span><span class="mf">3.62020844</span>
+   <span class="o">-</span><span class="mf">3.59839194</span>   <span class="o">-</span><span class="mf">4.21567429</span>   <span class="o">-</span><span class="mf">5.30184998</span>   <span class="o">-</span><span class="mf">6.05007985</span>   <span class="o">-</span><span class="mf">7.37517016</span>
+   <span class="o">-</span><span class="mf">8.82810609</span>  <span class="o">-</span><span class="mf">12.82691499</span>  <span class="o">-</span><span class="mf">15.60558542</span>  <span class="o">-</span><span class="mf">18.85505458</span>          <span class="o">-</span><span class="n">inf</span>
+          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span>          <span class="o">-</span><span class="n">inf</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Notice that the extra partitions idenitified are towards the end of the
+list. These tend to be partitions where true full-sib families are
+(erroneously) split into smaller groups, especially singleton families.
+Likelihoods for the extra partitions are not increasing, so most of the
+probability weight remains around partitions which are quite close to
+the true partition.</p>
+<p>Now consider a slightly different case where every offspring really is
+in a full sibship of its own (i.e. the true partition is
+<code class="docutils literal notranslate"><span class="pre">[0,</span> <span class="pre">1,</span> <span class="pre">2,</span> <span class="pre">3,</span> <span class="pre">4,</span> <span class="pre">5,</span> <span class="pre">6,</span> <span class="pre">7,</span> <span class="pre">8,</span> <span class="pre">9,</span> <span class="pre">10,</span> <span class="pre">11,</span> <span class="pre">12,</span> <span class="pre">13,</span> <span class="pre">14,</span> <span class="pre">15,</span> <span class="pre">16,</span> <span class="pre">17,</span> <span class="pre">18,</span> <span class="pre">19]</span></code>,
+which will be at the end of the lists of partitons). Likelihoods
+increase as we look from the start to the end of each list, and the
+final partition is the most likely for 100, 1000 and 10000 Monte Carlo
+draws.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">763</span><span class="p">)</span>
+<span class="n">mu</span> <span class="o">=</span> <span class="mf">0.003</span> <span class="c1"># genotype error rate</span>
+<span class="n">allele_freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">50</span><span class="p">)</span>
+
+<span class="n">adults</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_parents</span><span class="p">(</span><span class="mi">5000</span><span class="p">,</span> <span class="n">allele_freqs</span><span class="p">,</span> <span class="n">family_name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mutations</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+<span class="n">progeny</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_sibships</span><span class="p">(</span>
+    <span class="n">parents</span> <span class="o">=</span> <span class="n">adults</span><span class="p">,</span>
+    <span class="n">dam</span>     <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">sires</span>   <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">20</span><span class="p">),</span>
+    <span class="n">family_size</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">family_name</span><span class="o">=</span><span class="s1">&#39;x&#39;</span>
+<span class="p">)</span><span class="o">.</span><span class="n">mutations</span><span class="p">(</span><span class="n">mu</span><span class="p">)</span>
+<span class="n">mothers</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">parent_index</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+<span class="n">patlik</span>  <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">paternity_array</span><span class="p">(</span><span class="n">progeny</span><span class="p">,</span> <span class="n">mothers</span><span class="p">,</span> <span class="n">adults</span><span class="p">,</span> <span class="n">mu</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">,</span> <span class="n">ndraws</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">lik_partitions</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">,</span> <span class="n">ndraws</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span><span class="o">.</span><span class="n">lik_partitions</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">,</span> <span class="n">ndraws</span><span class="o">=</span><span class="mi">10000</span><span class="p">)</span><span class="o">.</span><span class="n">lik_partitions</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">,</span> <span class="n">ndraws</span><span class="o">=</span><span class="mi">100000</span><span class="p">)</span><span class="o">.</span><span class="n">lik_partitions</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="o">-</span><span class="mf">5.10167863e+02</span> <span class="o">-</span><span class="mf">4.70469862e+02</span> <span class="o">-</span><span class="mf">4.41730003e+02</span> <span class="o">-</span><span class="mf">4.12169267e+02</span>
+ <span class="o">-</span><span class="mf">3.38687892e+02</span> <span class="o">-</span><span class="mf">3.13903372e+02</span> <span class="o">-</span><span class="mf">2.65817267e+02</span> <span class="o">-</span><span class="mf">2.46135927e+02</span>
+ <span class="o">-</span><span class="mf">2.22143385e+02</span> <span class="o">-</span><span class="mf">1.86506965e+02</span> <span class="o">-</span><span class="mf">1.54572426e+02</span> <span class="o">-</span><span class="mf">1.32405700e+02</span>
+ <span class="o">-</span><span class="mf">1.12142708e+02</span> <span class="o">-</span><span class="mf">8.41154677e+01</span> <span class="o">-</span><span class="mf">6.68572681e+01</span> <span class="o">-</span><span class="mf">4.96377301e+01</span>
+ <span class="o">-</span><span class="mf">3.29178143e+01</span> <span class="o">-</span><span class="mf">1.79947014e+01</span> <span class="o">-</span><span class="mf">5.78805754e+00</span> <span class="o">-</span><span class="mf">2.80263898e-01</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mf">5.10165728e+02</span> <span class="o">-</span><span class="mf">4.70469862e+02</span> <span class="o">-</span><span class="mf">4.41730003e+02</span> <span class="o">-</span><span class="mf">4.12169206e+02</span>
+ <span class="o">-</span><span class="mf">3.38686789e+02</span> <span class="o">-</span><span class="mf">3.13897222e+02</span> <span class="o">-</span><span class="mf">2.65814805e+02</span> <span class="o">-</span><span class="mf">2.46096265e+02</span>
+ <span class="o">-</span><span class="mf">2.22102475e+02</span> <span class="o">-</span><span class="mf">1.86468403e+02</span> <span class="o">-</span><span class="mf">1.54562471e+02</span> <span class="o">-</span><span class="mf">1.32390225e+02</span>
+ <span class="o">-</span><span class="mf">1.12127150e+02</span> <span class="o">-</span><span class="mf">8.41008586e+01</span> <span class="o">-</span><span class="mf">6.68293139e+01</span> <span class="o">-</span><span class="mf">4.96112779e+01</span>
+ <span class="o">-</span><span class="mf">3.28708075e+01</span> <span class="o">-</span><span class="mf">1.79307196e+01</span> <span class="o">-</span><span class="mf">5.72126058e+00</span> <span class="o">-</span><span class="mf">1.19751137e-01</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mf">5.10165600e+02</span> <span class="o">-</span><span class="mf">4.70469830e+02</span> <span class="o">-</span><span class="mf">4.41729592e+02</span> <span class="o">-</span><span class="mf">4.12168347e+02</span>
+ <span class="o">-</span><span class="mf">3.38685737e+02</span> <span class="o">-</span><span class="mf">3.13895043e+02</span> <span class="o">-</span><span class="mf">2.65812508e+02</span> <span class="o">-</span><span class="mf">2.46087689e+02</span>
+ <span class="o">-</span><span class="mf">2.22094041e+02</span> <span class="o">-</span><span class="mf">1.86458265e+02</span> <span class="o">-</span><span class="mf">1.54559457e+02</span> <span class="o">-</span><span class="mf">1.32386598e+02</span>
+ <span class="o">-</span><span class="mf">1.12123513e+02</span> <span class="o">-</span><span class="mf">8.40971259e+01</span> <span class="o">-</span><span class="mf">6.68212498e+01</span> <span class="o">-</span><span class="mf">4.96018329e+01</span>
+ <span class="o">-</span><span class="mf">3.28607984e+01</span> <span class="o">-</span><span class="mf">1.79152119e+01</span> <span class="o">-</span><span class="mf">5.70440426e+00</span> <span class="o">-</span><span class="mf">4.94517515e-02</span><span class="p">]</span>
+<span class="p">[</span><span class="o">-</span><span class="mf">5.10165600e+02</span> <span class="o">-</span><span class="mf">4.70469798e+02</span> <span class="o">-</span><span class="mf">4.41729527e+02</span> <span class="o">-</span><span class="mf">4.12168104e+02</span>
+ <span class="o">-</span><span class="mf">3.38685627e+02</span> <span class="o">-</span><span class="mf">3.13894453e+02</span> <span class="o">-</span><span class="mf">2.65811908e+02</span> <span class="o">-</span><span class="mf">2.46085972e+02</span>
+ <span class="o">-</span><span class="mf">2.22092092e+02</span> <span class="o">-</span><span class="mf">1.86456407e+02</span> <span class="o">-</span><span class="mf">1.54558425e+02</span> <span class="o">-</span><span class="mf">1.32385102e+02</span>
+ <span class="o">-</span><span class="mf">1.12121855e+02</span> <span class="o">-</span><span class="mf">8.40955517e+01</span> <span class="o">-</span><span class="mf">6.68180370e+01</span> <span class="o">-</span><span class="mf">4.95986164e+01</span>
+ <span class="o">-</span><span class="mf">3.28571819e+01</span> <span class="o">-</span><span class="mf">1.79097544e+01</span> <span class="o">-</span><span class="mf">5.69722040e+00</span> <span class="o">-</span><span class="mf">2.17152577e-02</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>So how many Monte Carlo draws are necessary? The short answer is: it
+probably doesn’t matter. In the original FAPS paper (figure 5 in that
+paper) we found that increasing the number of Monte Carlo draws does
+increase the amount of probability space explored, but these regions
+tend to be areas of low probability. Likely configurations are found
+first, and increasing the number of draws doesn’t increase overall
+accuracy of inferred sibship relationships.</p>
+<p>A good rule is to use the default setting of 1000 draws. If you are
+concerned about this effect you can also change the number to 100 or
+10,000 and see if this alters your downstream analyses. You can also
+test this explicitly with simulations using the <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/06%20Simulating%20data.ipynb">power analysis
+tools</a>.</p>
+</div>
+<div class="section" id="inferring-family-structure">
+<h2>Inferring family structure<a class="headerlink" href="#inferring-family-structure" title="Permalink to this headline">¶</a></h2>
+<p>For this section we will simulate a slightly more interesting family
+structure. This block of code creates a half-sib array of 15 offspring
+from five fathers, where each father contributes five, four, three, two
+and one offspring respectively. It then performs sibship clustering on
+the array. We use 1000 candidate males and 50 loci.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># Lists indexing sires and dams</span>
+<span class="n">sires</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="mi">5</span> <span class="o">+</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="mi">4</span> <span class="o">+</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="mi">3</span> <span class="o">+</span> <span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="mi">2</span> <span class="o">+</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="mi">1</span>
+<span class="n">dam</span>   <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sires</span><span class="p">)</span>
+
+<span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="mi">542</span><span class="p">)</span>
+<span class="n">allele_freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">30</span><span class="p">)</span>
+<span class="n">adults</span>  <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_parents</span><span class="p">(</span><span class="mi">1000</span><span class="p">,</span> <span class="n">allele_freqs</span><span class="p">,</span> <span class="n">family_name</span><span class="o">=</span><span class="s1">&#39;a&#39;</span><span class="p">)</span>
+<span class="n">progeny</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_offspring</span><span class="p">(</span><span class="n">adults</span><span class="p">,</span> <span class="n">dam_list</span><span class="o">=</span><span class="n">dam</span><span class="p">,</span> <span class="n">sire_list</span><span class="o">=</span><span class="n">sires</span><span class="p">)</span>
+<span class="n">mothers</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">parent_index</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+
+<span class="n">patlik</span>  <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">paternity_array</span><span class="p">(</span><span class="n">progeny</span><span class="p">,</span> <span class="n">mothers</span><span class="p">,</span> <span class="n">adults</span><span class="p">,</span> <span class="n">mu</span><span class="p">)</span>
+<span class="n">sc</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="number-of-families">
+<h3>Number of families<a class="headerlink" href="#number-of-families" title="Permalink to this headline">¶</a></h3>
+<p>We saw before that we could call a list of valid partitions for <code class="docutils literal notranslate"><span class="pre">sc</span></code>
+using <code class="docutils literal notranslate"><span class="pre">sc.partitions</span></code>. The output is not terribly enlightening on its
+own, however. We could instead ask how probable it is that there are <em>x</em>
+full sibships in the array, integrating over all partition structures.
+Here each number is the probability that there are 1, 2, …, 15
+families.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">nfamilies</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">1.54459956e-94</span><span class="p">,</span> <span class="mf">2.57811788e-60</span><span class="p">,</span> <span class="mf">9.18372901e-44</span><span class="p">,</span> <span class="mf">7.72547191e-06</span><span class="p">,</span>
+       <span class="mf">7.47533669e-01</span><span class="p">,</span> <span class="mf">2.23504324e-01</span><span class="p">,</span> <span class="mf">2.89124365e-02</span><span class="p">,</span> <span class="mf">4.18453104e-05</span><span class="p">,</span>
+       <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="mf">0.00000000e+00</span><span class="p">,</span>
+       <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="mf">0.00000000e+00</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>We could show the same information graphically. Its clear that almost
+all the probability denisty is around <span class="math notranslate nohighlight">\(x=5\)</span> families.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">matplotlib</span> inline
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="c1">#ax.bar(np.arange(0.5, len(sc.nfamilies())+0.5), sc.nfamilies())</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">16</span><span class="p">),</span> <span class="n">sc</span><span class="o">.</span><span class="n">nfamilies</span><span class="p">())</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Number of full sibships&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Posterior probability&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/04%20Sibship%20clustering_files/04%20Sibship%20clustering_38_0.png" src="tutorials/04%20Sibship%20clustering_files/04%20Sibship%20clustering_38_0.png" />
+</div>
+<div class="section" id="family-size">
+<h3>Family size<a class="headerlink" href="#family-size" title="Permalink to this headline">¶</a></h3>
+<p>We can also get the distribution of family sizes within the array,
+averaged over all partitions. This returns a vector of the same length
+as the number of offspring in the array. <code class="docutils literal notranslate"><span class="pre">family_size</span></code> returns the
+posterior probability of observing one or more families of size 1, 2,
+… , 15. It will be clear that we are unable to distinguish a single
+sibship with high probability from multiple families of the same size,
+each with low probability; this is the price we pay for integrating out
+uncertainty in partition structure.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="o">.</span><span class="n">family_size</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">2.36420142e-01</span><span class="p">,</span> <span class="mf">1.95030543e-01</span><span class="p">,</span> <span class="mf">1.86762685e-01</span><span class="p">,</span> <span class="mf">2.32277965e-01</span><span class="p">,</span>
+       <span class="mf">1.49508665e-01</span><span class="p">,</span> <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="mf">0.00000000e+00</span><span class="p">,</span>
+       <span class="mf">3.06124300e-44</span><span class="p">,</span> <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="mf">1.28905894e-60</span><span class="p">,</span> <span class="mf">0.00000000e+00</span><span class="p">,</span>
+       <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="mf">1.54459956e-94</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Plotting this shows that we are roughly equally likely to observe a
+family of sizes one, two, three, four and five.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">()</span>
+<span class="n">ax</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sires</span><span class="p">))</span><span class="o">+</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">sc</span><span class="o">.</span><span class="n">family_size</span><span class="p">())</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/04%20Sibship%20clustering_files/04%20Sibship%20clustering_43_0.png" src="tutorials/04%20Sibship%20clustering_files/04%20Sibship%20clustering_43_0.png" />
+</div>
+<div class="section" id="sibling-relationships">
+<h3>Sibling relationships<a class="headerlink" href="#sibling-relationships" title="Permalink to this headline">¶</a></h3>
+<p>Often we want to know who is related to whom. <code class="docutils literal notranslate"><span class="pre">sc.full_sib_matrix()</span></code>
+returns an <span class="math notranslate nohighlight">\(n*n\)</span> matrix, where <span class="math notranslate nohighlight">\(n\)</span> is the number of
+offspring. Each element describes the log probability that a pair of
+individuals are full siblings. If we plot this using a heatmap you can
+clearly see the five full sibships jump out as blocks of yellow (&gt;90%
+probability of being full siblings) against a sea of purple (near zero
+probability of being full siblings).</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sibmat</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">full_sib_matrix</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">pcolor</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sibmat</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">()</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/04%20Sibship%20clustering_files/04%20Sibship%20clustering_46_0.png" src="tutorials/04%20Sibship%20clustering_files/04%20Sibship%20clustering_46_0.png" />
+<p>Note that real datasets seldom look this tidy!</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">faps</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00_Quickstart guide.html">Quickstart guide to FAPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01 Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02 Genotype data.html">Genotype data in FAPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03 Paternity arrays.html">Paternity arrays</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Sibship clustering</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#generating-a-sibshipcluster-object">Generating a <code class="docutils literal notranslate"><span class="pre">sibshipCluster</span></code> object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#how-many-monte-carlo-draws">How many Monte Carlo draws?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#inferring-family-structure">Inferring family structure</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="05 Inference about mating patterns.html">Inference about mating patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06 Simulating data.html">Simulating data and power analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07 Dealing with multiple half-sib families.html">Dealing with multiple half-sib families</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08 Data cleaning in A. majus.html">Data cleaning for <em>Antirrhinum majus</em> data set from 2012</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="03 Paternity arrays.html" title="previous chapter">Paternity arrays</a></li>
+      <li>Next: <a href="05 Inference about mating patterns.html" title="next chapter">Inference about mating patterns</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Tom Ellis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/tutorials/04 Sibship clustering.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

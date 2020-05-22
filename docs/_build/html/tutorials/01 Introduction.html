@@ -1,0 +1,360 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Introduction &#8212; faps 2.2.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Genotype data in FAPS" href="02 Genotype data.html" />
+    <link rel="prev" title="Quickstart guide to FAPS" href="00_Quickstart guide.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="introduction">
+<h1>Introduction<a class="headerlink" href="#introduction" title="Permalink to this headline">¶</a></h1>
+<p>Tom Ellis, February 2017</p>
+<p>FAPS stands for Fractional Analysis of Sibships and Paternity. It is a
+Python package for reconstructing genealogical relationships in wild
+populations, and making inference about biological processes. The
+sections of this document are intended as a user’s guide to introduce
+how FAPS works. For full details of the method, see <a class="reference external" href="https://doi.org/10.1111/1755-0998.12782">Ellis *et al.*
+2018</a>.</p>
+<div class="section" id="background">
+<h2>Background<a class="headerlink" href="#background" title="Permalink to this headline">¶</a></h2>
+<p>The motivation for developing of FAPS was to provide a package to
+investigate biological processes in a large population of snapdragons in
+the wild. Existing packages to do this relied on computationally intense
+Markov-chain algorithms, which limited the scope for subsequent analysis
+and for checking assumptions through simulations. As such, most of the
+examples in this guide relate to snapdragons. That said, FAPS addresses
+general issues in pedigree reconstruction of wild populations, and it is
+hoped that FAPS will be useful for other plant and animal systems.</p>
+<p>The specific aims of FAPS were to provide a package which would allow us
+to:</p>
+<ol class="arabic simple">
+<li><p>Jointly inferring sibship and paternity relationships, and hence gain
+better estimates of both (Wang 2007), without using a random-walk
+algorithm such as MCMC or simulated annealing.</p></li>
+<li><p>Account for uncertainty about relationships (i.e. to integrate
+fractional paternity assignment with sibship inference).</p></li>
+<li><p>Provide tools for testing biological hypotheses with minimal hassle.</p></li>
+<li><p>Do this efficiently for large populations.</p></li>
+<li><p>Not depend on mating system or genetic marker technology.</p></li>
+</ol>
+<div class="section" id="overview-of-the-method">
+<h3>Overview of the method<a class="headerlink" href="#overview-of-the-method" title="Permalink to this headline">¶</a></h3>
+<p>FAPS reconstructs relationships for one or more half-sibling arrays,
+that is to say a sample of offspring from one or more mothers whose
+identity is uncertain. A half-sibling array consistent of seedlings from
+the same maternal plant, or a family of lambs from the same ewe, to give
+two examples. The paternity of each offspring is unkown, and hence it is
+unknown whether pairs of offspring are full or half siblings.</p>
+<p>There is also a sample of males, each of whom is a candidate to be the
+true sire of each offspring individual. FAPS is used to identify likely
+sibling relationships between offspring and their shared fathers based
+on typed genetic markers, and to use this information to make meaningful
+conclusions about population or matig biology. The procedure can be
+summarised as follows:</p>
+<ol class="arabic simple">
+<li><p>FAPS begins with an matrix with a row for each offspring and a column
+for each candidate male. Each element represents the likelihood that
+the corresponding male is the sire of the offspring individual.</p></li>
+<li><p>Based on this matrix, we apply hierarchical clustering to group
+individuals into possible configurations of full-siblings.</p></li>
+<li><p>Calculate statistics of interest on each configuration, weighted by
+the probability of each candidate male and each configuration.</p></li>
+</ol>
+<p>Like all statistical analyses, FAPS makes a number of assumptions about
+your data. It is good to state these explicitly so everyone is aware of
+the limitations of the data and method:</p>
+<ol class="arabic simple">
+<li><p>Individuals come from two generations: a sample of offspring, and a
+sample of reproductive adults.</p></li>
+<li><p>At present FAPS is intended to deal with paternity assignment only,
+i.e. when one parent is known and the second must be inferred. That
+said, it would not take too much work to modify FAPS to accommodate
+bi-parental assignment.</p></li>
+<li><p>Sampling of the adults does not need to be complete, but the more
+true parents are missing the more likely it is that true
+full-siblings are inferred to be half-siblings.</p></li>
+<li><p>Genotype data are biallelic, and genotyping errors can be
+characterised as a haploid genotype being either correct or incorrect
+with some probability. Multi-allelic markers with complex error
+patterns such as microsatellites are not supported at present - see
+the sections on genotype data and paternity arrays for more on this.</p></li>
+</ol>
+</div>
+<div class="section" id="other-software">
+<h3>Other software<a class="headerlink" href="#other-software" title="Permalink to this headline">¶</a></h3>
+<p>Depending on your biological questions, your data may not fit the
+assumptions listed above, and an alternative approach might be more
+appropriate. For example:</p>
+<ul class="simple">
+<li><p>Cervus (Marshall 1998) was the first widely-used program for
+parentage/paternity assignment. It is restricted to categorical
+assignment of parent-offspring pairs and relies on substantial prior
+information about the demography of the population.</p></li>
+<li><p>Colony2 is a dedicated Fortran program for sibship inference (Wang
+2004, Wang and Santure 2009). Analyses can be run with or without a
+sample of parents. Originally designed for microsatellites, it can be
+slow for large SNP datasets, although Wang <em>et al.</em> 2012 updated the
+software to support SNP data with a slight cost to accuracy.</p></li>
+<li><p>As argued eloquently by Hadfield (2006), frequently the aim of
+genealogical reconstruction is very often not the pedigree itself,
+but some biological parameter of the population. His MasterBayes
+package for R allows the user to dircetly estimate the posterior
+distribution for the statistic of interest. It is usually slow for
+SNP data, can does not incorporate information about siblings.</p></li>
+<li><p>SNPPIT (Anderson &amp; Garza, 2006) provides very fast and accurate
+assignments of parentage using SNPs.</p></li>
+<li><p>Almudevar (2003), Huisman (2017) and Anderson and Ng (2016) provide
+software for estimating multigenerational pedigrees.</p></li>
+</ul>
+</div>
+</div>
+<div class="section" id="prerequisites">
+<h2>Prerequisites<a class="headerlink" href="#prerequisites" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="python-packages">
+<h3>Python packages<a class="headerlink" href="#python-packages" title="Permalink to this headline">¶</a></h3>
+<p>It is assumed you have read Ellis <em>et al.</em> 2018 for the basic background
+to the method. It would also be useful to read Devlin (1988) for an
+overview of the motivation and basic methods of fractional assignment.
+It is also assumed you have a basic understanding of probability and
+likelihood; see Bolker (2006, chapter 6) for an example of a general
+introduction.</p>
+<p>FAPS uses Python as an interface, but it is hoped that this guide should
+allow users who aren’t familiar with Python to adapt the code to their
+needs. It would be worthwhile to at least familiarise yourself with
+Python’s data types, especially lists and NumPy arrays, and how list
+comprehensions work. A general introduction to Python concepts can be
+found <a class="reference external" href="v">here</a>. I recommend interacting with FAPS through
+<a class="reference external" href="http://ipython.org/">IPython/Jupyter</a>, which allows you to test
+small pieces of code and annotate analyses as you go. This document, for
+example, is written in IPython.</p>
+<p>You will of course need to have Python installed on your machine. If you
+do not already have this, instructions can be found
+<a class="reference external" href="https://wiki.python.org/moin/BeginnersGuide/Download">here</a>. You
+will also need to install the NumPy, fastcluster and Pandas libraries.
+These should be installed automatically if you intall FAPS using pip
+(see below), but if for some reason they are not, the easiest way to do
+this is to install one of the <a class="reference external" href="http://www.scipy.org/install.html">scientific Python
+bundles</a>. Some of the simulation
+tools also make use of <a class="reference external" href="http://ipywidgets.readthedocs.io/en/latest/user_install.html">Jupyter
+widgets</a>,
+but these are optional. There are no specific hardware requirements
+beyond what is needed to run Python, but it is possible that RAM will be
+a limiting factor if you are dealing with large samples (for example
+~100 offspring and 10,000 candidate males).</p>
+<p>All testing and development of FAPS was done on Linux and Mac machines.
+I have not tested it on Windows, nor do I intend to. That said, an
+advantage of Python is that it ought to work on any operating system, so
+in principle FAPS ought to run as well as on a Unix machine. One
+important difference is that Windows uses ‘’ instead of ‘/’ in its file
+paths, so you will need to edit accordingly.</p>
+</div>
+<div class="section" id="installing-faps">
+<h3>Installing FAPS<a class="headerlink" href="#installing-faps" title="Permalink to this headline">¶</a></h3>
+<p>The best way to install FAPS is to use Python’s package manager, Pip.
+Instructions to do so can be found at that projects <a class="reference external" href="https://pip.pypa.io/en/stable/installing/">documentation
+page</a>. Windows users might
+also consider
+<a class="reference external" href="https://sites.google.com/site/pydatalog/python/pip-for-windows">pip-Win</a>.
+To download the stable release run <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">faps</span></code> in the command
+line. If Python is unable to locate the package, try
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">fap</span> <span class="pre">--user</span></code>. You can download the development version of
+FAPS from <a class="reference external" href="https://github.com/ellisztamas/faps">the project github
+repository</a>.</p>
+<p>Once in Python/IPython you’ll need to import the package, as well as the
+NumPy library on which it is based. In the rest of this document, I’ll
+assume you’ve run the following lines to do this if this isn’t
+explicitly stated.</p>
+<p>from faps import * import numpy as np</p>
+<p>The asterisk on the first line is a shortcut to tell Python to import
+all the functions and classes in FAPS. This is somewhat lazy, but saves
+us having to give the package name every time we call something.</p>
+</div>
+</div>
+<div class="section" id="marker-data-types">
+<h2>Marker data types<a class="headerlink" href="#marker-data-types" title="Permalink to this headline">¶</a></h2>
+<p>The basic unit on which analyses are built is a matrix of likelihoods of
+paternities, with a row for each offspring individual and a column for
+each candidate father (matrix G in Ellis <em>et al.</em> 2018). Each element
+represents the likelihood that a single candidate male is the father of
+a single offspring individual based on alleles shared between them and
+the offspring’s mother. One of the aims of FAPS was to create a method
+which did not depend on marker type, mating system, ploidy, or
+genotyping technology, with the aim that it should be applicable to as
+broad a range of datasets that exist, or may yet exist. As such, the
+optimum way to estimate G will vary from case to case.</p>
+<p>Although microsatellite data are fairly standard in format, SNP
+technologies are moving fast. Since every technology comes with its own
+quirks, so FAPS was written with the expectation that <em>most users will
+be using non-standard data in some way</em>. As such, it is really difficult
+to write functions to calculate G that are general, and users are
+strongly encouraged to think about the most appropriate way to calculate
+G for their data. Once you have done this, all other aspects of the
+analysis are independent of marker type. See the sections on <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/02%20Genotype%20data.ipynb">Importing
+genotype
+data</a>
+and <a class="reference external" href="http://localhost:8888/notebooks/docs/03%20Paternity%20arrays.ipynb">Paternity
+arrays</a>
+for more details on how to import data.</p>
+<p>FAPS will also work given an appropriate G matrix for a polyploid
+species, but you will also need to provide G yourself. See Wang 2016 for
+inspiration. This topic is rather involved, and I personally do not feel
+comfortable implementing anything in this area myself, but I would be
+interested to hear from anyone who is willing to try it.</p>
+</div>
+<div class="section" id="literature-cited">
+<h2>Literature cited<a class="headerlink" href="#literature-cited" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li><p>Anderson, E. C., &amp; Garza, J. C. (2006). The power of
+single-nucleotide polymorphisms for large-scale parentage inference.
+Genetics, 172(4),2567–2582.</p></li>
+<li><p>Anderson, E. C., &amp; Ng, T. C. (2016). Bayesian pedigree inference with
+small numbers of single nucleotide polymorphisms via a factor-graph
+representation. Theoretical Population Biology, 107, 39–51.
+<a class="reference external" href="https://doi.org/10.1016/j.tpb.2015.09.005">https://doi.org/10.1016/j.tpb.2015.09.005</a></p></li>
+<li><p>Devlin, B., Roeder, K., &amp; Ellstrand, N. (1988). Fractional paternity
+assignment: Theoretical development and comparison to other methods.
+Theoretical and Applied Genetics, 76(3), 369–380.</p></li>
+<li><p>Ellis, TJ, Field DL, Barton, NH (2018) Efficient inference of
+paternity and sibship inference given known maternity via
+hierarchical clustering. Molecular Ecology Resources
+<a class="reference external" href="https://doi.org/10.1111/1755-0998.12782">https://doi.org/10.1111/1755-0998.12782</a></p></li>
+<li><p>Hadfield, J., Richardson, D., &amp; Burke, T. (2006). Towards unbiased
+parentage assignment: Combining genetic, behavioural and spatial data
+in a Bayesian framework. Molecular Ecology, 15(12), 3715–3730.
+<a class="reference external" href="https://doi.org/10.1111/j.1365-294X.2006.03050.x">https://doi.org/10.1111/j.1365-294X.2006.03050.x</a></p></li>
+<li><p>Huisman, J. (2017). Pedigree reconstruction from SNP data: parentage
+assignment, sibship clustering and beyond. Molecular ecology
+resources, 17(5), 1009-1024. <a class="reference external" href="https://doi.org/10.1111/1755-0998.12665">https://doi.org/10.1111/1755-0998.12665</a></p></li>
+<li><p>Marshall, T., Slate, J., Kruuk, L., &amp; Pemberton, J. (1998).
+Statistical confdence for likelihood-based paternity inference in
+natural populations. Molecular Ecology, 7(5), 639–655.
+<a class="reference external" href="https://doi.org/10.1046/j.1365-294x.1998.00374.x">https://doi.org/10.1046/j.1365-294x.1998.00374.x</a></p></li>
+<li><p>Wang, J. (2004). Sibship reconstruction from genetic data with
+typingerrors. Genetics, 166(4), 1963–1979.
+<a class="reference external" href="https://doi.org/10.1534/genetics.166.4.1963">https://doi.org/10.1534/genetics.166.4.1963</a></p></li>
+<li><p>Wang, J. (2007). Parentage and sibship exclusions: Higher statistical
+power with more family members. Heredity, 99(2), 205–217.
+<a class="reference external" href="https://doi.org/10.1038/sj.hdy.6800984">https://doi.org/10.1038/sj.hdy.6800984</a></p></li>
+<li><p>Wang, J., &amp; Santure, A. W. (2009). Parentage and sibship inference
+from multilocus genotype data under polygamy. Genetics, 181(4),
+1579–1594. <a class="reference external" href="https://doi.org/10.1534/genetics.108.100214">https://doi.org/10.1534/genetics.108.100214</a></p></li>
+<li><p>Wang, J. (2012). Computationally efficient sibship and parentage
+assignment from multilocus marker data. Genetics, 191(1),
+183–194.https://doi.org/10.1534/genetics.111.138149</p></li>
+<li><p>Wang, J., &amp; Scribner, K. T. (2014). Parentage and sibship inference
+from markers in polyploids. Molecular Ecology Resources, 14(3),
+541–553. <a class="reference external" href="https://doi.org/10.1111/1755-0998.12210">https://doi.org/10.1111/1755-0998.12210</a></p></li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">faps</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00_Quickstart guide.html">Quickstart guide to FAPS</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#background">Background</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prerequisites">Prerequisites</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#marker-data-types">Marker data types</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#literature-cited">Literature cited</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="02 Genotype data.html">Genotype data in FAPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03 Paternity arrays.html">Paternity arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04 Sibship clustering.html">Sibship clustering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05 Inference about mating patterns.html">Inference about mating patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06 Simulating data.html">Simulating data and power analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07 Dealing with multiple half-sib families.html">Dealing with multiple half-sib families</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08 Data cleaning in A. majus.html">Data cleaning for <em>Antirrhinum majus</em> data set from 2012</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="00_Quickstart guide.html" title="previous chapter">Quickstart guide to FAPS</a></li>
+      <li>Next: <a href="02 Genotype data.html" title="next chapter">Genotype data in FAPS</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Tom Ellis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/tutorials/01 Introduction.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

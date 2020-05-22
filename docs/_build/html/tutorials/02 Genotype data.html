@@ -1,0 +1,537 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Genotype data in FAPS &#8212; faps 2.2.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Paternity arrays" href="03 Paternity arrays.html" />
+    <link rel="prev" title="Introduction" href="01 Introduction.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="genotype-data-in-faps">
+<h1>Genotype data in FAPS<a class="headerlink" href="#genotype-data-in-faps" title="Permalink to this headline">¶</a></h1>
+<p>Tom Ellis, March 2017</p>
+<p>In most cases, researchers will have a sample of offspring, maternal and
+candidate paternal individuals typed at a set of markers. In this
+section we’ll look in more detail at how FAPS deals with genotype data
+to build a matrix we can use for sibship inference.</p>
+<p>This notebook will examine how to:</p>
+<ol class="arabic simple">
+<li><p>Generate simple <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> objects and explore what
+information is contained in them.</p></li>
+<li><p>Import external genotype data.</p></li>
+<li><p>Work with genotype data from multiple half sib families.</p></li>
+</ol>
+<p>Checking genotype data is an important step before committing to a full
+analysis. A case study of data checking and cleaning using an empirical
+dataset is given in <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/08%20Data%20cleaning%20in%20A.%20majus.ipynb">section
+8</a>.
+In the <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/03%20Paternity%20arrays.ipynb">next
+section</a>
+we’ll see how to combine genotype information on offspring and a set of
+candidate parents to create an array of likelihoods of paternity for
+dyads of offspring and candidate fathers. Also relevant is the section
+on <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/06%20Simulating%20data.ipynb">simulating data and power
+analysis</a>.</p>
+<p>Currently, FAPS <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> objects assume you are using
+biallelic, unlinked SNPs for a diploid. If your system deviates from
+these criteria in some way you can also skip this stage by creating your
+own array of paternity likelihoods using an appropriate likelihood
+function, and importing this directly as a <code class="docutils literal notranslate"><span class="pre">paternityArrays</span></code>. See the
+next section for more on <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> objects and how they should
+look.</p>
+<div class="section" id="genotypearray-objects">
+<h2><code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> objects<a class="headerlink" href="#genotypearray-objects" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="basic-genotype-information">
+<h3>Basic genotype information<a class="headerlink" href="#basic-genotype-information" title="Permalink to this headline">¶</a></h3>
+<p>Genotype data are stored in a class of objects called a
+<code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code>. We’ll illustrate how these work with simulated data,
+since not all information is available for real-world data sets. We
+first generate a vector of population allele frequencies for 10 unlinked
+SNP markers, and use these to create a population of five adult
+individuals. This is obviously an unrealisticaly small dataset, but
+serves for illustration. The optional argument <code class="docutils literal notranslate"><span class="pre">family_names</span></code> allows
+you to name this generation.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">faps</span> <span class="k">as</span> <span class="nn">fp</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="n">allele_freqs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">uniform</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">mypop</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_parents</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="n">allele_freqs</span><span class="p">,</span> <span class="n">family_name</span><span class="o">=</span><span class="s1">&#39;my_population&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The object we just created contains information about the genotypes of
+each of the ten parent individuals. Genotypes are stored as
+<em>N</em>x<em>L</em>x2-dimensional arrays, where <em>N</em> is the number of
+individuals and <em>L</em> is the number of loci. We can view the genotype for
+the first parent like so (recall that Python starts counting from zero,
+not one):</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mypop</span><span class="o">.</span><span class="n">geno</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>You could subset the array by indexes the genotypes, for example by
+taking only the first two individuals and the first five loci:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mypop</span><span class="o">.</span><span class="n">geno</span><span class="p">[:</span><span class="mi">2</span><span class="p">,</span> <span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
+
+       <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]])</span>
+</pre></div>
+</div>
+<p>For realistic examples with many more loci, this obviously gets unwieldy
+pretty soon. It’s cleaner to supply a list of individuals to keep or
+remove to the <code class="docutils literal notranslate"><span class="pre">subset</span></code> and <code class="docutils literal notranslate"><span class="pre">drop</span></code> functions. These return return a
+new <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> for the individuals of interest.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">mypop</span><span class="o">.</span><span class="n">subset</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mypop</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;my_population_0&#39;</span> <span class="s1">&#39;my_population_2&#39;</span><span class="p">]</span>
+<span class="p">[</span><span class="s1">&#39;my_population_1&#39;</span> <span class="s1">&#39;my_population_3&#39;</span> <span class="s1">&#39;my_population_4&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="information-on-indivuals">
+<h3>Information on indivuals<a class="headerlink" href="#information-on-indivuals" title="Permalink to this headline">¶</a></h3>
+<p>A <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> contains other useful information about the
+individuals:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">mypop</span><span class="o">.</span><span class="n">names</span><span class="p">)</span> <span class="c1"># individual names</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mypop</span><span class="o">.</span><span class="n">size</span><span class="p">)</span>  <span class="c1"># number of individuals</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mypop</span><span class="o">.</span><span class="n">nloci</span><span class="p">)</span> <span class="c1"># numbe of loci typed.</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;my_population_0&#39;</span> <span class="s1">&#39;my_population_1&#39;</span> <span class="s1">&#39;my_population_2&#39;</span> <span class="s1">&#39;my_population_3&#39;</span>
+ <span class="s1">&#39;my_population_4&#39;</span><span class="p">]</span>
+<span class="mi">5</span>
+<span class="mi">10</span>
+</pre></div>
+</div>
+<p><code class="docutils literal notranslate"><span class="pre">make_sibships</span></code> is a convenient way to generate a single half-sibling
+array from individuals in <code class="docutils literal notranslate"><span class="pre">mypop</span></code>. This code mates makes a half-sib
+array with individual 0 as the mothers, with individuals 1, 2 and 3
+contributing male gametes. Each father has four offspring each.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">progeny</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">make_sibships</span><span class="p">(</span><span class="n">mypop</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">],</span> <span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;myprogeny&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With this generation we can extract a little extra information from the
+<code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> than we could from the parents about their parents and
+family structure.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">fathers</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">mothers</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">families</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">nfamilies</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;my_population_1&#39;</span> <span class="s1">&#39;my_population_1&#39;</span> <span class="s1">&#39;my_population_1&#39;</span> <span class="s1">&#39;my_population_1&#39;</span>
+ <span class="s1">&#39;my_population_2&#39;</span> <span class="s1">&#39;my_population_2&#39;</span> <span class="s1">&#39;my_population_2&#39;</span> <span class="s1">&#39;my_population_2&#39;</span>
+ <span class="s1">&#39;my_population_3&#39;</span> <span class="s1">&#39;my_population_3&#39;</span> <span class="s1">&#39;my_population_3&#39;</span> <span class="s1">&#39;my_population_3&#39;</span><span class="p">]</span>
+<span class="p">[</span><span class="s1">&#39;my_population_0&#39;</span> <span class="s1">&#39;my_population_0&#39;</span> <span class="s1">&#39;my_population_0&#39;</span> <span class="s1">&#39;my_population_0&#39;</span>
+ <span class="s1">&#39;my_population_0&#39;</span> <span class="s1">&#39;my_population_0&#39;</span> <span class="s1">&#39;my_population_0&#39;</span> <span class="s1">&#39;my_population_0&#39;</span>
+ <span class="s1">&#39;my_population_0&#39;</span> <span class="s1">&#39;my_population_0&#39;</span> <span class="s1">&#39;my_population_0&#39;</span> <span class="s1">&#39;my_population_0&#39;</span><span class="p">]</span>
+<span class="p">[</span><span class="s1">&#39;my_population_0/my_population_1&#39;</span> <span class="s1">&#39;my_population_0/my_population_2&#39;</span>
+ <span class="s1">&#39;my_population_0/my_population_3&#39;</span><span class="p">]</span>
+<span class="mi">3</span>
+</pre></div>
+</div>
+<p>Of course with real data we would not normally know the identity of the
+father or the number of families, but this is useful for checking
+accuracy in simulations. It can also be useful to look up the positions
+of the parents in another list of names. This code finds the indices of
+the mothers and fathers of the offspring in the names listed in
+<code class="docutils literal notranslate"><span class="pre">mypop</span></code>.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">parent_index</span><span class="p">(</span><span class="s1">&#39;mother&#39;</span><span class="p">,</span> <span class="n">mypop</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">parent_index</span><span class="p">(</span><span class="s1">&#39;father&#39;</span><span class="p">,</span> <span class="n">mypop</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+<span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="information-on-markers">
+<h3>Information on markers<a class="headerlink" href="#information-on-markers" title="Permalink to this headline">¶</a></h3>
+<p>Pull out marker names with <code class="docutils literal notranslate"><span class="pre">marker</span></code>. The names here are boring because
+they are simulated, but your data can have as exciting names as you’d
+like.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mypop</span><span class="o">.</span><span class="n">markers</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">9</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Check whether the locus names for parents and offspring match. This is
+obvious vital for determining who shares alleles with whom, but easy to
+overlook! If they don’t match, the most likely explanation is that you
+have imported genotype data and misspecified where the genotype data
+start (the <code class="docutils literal notranslate"><span class="pre">genotype_col</span></code> argument).</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mypop</span><span class="o">.</span><span class="n">markers</span> <span class="o">==</span> <span class="n">progeny</span><span class="o">.</span><span class="n">markers</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span> <span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span>  <span class="kc">True</span><span class="p">,</span>
+        <span class="kc">True</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>FAPS uses population allele frequencies to calculate the likelihood that
+paternal alleles are drawn at random. They are are useful to check the
+markers are doing what you think they are. Pull out the population
+allele frequencies for each locus:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mypop</span><span class="o">.</span><span class="n">allele_freqs</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.</span> <span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>We can also check for missing data and heterozygosity for each marker
+and individual. By default, data for each marker are returned:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">mypop</span><span class="o">.</span><span class="n">missing_data</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mypop</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">0.6</span> <span class="mf">0.6</span> <span class="mf">0.2</span> <span class="mf">0.4</span> <span class="mf">0.8</span> <span class="mf">0.6</span> <span class="mf">0.4</span> <span class="mf">0.</span>  <span class="mf">0.4</span> <span class="mf">0.4</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>To get summaries for each individual:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">mypop</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;individual&#39;</span><span class="p">))</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">mypop</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;individual&#39;</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">0.4</span> <span class="mf">0.5</span> <span class="mf">0.5</span> <span class="mf">0.4</span> <span class="mf">0.4</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>In this instance there is no missing data, because data are simulated to
+be error-free. See the next section on an empircal example where this is
+not true.</p>
+</div>
+</div>
+<div class="section" id="importing-genotype-data">
+<h2>Importing genotype data<a class="headerlink" href="#importing-genotype-data" title="Permalink to this headline">¶</a></h2>
+<p>You can import genotype data from a text or CSV (comma-separated text)
+file. Both can be easily exported from a spreadsheet program. Rows index
+individuals, and columns index each typed locus. More specifically:</p>
+<ol class="arabic simple">
+<li><p>Offspring names should be given in the first column</p></li>
+<li><p>If the data are offspring, names of the mothers are given in the
+second column.</p></li>
+<li><p>If known for some reason, names of fathers can be given as well.</p></li>
+<li><p>Genotype information should be given <em>to the right</em> of columns
+indicating individual or parental names, with locus names in the
+column headers.</p></li>
+</ol>
+<p>SNP genotype data must be biallelic, that is they can only be homozygous
+for the first allele, heterozygous, or homozygous for the second allele.
+These should be given as 0, 1 and 2 respectively. If genotype data is
+missing this should be entered as NA.</p>
+<p>The following code imports genotype information on real samples of
+offspring from half-sibling array of wild-pollinated snpadragon
+seedlings collected in the Spanish Pyrenees. The candidate parents are
+as many of the wild adult plants as we could find. You will find the
+data files on the <a class="reference external" href="https://datarep.app.ist.ac.at/id/eprint/95">IST Austria data
+repository</a>
+(DOI:10.15479/AT:ISTA:95). Aside from the path to where the data file is
+stored, the two other arguments specify the column containing names of
+the mothers, and the first column containing genotype data of the
+offspring.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">offspring</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read_genotypes</span><span class="p">(</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;../data/offspring_2012_genotypes.csv&#39;</span><span class="p">,</span>
+    <span class="n">mothers_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">genotype_col</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Again, Python starts counting from zero rather than one, so the first
+column is really column zero, and so on. Because these are CSV, there
+was no need to specify that data are delimited by commas, but this is
+included for illustration.</p>
+<p>Offspring are divided into 60 maternal families of different sizes. You
+can call the name of the mother of each offspring. You can also call the
+names of the fathers, with <code class="docutils literal notranslate"><span class="pre">offspring.fathers</span></code>, but since these are
+unknown this is not informative.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">offspring</span><span class="o">.</span><span class="n">mothers</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;J1246&#39;</span><span class="p">,</span> <span class="s1">&#39;K0451&#39;</span><span class="p">,</span> <span class="s1">&#39;K0632&#39;</span><span class="p">,</span> <span class="s1">&#39;K0635&#39;</span><span class="p">,</span> <span class="s1">&#39;K1768&#39;</span><span class="p">,</span> <span class="s1">&#39;K1809&#39;</span><span class="p">,</span> <span class="s1">&#39;K2036&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;L0057&#39;</span><span class="p">,</span> <span class="s1">&#39;L0221&#39;</span><span class="p">,</span> <span class="s1">&#39;L0911&#39;</span><span class="p">,</span> <span class="s1">&#39;L0935&#39;</span><span class="p">,</span> <span class="s1">&#39;L1264&#39;</span><span class="p">,</span> <span class="s1">&#39;L1847&#39;</span><span class="p">,</span> <span class="s1">&#39;L1872&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;L1882&#39;</span><span class="p">,</span> <span class="s1">&#39;L1892&#39;</span><span class="p">,</span> <span class="s1">&#39;M0002&#39;</span><span class="p">,</span> <span class="s1">&#39;M0009&#39;</span><span class="p">,</span> <span class="s1">&#39;M0018&#39;</span><span class="p">,</span> <span class="s1">&#39;M0022&#39;</span><span class="p">,</span> <span class="s1">&#39;M0025&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;M0028&#39;</span><span class="p">,</span> <span class="s1">&#39;M0034&#39;</span><span class="p">,</span> <span class="s1">&#39;M0042&#39;</span><span class="p">,</span> <span class="s1">&#39;M0043&#39;</span><span class="p">,</span> <span class="s1">&#39;M0045&#39;</span><span class="p">,</span> <span class="s1">&#39;M0047&#39;</span><span class="p">,</span> <span class="s1">&#39;M0054&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;M0069&#39;</span><span class="p">,</span> <span class="s1">&#39;M0078&#39;</span><span class="p">,</span> <span class="s1">&#39;M0130&#39;</span><span class="p">,</span> <span class="s1">&#39;M0137&#39;</span><span class="p">,</span> <span class="s1">&#39;M0202&#39;</span><span class="p">,</span> <span class="s1">&#39;M0209&#39;</span><span class="p">,</span> <span class="s1">&#39;M0210&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;M0225&#39;</span><span class="p">,</span> <span class="s1">&#39;M0238&#39;</span><span class="p">,</span> <span class="s1">&#39;M0251&#39;</span><span class="p">,</span> <span class="s1">&#39;M0254&#39;</span><span class="p">,</span> <span class="s1">&#39;M0258&#39;</span><span class="p">,</span> <span class="s1">&#39;M0259&#39;</span><span class="p">,</span> <span class="s1">&#39;M0267&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;M0283&#39;</span><span class="p">,</span> <span class="s1">&#39;M0310&#39;</span><span class="p">,</span> <span class="s1">&#39;M0323&#39;</span><span class="p">,</span> <span class="s1">&#39;M0329&#39;</span><span class="p">,</span> <span class="s1">&#39;M0333&#39;</span><span class="p">,</span> <span class="s1">&#39;M0344&#39;</span><span class="p">,</span> <span class="s1">&#39;M0345&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;M0484&#39;</span><span class="p">,</span> <span class="s1">&#39;M0494&#39;</span><span class="p">,</span> <span class="s1">&#39;M0773&#39;</span><span class="p">,</span> <span class="s1">&#39;M0884&#39;</span><span class="p">,</span> <span class="s1">&#39;M1000&#39;</span><span class="p">,</span> <span class="s1">&#39;M1335&#39;</span><span class="p">,</span> <span class="s1">&#39;M1454&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;M1460&#39;</span><span class="p">,</span> <span class="s1">&#39;M1463&#39;</span><span class="p">,</span> <span class="s1">&#39;M1466&#39;</span><span class="p">,</span> <span class="s1">&#39;M1846&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&lt;U5&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Offspring names are a combination of maternal family and a unique ID for
+ecah offspring.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">offspring</span><span class="o">.</span><span class="n">names</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;J1246_221&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_222&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_223&#39;</span><span class="p">,</span> <span class="o">...</span><span class="p">,</span> <span class="s1">&#39;M1846_435&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;M1846_436&#39;</span><span class="p">,</span> <span class="s1">&#39;M1846_437&#39;</span><span class="p">],</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&lt;U10&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can call summaries of genotype data to help in data cleaning. For
+example, this code shows the proportion of loci with missing genotype
+data for the first ten offspring individuals.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">offspring</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="s1">&#39;individual&#39;</span><span class="p">)[:</span><span class="mi">10</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mf">0.01408451</span> <span class="mf">0.12676056</span> <span class="mf">0.09859155</span> <span class="mf">0.07042254</span> <span class="mf">0.01408451</span> <span class="mf">0.08450704</span>
+ <span class="mf">0.11267606</span> <span class="mf">0.07042254</span> <span class="mf">0.22535211</span> <span class="mf">0.08450704</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>This snippet shows the proportion of missing data points and
+heterozygosity for the first ten loci. These can be helpful in
+identifying dubious loci.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">offspring</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="s1">&#39;marker&#39;</span><span class="p">)[:</span><span class="mi">10</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">offspring</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">()[:</span><span class="mi">10</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mf">0.07616361</span> <span class="mf">0.07616361</span> <span class="mf">0.0606488</span>  <span class="mf">0.16643159</span> <span class="mf">0.05500705</span> <span class="mf">0.0909732</span>
+ <span class="mf">0.09449929</span> <span class="mf">0.05994358</span> <span class="mf">0.05923836</span> <span class="mf">0.07757405</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">0.36812412</span> <span class="mf">0.39985896</span> <span class="mf">0.45627645</span> <span class="mf">0.33497884</span> <span class="mf">0.42665726</span> <span class="mf">0.4696756</span>
+ <span class="mf">0.36318759</span> <span class="mf">0.35543018</span> <span class="mf">0.4506347</span>  <span class="mf">0.3751763</span> <span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="multiple-families">
+<h2>Multiple families<a class="headerlink" href="#multiple-families" title="Permalink to this headline">¶</a></h2>
+<p>In real data set we generally work with multplie half-sibling arrays at
+once. For downstream analyses we need to split up the genotype data into
+families to reflect this. This is easy to do with <code class="docutils literal notranslate"><span class="pre">split</span></code> and a vector
+of labels to group offspring by. This returns a dictionary of
+<code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> objects labelled by maternal family. These snippet
+splits up the data and prints the maternal family names.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">offs_split</span> <span class="o">=</span> <span class="n">offspring</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">by</span> <span class="o">=</span> <span class="n">offspring</span><span class="o">.</span><span class="n">mothers</span><span class="p">)</span>
+<span class="n">offs_split</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dict_keys</span><span class="p">([</span><span class="s1">&#39;J1246&#39;</span><span class="p">,</span> <span class="s1">&#39;K0451&#39;</span><span class="p">,</span> <span class="s1">&#39;K0632&#39;</span><span class="p">,</span> <span class="s1">&#39;K0635&#39;</span><span class="p">,</span> <span class="s1">&#39;K1768&#39;</span><span class="p">,</span> <span class="s1">&#39;K1809&#39;</span><span class="p">,</span> <span class="s1">&#39;K2036&#39;</span><span class="p">,</span> <span class="s1">&#39;L0057&#39;</span><span class="p">,</span> <span class="s1">&#39;L0221&#39;</span><span class="p">,</span> <span class="s1">&#39;L0911&#39;</span><span class="p">,</span> <span class="s1">&#39;L0935&#39;</span><span class="p">,</span> <span class="s1">&#39;L1264&#39;</span><span class="p">,</span> <span class="s1">&#39;L1847&#39;</span><span class="p">,</span> <span class="s1">&#39;L1872&#39;</span><span class="p">,</span> <span class="s1">&#39;L1882&#39;</span><span class="p">,</span> <span class="s1">&#39;L1892&#39;</span><span class="p">,</span> <span class="s1">&#39;M0002&#39;</span><span class="p">,</span> <span class="s1">&#39;M0009&#39;</span><span class="p">,</span> <span class="s1">&#39;M0018&#39;</span><span class="p">,</span> <span class="s1">&#39;M0022&#39;</span><span class="p">,</span> <span class="s1">&#39;M0025&#39;</span><span class="p">,</span> <span class="s1">&#39;M0028&#39;</span><span class="p">,</span> <span class="s1">&#39;M0034&#39;</span><span class="p">,</span> <span class="s1">&#39;M0042&#39;</span><span class="p">,</span> <span class="s1">&#39;M0043&#39;</span><span class="p">,</span> <span class="s1">&#39;M0045&#39;</span><span class="p">,</span> <span class="s1">&#39;M0047&#39;</span><span class="p">,</span> <span class="s1">&#39;M0054&#39;</span><span class="p">,</span> <span class="s1">&#39;M0069&#39;</span><span class="p">,</span> <span class="s1">&#39;M0078&#39;</span><span class="p">,</span> <span class="s1">&#39;M0130&#39;</span><span class="p">,</span> <span class="s1">&#39;M0137&#39;</span><span class="p">,</span> <span class="s1">&#39;M0202&#39;</span><span class="p">,</span> <span class="s1">&#39;M0209&#39;</span><span class="p">,</span> <span class="s1">&#39;M0210&#39;</span><span class="p">,</span> <span class="s1">&#39;M0225&#39;</span><span class="p">,</span> <span class="s1">&#39;M0238&#39;</span><span class="p">,</span> <span class="s1">&#39;M0251&#39;</span><span class="p">,</span> <span class="s1">&#39;M0254&#39;</span><span class="p">,</span> <span class="s1">&#39;M0258&#39;</span><span class="p">,</span> <span class="s1">&#39;M0259&#39;</span><span class="p">,</span> <span class="s1">&#39;M0267&#39;</span><span class="p">,</span> <span class="s1">&#39;M0283&#39;</span><span class="p">,</span> <span class="s1">&#39;M0310&#39;</span><span class="p">,</span> <span class="s1">&#39;M0323&#39;</span><span class="p">,</span> <span class="s1">&#39;M0329&#39;</span><span class="p">,</span> <span class="s1">&#39;M0333&#39;</span><span class="p">,</span> <span class="s1">&#39;M0344&#39;</span><span class="p">,</span> <span class="s1">&#39;M0345&#39;</span><span class="p">,</span> <span class="s1">&#39;M0484&#39;</span><span class="p">,</span> <span class="s1">&#39;M0494&#39;</span><span class="p">,</span> <span class="s1">&#39;M0773&#39;</span><span class="p">,</span> <span class="s1">&#39;M0884&#39;</span><span class="p">,</span> <span class="s1">&#39;M1000&#39;</span><span class="p">,</span> <span class="s1">&#39;M1335&#39;</span><span class="p">,</span> <span class="s1">&#39;M1454&#39;</span><span class="p">,</span> <span class="s1">&#39;M1460&#39;</span><span class="p">,</span> <span class="s1">&#39;M1463&#39;</span><span class="p">,</span> <span class="s1">&#39;M1466&#39;</span><span class="p">,</span> <span class="s1">&#39;M1846&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Each entry is an individual <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code>. You can pull out
+individual families by indexing the dictionary by name. For example,
+here are the names of the offspring in family J1246:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">offs_split</span><span class="p">[</span><span class="s2">&quot;J1246&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">names</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;J1246_221&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_222&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_223&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_224&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_225&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;J1246_226&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_227&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_228&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_229&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_230&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;J1246_231&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_232&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_233&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_241&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_615&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;J1246_616&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_617&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_618&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_619&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_620&#39;</span><span class="p">,</span>
+       <span class="s1">&#39;J1246_621&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_622&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_623&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_624&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_625&#39;</span><span class="p">],</span>
+      <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;&lt;U10&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To perform operations on each <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> we now have to iterate
+over each element. A convenient way to do this is with dictionary
+comprehensions by separating out the labels from the <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code>
+objects using <code class="docutils literal notranslate"><span class="pre">items</span></code>.</p>
+<p>As an example, here’s how you call the number of offspring in each
+family. It splits up the dictionary into keys for each family, and calls
+<code class="docutils literal notranslate"><span class="pre">size</span></code> on each <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> (labelled genArray in the
+comprehension).</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="n">family</span> <span class="p">:</span> <span class="n">genArray</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">family</span><span class="p">,</span><span class="n">genArray</span> <span class="ow">in</span> <span class="n">offs_split</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;J1246&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+ <span class="s1">&#39;K0451&#39;</span><span class="p">:</span> <span class="mi">27</span><span class="p">,</span>
+ <span class="s1">&#39;K0632&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+ <span class="s1">&#39;K0635&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+ <span class="s1">&#39;K1768&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+ <span class="s1">&#39;K1809&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+ <span class="s1">&#39;K2036&#39;</span><span class="p">:</span> <span class="mi">19</span><span class="p">,</span>
+ <span class="s1">&#39;L0057&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+ <span class="s1">&#39;L0221&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
+ <span class="s1">&#39;L0911&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+ <span class="s1">&#39;L0935&#39;</span><span class="p">:</span> <span class="mi">26</span><span class="p">,</span>
+ <span class="s1">&#39;L1264&#39;</span><span class="p">:</span> <span class="mi">23</span><span class="p">,</span>
+ <span class="s1">&#39;L1847&#39;</span><span class="p">:</span> <span class="mi">33</span><span class="p">,</span>
+ <span class="s1">&#39;L1872&#39;</span><span class="p">:</span> <span class="mi">26</span><span class="p">,</span>
+ <span class="s1">&#39;L1882&#39;</span><span class="p">:</span> <span class="mi">27</span><span class="p">,</span>
+ <span class="s1">&#39;L1892&#39;</span><span class="p">:</span> <span class="mi">9</span><span class="p">,</span>
+ <span class="s1">&#39;M0002&#39;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
+ <span class="s1">&#39;M0009&#39;</span><span class="p">:</span> <span class="mi">41</span><span class="p">,</span>
+ <span class="s1">&#39;M0018&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+ <span class="s1">&#39;M0022&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
+ <span class="s1">&#39;M0025&#39;</span><span class="p">:</span> <span class="mi">26</span><span class="p">,</span>
+ <span class="s1">&#39;M0028&#39;</span><span class="p">:</span> <span class="mi">33</span><span class="p">,</span>
+ <span class="s1">&#39;M0034&#39;</span><span class="p">:</span> <span class="mi">37</span><span class="p">,</span>
+ <span class="s1">&#39;M0042&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+ <span class="s1">&#39;M0043&#39;</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span>
+ <span class="s1">&#39;M0045&#39;</span><span class="p">:</span> <span class="mi">21</span><span class="p">,</span>
+ <span class="s1">&#39;M0047&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+ <span class="s1">&#39;M0054&#39;</span><span class="p">:</span> <span class="mi">27</span><span class="p">,</span>
+ <span class="s1">&#39;M0069&#39;</span><span class="p">:</span> <span class="mi">31</span><span class="p">,</span>
+ <span class="s1">&#39;M0078&#39;</span><span class="p">:</span> <span class="mi">33</span><span class="p">,</span>
+ <span class="s1">&#39;M0130&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+ <span class="s1">&#39;M0137&#39;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+ <span class="s1">&#39;M0202&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+ <span class="s1">&#39;M0209&#39;</span><span class="p">:</span> <span class="mi">33</span><span class="p">,</span>
+ <span class="s1">&#39;M0210&#39;</span><span class="p">:</span> <span class="mi">26</span><span class="p">,</span>
+ <span class="s1">&#39;M0225&#39;</span><span class="p">:</span> <span class="mi">23</span><span class="p">,</span>
+ <span class="s1">&#39;M0238&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+ <span class="s1">&#39;M0251&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+ <span class="s1">&#39;M0254&#39;</span><span class="p">:</span> <span class="mi">26</span><span class="p">,</span>
+ <span class="s1">&#39;M0258&#39;</span><span class="p">:</span> <span class="mi">23</span><span class="p">,</span>
+ <span class="s1">&#39;M0259&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+ <span class="s1">&#39;M0267&#39;</span><span class="p">:</span> <span class="mi">23</span><span class="p">,</span>
+ <span class="s1">&#39;M0283&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+ <span class="s1">&#39;M0310&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+ <span class="s1">&#39;M0323&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+ <span class="s1">&#39;M0329&#39;</span><span class="p">:</span> <span class="mi">26</span><span class="p">,</span>
+ <span class="s1">&#39;M0333&#39;</span><span class="p">:</span> <span class="mi">26</span><span class="p">,</span>
+ <span class="s1">&#39;M0344&#39;</span><span class="p">:</span> <span class="mi">16</span><span class="p">,</span>
+ <span class="s1">&#39;M0345&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+ <span class="s1">&#39;M0484&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+ <span class="s1">&#39;M0494&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
+ <span class="s1">&#39;M0773&#39;</span><span class="p">:</span> <span class="mi">25</span><span class="p">,</span>
+ <span class="s1">&#39;M0884&#39;</span><span class="p">:</span> <span class="mi">36</span><span class="p">,</span>
+ <span class="s1">&#39;M1000&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+ <span class="s1">&#39;M1335&#39;</span><span class="p">:</span> <span class="mi">28</span><span class="p">,</span>
+ <span class="s1">&#39;M1454&#39;</span><span class="p">:</span> <span class="mi">18</span><span class="p">,</span>
+ <span class="s1">&#39;M1460&#39;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
+ <span class="s1">&#39;M1463&#39;</span><span class="p">:</span> <span class="mi">26</span><span class="p">,</span>
+ <span class="s1">&#39;M1466&#39;</span><span class="p">:</span> <span class="mi">24</span><span class="p">,</span>
+ <span class="s1">&#39;M1846&#39;</span><span class="p">:</span> <span class="mi">23</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>You can achieve the same thing with a list comprehension, but you lose
+information about family ID. It is also more difficult to pass a list on
+to downstream functions. This snippet shows the first ten items.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="n">genArray</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">genArray</span> <span class="ow">in</span> <span class="n">offs_split</span><span class="o">.</span><span class="n">values</span><span class="p">()][:</span><span class="mi">10</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mi">25</span><span class="p">,</span> <span class="mi">27</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">24</span><span class="p">,</span> <span class="mi">22</span><span class="p">,</span> <span class="mi">24</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">faps</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00_Quickstart guide.html">Quickstart guide to FAPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01 Introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Genotype data in FAPS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#genotypearray-objects"><code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> objects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#importing-genotype-data">Importing genotype data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-families">Multiple families</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="03 Paternity arrays.html">Paternity arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04 Sibship clustering.html">Sibship clustering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05 Inference about mating patterns.html">Inference about mating patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06 Simulating data.html">Simulating data and power analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07 Dealing with multiple half-sib families.html">Dealing with multiple half-sib families</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08 Data cleaning in A. majus.html">Data cleaning for <em>Antirrhinum majus</em> data set from 2012</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="01 Introduction.html" title="previous chapter">Introduction</a></li>
+      <li>Next: <a href="03 Paternity arrays.html" title="next chapter">Paternity arrays</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Tom Ellis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/tutorials/02 Genotype data.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

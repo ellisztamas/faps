@@ -1,0 +1,890 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>Data cleaning for Antirrhinum majus data set from 2012 &#8212; faps 2.2.1 documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script type="text/javascript" src="../_static/language_data.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="Dealing with multiple half-sib families" href="07 Dealing with multiple half-sib families.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="data-cleaning-for-antirrhinum-majus-data-set-from-2012">
+<h1>Data cleaning for <em>Antirrhinum majus</em> data set from 2012<a class="headerlink" href="#data-cleaning-for-antirrhinum-majus-data-set-from-2012" title="Permalink to this headline">¶</a></h1>
+<p>Tom Ellis, June 2017</p>
+<p>In this notebook we will examine an empirical dataset using the
+snapdragon <em>Antirrhinum majus</em>.</p>
+<p>In 2012 we collected open-pollinated seed capsules from wild mothers and
+genotypes samples of the offsping. A single seed capsule contains up to
+several hundred seeds from between 1 and lots of pollen donors. We also
+collected tissue and GPS positions for as many of the adults
+reproductive plants as we could find.</p>
+<p>These data are those desribed and analysed by Ellis <em>et al.</em> (2018), and
+are available from the <a class="reference external" href="https://datarep.app.ist.ac.at/id/eprint/95">IST Austria data
+repository</a>
+(DOI:10.15479/AT:ISTA:95).</p>
+<p>Below, we will do an initial data inspection to weed out dubious loci
+and individuals. It can be argued that this process was overly
+conservative, and we threw out a lot of useful data, so you need not
+necessarily be so critical of your own data.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">faps</span> <span class="kn">import</span> <span class="o">*</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="o">%</span><span class="k">pylab</span> inline
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Populating</span> <span class="n">the</span> <span class="n">interactive</span> <span class="n">namespace</span> <span class="kn">from</span> <span class="nn">numpy</span> <span class="ow">and</span> <span class="n">matplotlib</span>
+</pre></div>
+</div>
+<div class="section" id="data-inspection">
+<h2>Data inspection<a class="headerlink" href="#data-inspection" title="Permalink to this headline">¶</a></h2>
+<p>Import genotype data for the reproductive adults and offspring. The
+latter includes information on the ID of the maternal mother.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">progeny</span> <span class="o">=</span> <span class="n">read_genotypes</span><span class="p">(</span><span class="s1">&#39;../manuscript_faps/data_files/offspring_SNPs_2012.csv&#39;</span><span class="p">,</span> <span class="n">mothers_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">genotype_col</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">adults</span>  <span class="o">=</span> <span class="n">read_genotypes</span><span class="p">(</span><span class="s1">&#39;../manuscript_faps/data_files/parents_SNPs_2012.csv&#39;</span><span class="p">)</span>
+
+<span class="n">iix</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="ow">in</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">progeny</span><span class="o">.</span><span class="n">mothers</span><span class="o">.</span><span class="n">tolist</span><span class="p">()]</span>
+<span class="n">progeny</span> <span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">iix</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="section" id="gps-data">
+<h3>GPS data<a class="headerlink" href="#gps-data" title="Permalink to this headline">¶</a></h3>
+<p>We will also import data GPS data for 2219 individuals tagged as alive
+in 2012. Since not all of these have been genotyped, we reformat the
+data to match the genotype data.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">gps_pos</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="s1">&#39;../manuscript_faps/data_files/amajus_GPS_2012.csv&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">skip_header</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">])</span> <span class="c1"># import CSV file</span>
+<span class="n">gps_lab</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">genfromtxt</span><span class="p">(</span><span class="s1">&#39;../manuscript_faps/data_files/amajus_GPS_2012.csv&#39;</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="n">skip_header</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">usecols</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="s1">&#39;str&#39;</span><span class="p">)</span> <span class="c1"># import CSV file</span>
+<span class="c1"># subset GPS data to match the genotype data.</span>
+<span class="n">ix</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gps_lab</span><span class="p">))</span> <span class="k">if</span> <span class="n">gps_lab</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">]</span>
+<span class="n">gps_pos</span><span class="p">,</span> <span class="n">gps_lab</span> <span class="o">=</span> <span class="n">gps_pos</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">gps_lab</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>17 individuals are actually from about 15km to the East. It is hard to
+imagine that these individuals could contribute to the pollen pool of
+the mothers, so let’s remove these from the sample.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">gps_pos</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">gps_pos</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">matplotlib</span><span class="o">.</span><span class="n">collections</span><span class="o">.</span><span class="n">PathCollection</span> <span class="n">at</span> <span class="mh">0x7f610159f290</span><span class="o">&gt;</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_10_1.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_10_1.png" />
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ix</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gps_lab</span><span class="p">))</span> <span class="k">if</span> <span class="n">gps_pos</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">5000</span><span class="p">]</span>
+<span class="n">gps_pos</span><span class="p">,</span> <span class="n">gps_lab</span> <span class="o">=</span> <span class="n">gps_pos</span><span class="p">[</span><span class="n">ix</span><span class="p">],</span> <span class="n">gps_lab</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="genotype-information">
+<h3>Genotype information<a class="headerlink" href="#genotype-information" title="Permalink to this headline">¶</a></h3>
+<p>As a sanity check, confirm that the marker names really do match.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="nb">all</span><span class="p">([</span><span class="n">progeny</span><span class="o">.</span><span class="n">markers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">adults</span><span class="o">.</span><span class="n">markers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">nloci</span><span class="p">)])</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kc">True</span>
+</pre></div>
+</div>
+<p>Tissue from the adults and progeny was dried in different ways. For the
+progeny, I didnt use enough silica gel to dry the tissue rapidly, and
+the DNA became degraded. Reflecting this, although genotype dropouts
+(the rate at which genotype information at a single locus fails to
+amplify) is respectable for the adults, but dire for the offspring.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">print</span> <span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">0.027972027972027972</span>
+<span class="mf">0.7916666666666666</span>
+</pre></div>
+</div>
+<p>Luckily a lot of this is driven by a small number of loci/individuals
+with very high dropout rates.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+<span class="n">mdo</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">mdo</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="s1">&#39;marker&#39;</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">))</span>
+<span class="n">mdo</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Missing data&quot;</span><span class="p">)</span>
+<span class="n">mdo</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Number of loci&quot;</span><span class="p">)</span>
+<span class="n">mdo</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Per locus: offspring&#39;</span><span class="p">)</span>
+
+<span class="n">indo</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">indo</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;individual&#39;</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">))</span>
+<span class="n">indo</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Missing data&quot;</span><span class="p">)</span>
+<span class="n">indo</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Number of loci&quot;</span><span class="p">)</span>
+<span class="n">indo</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Per indiviudual: offspring&#39;</span><span class="p">)</span>
+
+<span class="n">mda</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">mda</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="s1">&#39;marker&#39;</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">))</span>
+<span class="n">mda</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Missing data&quot;</span><span class="p">)</span>
+<span class="n">mda</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Number of loci&quot;</span><span class="p">)</span>
+<span class="n">mda</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Per locus: adults&#39;</span><span class="p">)</span>
+
+<span class="n">inda</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">inda</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;individual&#39;</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">))</span>
+<span class="n">inda</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Missing data&quot;</span><span class="p">)</span>
+<span class="n">inda</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Number of loci&quot;</span><span class="p">)</span>
+<span class="n">inda</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Per indiviudual: adults&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="sa">u</span><span class="s1">&#39;Per indiviudual: adults&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_18_1.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_18_1.png" />
+<p>Although overall per locus drop-out rates are low for the adults, there
+are some individuals with alarmingly high amounts of missing data.
+Candidates with very few loci typed can come out as being highly
+compatible with many offspring, just because there is insufficient
+information to exclude them.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">print</span> <span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;individual&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="s1">&#39;individual&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mf">0.8985507246376812</span>
+<span class="mf">0.9710144927536232</span>
+</pre></div>
+</div>
+<p>Count, then remove individuals with &gt;5% missing data.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">print</span> <span class="s2">&quot;Offspring:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">names</span><span class="p">)[</span><span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">])</span>
+<span class="k">print</span> <span class="s2">&quot;Parents:&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">)[</span><span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.05</span><span class="p">])</span>
+
+<span class="n">progeny</span> <span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span>    <span class="n">individuals</span><span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">)</span>
+<span class="n">adults</span>  <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">individuals</span><span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.05</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Offspring</span><span class="p">:</span> <span class="mi">688</span>
+<span class="n">Parents</span><span class="p">:</span> <span class="mi">66</span>
+</pre></div>
+</div>
+<p>Histograms look much better. It would still worth removing some of the
+dubious loci with high drop-out rates though.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+<span class="n">mdo</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">mdo</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="s1">&#39;marker&#39;</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">))</span>
+<span class="n">mdo</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Missing data&quot;</span><span class="p">)</span>
+<span class="n">mdo</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Number of loci&quot;</span><span class="p">)</span>
+<span class="n">mdo</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Per locus: offspring&#39;</span><span class="p">)</span>
+
+<span class="n">indo</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">indo</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;individual&#39;</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">))</span>
+<span class="n">indo</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Missing data&quot;</span><span class="p">)</span>
+<span class="n">indo</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Number of loci&quot;</span><span class="p">)</span>
+<span class="n">indo</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Per indiviudual: offspring&#39;</span><span class="p">)</span>
+
+<span class="n">mda</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">mda</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="s1">&#39;marker&#39;</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">))</span>
+<span class="n">mda</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Missing data&quot;</span><span class="p">)</span>
+<span class="n">mda</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Number of loci&quot;</span><span class="p">)</span>
+<span class="n">mda</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Per locus: adults&#39;</span><span class="p">)</span>
+
+<span class="n">inda</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">inda</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="s1">&#39;individual&#39;</span><span class="p">),</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">))</span>
+<span class="n">inda</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Missing data&quot;</span><span class="p">)</span>
+<span class="n">inda</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Number of loci&quot;</span><span class="p">)</span>
+<span class="n">inda</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Per indiviudual: adults&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="sa">u</span><span class="s1">&#39;Per indiviudual: adults&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_24_1.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_24_1.png" />
+<p>Remove the loci with dropouts &gt;10% from both the offspring and adult
+datasets.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">print</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">markers</span><span class="p">)[</span><span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mf">0.1</span><span class="p">]</span>
+
+<span class="n">progeny</span><span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">loci</span><span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">)</span>
+<span class="n">adults</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">loci</span> <span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;s217_2722063&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Allele frequency and heterozygosity generally show the convex pattern
+one would expect. An exception is the locus with allele frequency at
+around 0.4, but heterozygosity &gt;0.7, which is suspect, and indicative of
+a possible outlier.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">allele_freqs</span><span class="p">(),</span> <span class="n">adults</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Allele frequency&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Heterozygosity&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_28_0.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_28_0.png" />
+<p>Loci with low heterozygosity are not dangerous in themselves; they might
+contribute some information, albeit little. To be on the safe side,
+let’s remove loci with less than 0.2 heterozygosity, and the errant
+locus with high heterozygosity.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">print</span> <span class="s2">&quot;Heterozygosity &gt; 0.7:&quot;</span><span class="p">,</span> <span class="n">adults</span><span class="o">.</span><span class="n">markers</span><span class="p">[</span><span class="n">adults</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span><span class="mf">0.7</span><span class="p">]</span>
+<span class="k">print</span> <span class="s2">&quot;Heterozygosity &lt; 0.2:&quot;</span><span class="p">,</span> <span class="n">progeny</span><span class="o">.</span><span class="n">markers</span><span class="p">[</span><span class="n">adults</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.2</span><span class="p">]</span>
+
+<span class="n">progeny</span> <span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">loci</span><span class="o">=</span> <span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.7</span><span class="p">))</span>
+<span class="n">adults</span>  <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span> <span class="n">loci</span><span class="o">=</span> <span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mf">0.2</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mf">0.7</span><span class="p">))</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Heterozygosity</span> <span class="o">&gt;</span> <span class="mf">0.7</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;s217_2722063&#39;</span><span class="p">]</span>
+<span class="n">Heterozygosity</span> <span class="o">&lt;</span> <span class="mf">0.2</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;s154_504353&#39;</span> <span class="s1">&#39;s320_60828&#39;</span> <span class="s1">&#39;s316_93292&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="summary-of-genotype-data">
+<h3>Summary of genotype data<a class="headerlink" href="#summary-of-genotype-data" title="Permalink to this headline">¶</a></h3>
+<p>This leaves us with a dataset of 61 loci for which allele frequency and
+heterozygosity are highest around 0.5, which is what we would like. In
+particular, heterozygosity (and hence homozygosity) among the adults is
+humped around 0.5, which is a good sign that parents should be readily
+distinguishable. There is nevertheless substantial spread towards zero
+and one for the progeny data however, which is less than ideal.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+
+<span class="n">afp</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">afp</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">allele_freqs</span><span class="p">())</span>
+<span class="n">afp</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Adults&#39;</span><span class="p">)</span>
+<span class="n">afp</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Allele frequency&quot;</span><span class="p">)</span>
+
+<span class="n">afo</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">afo</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">allele_freqs</span><span class="p">())</span>
+<span class="n">afo</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Offspring&#39;</span><span class="p">)</span>
+<span class="n">afo</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Allele frequency&quot;</span><span class="p">)</span>
+
+<span class="n">hetp</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">hetp</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">hetp</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Heterozygosity&quot;</span><span class="p">)</span>
+
+<span class="n">heto</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
+<span class="n">heto</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+<span class="n">heto</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Heterozygosity&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Text</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="sa">u</span><span class="s1">&#39;Heterozygosity&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_33_1.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_33_1.png" />
+<p>The effective number of loci can be seen as the number of loci at which
+one can make compare the offspring, maternal and candidate paternal
+genotype (i.e. those loci with no missing data). Given how high dropouts
+are in the offspring, it is worthwhile to check the effective number of
+loci for this dataset.</p>
+<p>In fact, effective number of loci is good. The minimum number of valid
+loci to compare is 46, and in 99% of cases there are 57 or more loci.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">([</span><span class="n">progeny</span><span class="o">.</span><span class="n">mothers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="k">if</span> <span class="n">progeny</span><span class="o">.</span><span class="n">mothers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">])</span>
+<span class="n">ix</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">size</span><span class="p">)</span> <span class="k">if</span> <span class="n">progeny</span><span class="o">.</span><span class="n">mothers</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">]</span>
+<span class="n">progeny</span> <span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">ix</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">mothers</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">parent_index</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+<span class="n">neloci</span>  <span class="o">=</span> <span class="n">effective_nloci</span><span class="p">(</span><span class="n">progeny</span><span class="p">,</span> <span class="n">mothers</span><span class="p">,</span> <span class="n">adults</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">neloci</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">45.5</span><span class="p">,</span><span class="mf">63.5</span><span class="p">,</span><span class="mi">1</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_36_0.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_36_0.png" />
+<p>Finally, print some summary statistics about the quality of the genotype
+information in the data set.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">print</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">nloci</span><span class="p">)</span>
+<span class="k">print</span> <span class="n">progeny</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">adults</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">adults</span><span class="o">.</span><span class="n">heterozygosity</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+<span class="k">print</span> <span class="n">adults</span><span class="o">.</span><span class="n">allele_freqs</span><span class="p">()</span><span class="o">.</span><span class="n">min</span><span class="p">(),</span> <span class="n">adults</span><span class="o">.</span><span class="n">allele_freqs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">64</span>
+<span class="mf">0.01730390401146132</span>
+<span class="mf">0.007726070226070227</span>
+<span class="mf">0.2000962000962001</span> <span class="mf">0.5483405483405484</span>
+<span class="mf">0.2308624031007752</span> <span class="mf">0.8760975609756098</span>
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="example-family-l1872">
+<h2>Example family: L1872<a class="headerlink" href="#example-family-l1872" title="Permalink to this headline">¶</a></h2>
+<p>The <code class="docutils literal notranslate"><span class="pre">progeny</span></code> dataset consists of offspring from multiple families
+that were genotyped at the same time. It was convenient to consider them
+as one so far to tidy up the genotype data, but for subsequent analysis
+we need to split them up into their constituent full sib families. This
+is easy to do with <code class="docutils literal notranslate"><span class="pre">split</span></code>, which returns a list of <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code>
+objects.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">prlist</span> <span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">mothers</span><span class="p">)</span>
+<span class="nb">len</span><span class="p">(</span><span class="n">prlist</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">57</span>
+</pre></div>
+</div>
+<p>By way of a sanity check we will examine one of the largest families in
+detail. After the data filtering above, there are 20 offspring from
+mother L1872. Distributions of missing data, heterozygosity and allele
+frequency at each locus suggest no reason for alarm.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ex_progeny</span> <span class="o">=</span> <span class="n">prlist</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+<span class="n">ex_mother</span>  <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">ex_progeny</span><span class="o">.</span><span class="n">parent_index</span><span class="p">(</span><span class="s1">&#39;m&#39;</span><span class="p">,</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+
+<span class="n">ex_progeny</span><span class="o">.</span><span class="n">size</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">20</span>
+</pre></div>
+</div>
+<div class="section" id="family-structure">
+<h3>Family structure<a class="headerlink" href="#family-structure" title="Permalink to this headline">¶</a></h3>
+<p>Cluster the family into sibships. I have set the proportion of missing
+parents to 0.1; we have removed 140 of the 2219 (6%) candidates logged
+as alive in 2012, and I allow for 10% of candidates having been missed.
+In fact the results do not depend on the parameter unless it is
+unrealistically high.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">allele_freqs</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">allele_freqs</span><span class="p">()</span> <span class="c1"># population allele frequencies</span>
+<span class="n">ex_patlik</span>    <span class="o">=</span> <span class="n">paternity_array</span><span class="p">(</span><span class="n">ex_progeny</span><span class="p">,</span> <span class="n">ex_mother</span><span class="p">,</span> <span class="n">adults</span><span class="p">,</span> <span class="mf">0.0015</span><span class="p">,</span> <span class="n">missing_parents</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">ex_sc</span>        <span class="o">=</span> <span class="n">sibship_clustering</span><span class="p">(</span><span class="n">ex_patlik</span><span class="p">,</span> <span class="mi">1000</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can first look at the dendrogram of relatedness between individuals
+derived from the array of paternity likleihoods.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">scipy.cluster.hierarchy</span> <span class="kn">import</span> <span class="n">dendrogram</span>
+<span class="n">dendrogram</span><span class="p">(</span><span class="n">ex_sc</span><span class="o">.</span><span class="n">linkage_matrix</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">color_threshold</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+           <span class="n">above_threshold_color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_48_0.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_48_0.png" />
+<p>We can compare this to the most-likely partition structure to get a
+rough idea of what as going on. This partition groups offspring into 7
+full sibships and has a posterior probability of 0.8. The partition
+structure simply labels individuals 0 to 20 with a unique, arbitrary
+identifier. For example, individuals 2 and 3 are grouped into an
+especially large family labelled ‘1’.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="k">print</span> <span class="s2">&quot;most-likely partition:&quot;</span><span class="p">,</span> <span class="n">ex_sc</span><span class="o">.</span><span class="n">mlpartition</span>
+<span class="k">print</span> <span class="s2">&quot;unique families:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">ex_sc</span><span class="o">.</span><span class="n">mlpartition</span><span class="p">)</span>
+<span class="k">print</span> <span class="s2">&quot;partition probability:&quot;</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">ex_sc</span><span class="o">.</span><span class="n">prob_partitions</span><span class="o">.</span><span class="n">max</span><span class="p">())</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">most</span><span class="o">-</span><span class="n">likely</span> <span class="n">partition</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span> <span class="mi">1</span> <span class="mi">1</span> <span class="mi">4</span> <span class="mi">3</span> <span class="mi">2</span> <span class="mi">1</span> <span class="mi">5</span> <span class="mi">4</span> <span class="mi">1</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">3</span> <span class="mi">1</span> <span class="mi">7</span> <span class="mi">6</span><span class="p">]</span>
+<span class="n">unique</span> <span class="n">families</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span> <span class="mi">2</span> <span class="mi">3</span> <span class="mi">4</span> <span class="mi">5</span> <span class="mi">6</span> <span class="mi">7</span><span class="p">]</span>
+<span class="n">partition</span> <span class="n">probability</span><span class="p">:</span> <span class="mf">0.5216846355100478</span>
+</pre></div>
+</div>
+<p>We can recover posterior probabilties of paternity for each candidate on
+each offspring using <code class="docutils literal notranslate"><span class="pre">prob_paternity</span></code>. For most offspring, there is a
+single candidate with a probability of paternity close to one.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">postpat</span> <span class="o">=</span> <span class="n">ex_sc</span><span class="o">.</span><span class="n">prob_paternity</span><span class="p">()</span>
+
+<span class="c1"># names of most probable candidates</span>
+<span class="n">mx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">postpat</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">==</span> <span class="n">postpat</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ex_progeny</span><span class="o">.</span><span class="n">size</span><span class="p">)])</span>
+
+<span class="kn">from</span> <span class="nn">pandas</span> <span class="kn">import</span> <span class="n">DataFrame</span> <span class="k">as</span> <span class="n">df</span>
+<span class="n">df</span><span class="p">([</span><span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">mx</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">postpat</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="mi">1</span><span class="p">))])</span><span class="o">.</span><span class="n">T</span>
+</pre></div>
+</div>
+<div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>0</th>
+      <th>1</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>M0880</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>1</th>
+      <td>M0819</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>2</th>
+      <td>M0819</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>3</th>
+      <td>M0698</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>4</th>
+      <td>M0122</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>5</th>
+      <td>M0880</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>6</th>
+      <td>M0819</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>7</th>
+      <td>M0125</td>
+      <td>0.99994</td>
+    </tr>
+    <tr>
+      <th>8</th>
+      <td>M0698</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>9</th>
+      <td>M0819</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>10</th>
+      <td>M0819</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>11</th>
+      <td>M0122</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>12</th>
+      <td>M0122</td>
+      <td>0.788393</td>
+    </tr>
+    <tr>
+      <th>13</th>
+      <td>M0122</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>14</th>
+      <td>M0122</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>15</th>
+      <td>M0819</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>16</th>
+      <td>M0122</td>
+      <td>0.983386</td>
+    </tr>
+    <tr>
+      <th>17</th>
+      <td>M0819</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>18</th>
+      <td>M0107</td>
+      <td>1</td>
+    </tr>
+    <tr>
+      <th>19</th>
+      <td>M0854</td>
+      <td>1</td>
+    </tr>
+  </tbody>
+</table>
+</div></div>
+<div class="section" id="family-sizes">
+<h3>Family sizes<a class="headerlink" href="#family-sizes" title="Permalink to this headline">¶</a></h3>
+<p>Consistent with the results for many families (shown below), the
+posterior distributions for family size suggest many small families and
+a smaller number of larger families.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">6</span><span class="p">))</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">ex_progeny</span><span class="o">.</span><span class="n">size</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">ex_sc</span><span class="o">.</span><span class="n">nfamilies</span><span class="p">())</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Number of families&#39;</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Probability&#39;</span><span class="p">)</span>
+
+<span class="n">fs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">ex_progeny</span><span class="o">.</span><span class="n">size</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="n">ex_sc</span><span class="o">.</span><span class="n">family_size</span><span class="p">())</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Family size&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_55_0.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_55_0.png" />
+</div>
+<div class="section" id="geographic-positions">
+<h3>Geographic positions<a class="headerlink" href="#geographic-positions" title="Permalink to this headline">¶</a></h3>
+<p>Intuitively, one would expect most pollen donors to be fairly close to
+the mother. Since the most probable partition had fairly strong support
+and identified a set of candidates with posterior probabilities close to
+one, it is reasonable to use these individuals to get an idea of where
+the pollen donors are to be found.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ix</span> <span class="o">=</span><span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">gps_lab</span><span class="p">))</span> <span class="k">if</span> <span class="n">gps_lab</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="ow">in</span> <span class="n">adults</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="n">mx</span><span class="p">]]</span>
+<span class="n">gps_cands</span> <span class="o">=</span> <span class="n">gps_pos</span><span class="p">[</span><span class="n">ix</span><span class="p">]</span>
+<span class="n">gps_ex</span> <span class="o">=</span>  <span class="n">gps_pos</span><span class="p">[</span><span class="n">gps_lab</span> <span class="o">==</span> <span class="s2">&quot;L1872&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>The map below shows the spatial positions of all individuals in the
+sample in green. Overlaid are the mother in red, and top candidates in
+blue. The likley candidates are indeed found close to the mother along
+the lower (southern-most) road, with two individuals on the upper
+(northern) road. This gives us no cause to doubt the validity of the
+paternity results.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">second</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">postpat</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[:,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="n">sx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">second</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">postpat</span><span class="p">[</span><span class="n">i</span><span class="p">])[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ex_progeny</span><span class="o">.</span><span class="n">size</span><span class="p">)])</span>
+<span class="n">gps_sec</span> <span class="o">=</span> <span class="n">gps_pos</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">sx</span><span class="p">)]</span>
+</pre></div>
+</div>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">16.9</span><span class="o">/</span><span class="mf">2.54</span><span class="p">,</span><span class="mf">6.75</span><span class="o">/</span><span class="mf">2.54</span><span class="p">))</span>
+<span class="c1">#plt.figure(figsize=(12.5,5)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;East-West positition (m)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;North-South positition (m)&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="o">-</span><span class="mi">2500</span><span class="p">,</span><span class="mi">2000</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">gps_pos</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span>  <span class="n">gps_pos</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">gps_sec</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span>  <span class="n">gps_sec</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;gold&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">gps_cands</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">gps_cands</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">gps_ex</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">gps_ex</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">40</span><span class="p">,</span> <span class="n">edgecolors</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_61_0.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_61_0.png" />
+<p>We can use these data to get a very rough dispersal kernal. Most pollen
+comes from within 50m of the maternal plant.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">dists</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">gps_ex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">gps_cands</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">gps_ex</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">gps_cands</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">print</span> <span class="s2">&quot;Mean dispersal =&quot;</span><span class="p">,</span><span class="n">mean</span><span class="p">(</span><span class="n">dists</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">dists</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">650</span><span class="p">,</span><span class="mi">50</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Mean</span> <span class="n">dispersal</span> <span class="o">=</span> <span class="mf">48.04159641841041</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_63_1.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_63_1.png" />
+<p>In contrast, the second-most-likely candidates are on average more than
+800m from the maternal plant.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">dists2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">gps_ex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">gps_sec</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="p">(</span><span class="n">gps_ex</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">gps_sec</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="k">print</span> <span class="s2">&quot;Mean dispersal =&quot;</span><span class="p">,</span><span class="n">mean</span><span class="p">(</span><span class="n">dists2</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Mean</span> <span class="n">dispersal</span> <span class="o">=</span> <span class="mf">907.2250748822763</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="missing-data-in-the-candidates">
+<h3>Missing data in the candidates<a class="headerlink" href="#missing-data-in-the-candidates" title="Permalink to this headline">¶</a></h3>
+<p>When candidate fathers have substantial missing data, they can have
+apparently high likelihoods of paternity just because there are fewer
+opportunities to show an incompatibility.</p>
+<p>I previously found that candidates with ~10% missing data tended to be
+assigned as the true father alarmingly frequently. Here, we have already
+excluded candidates with more than 5% missing data. As a sanity to check
+to ensure missing data is not a substantial problem here, we can check
+how often the most likely candidate has 0, 1, 2, 3 or 4 loci with no
+genotype information.</p>
+<p>The histograms below show these distributions based on probabilities
+before and after sibship clustering. Top candidates have either one or
+zero missing data points. This is probably really a random draw from the
+pool of candidates, because these are the most common categories.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">md</span> <span class="o">=</span> <span class="n">ex_sc</span><span class="o">.</span><span class="n">prob_paternity</span><span class="p">()</span>
+<span class="n">px</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">md</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>                  <span class="o">==</span> <span class="n">md</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>                     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ex_progeny</span><span class="o">.</span><span class="n">size</span><span class="p">)]</span>
+<span class="n">lx</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ex_patlik</span><span class="o">.</span><span class="n">lik_array</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">ex_patlik</span><span class="o">.</span><span class="n">lik_array</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">())[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ex_progeny</span><span class="o">.</span><span class="n">size</span><span class="p">)]</span>
+
+<span class="n">fig</span><span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">16.9</span><span class="o">/</span><span class="mf">2.54</span><span class="p">,</span> <span class="mi">6</span><span class="o">/</span><span class="mf">2.54</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.3</span><span class="p">)</span>
+
+
+<span class="n">lh</span><span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">lh</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">return_counts</span><span class="o">=</span><span class="bp">True</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">lh</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;All adults&#39;</span><span class="p">)</span>
+<span class="n">lh</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Number failed loci&#39;</span><span class="p">)</span>
+<span class="n">lh</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Number of individuals&#39;</span><span class="p">)</span>
+<span class="n">lh</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="mf">0.4</span><span class="p">)</span>
+<span class="n">lh</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+
+<span class="n">ph</span><span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">ph</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">2</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">adults</span><span class="o">.</span><span class="n">missing_data</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="n">px</span><span class="p">],</span> <span class="n">return_counts</span><span class="o">=</span><span class="bp">True</span><span class="p">)[</span><span class="mi">1</span><span class="p">])</span>
+<span class="n">ph</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;Top candidates&#39;</span><span class="p">)</span>
+<span class="n">ph</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Number failed loci&#39;</span><span class="p">)</span>
+<span class="n">ph</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="o">+</span><span class="mf">0.4</span><span class="p">)</span>
+<span class="n">ph</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">4</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_68_0.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_68_0.png" />
+</div>
+<div class="section" id="relatedness">
+<h3>Relatedness<a class="headerlink" href="#relatedness" title="Permalink to this headline">¶</a></h3>
+<p>Another explanation for splitting a full sibship into multiple smaller
+sibships would be that there is relatedness among candidates, and a
+relative of the true sire can sometimes have a higher likelihood of
+paternity than the true sire just by chance. If this is the case we
+would expect the most likely candidates to be more related to one
+another than we would expect if they were a random draw from the
+population.</p>
+<p>First, calculate a matrix of pairwise relatedness between all
+individuals in the sample of candidates:</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">matches</span> <span class="o">=</span> <span class="p">[(</span><span class="n">adults</span><span class="o">.</span><span class="n">geno</span><span class="p">[:,:,</span><span class="n">i</span><span class="p">][</span><span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">]</span> <span class="o">==</span> <span class="n">adults</span><span class="o">.</span><span class="n">geno</span><span class="p">[:,:,</span><span class="n">j</span><span class="p">][:,</span> <span class="n">np</span><span class="o">.</span><span class="n">newaxis</span><span class="p">])</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span>
+<span class="n">matches</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span>
+<span class="n">matches</span> <span class="o">=</span> <span class="n">matches</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>These histograms show pairwise relatedness for all pairs of candidates
+in blue, and the most probable father of each individual after
+clustering in orange (I have excluded duplicate candidates). There is no
+reason to suppose the top candidates are anything other than a random
+draw.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">ux</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">px</span><span class="p">)</span>
+<span class="n">top_r</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">matches</span><span class="p">[</span><span class="n">ux</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">ux</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ux</span><span class="p">))])</span>
+
+<span class="c1"># weight bars to ensure the histograms sum to one.</span>
+<span class="n">w1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">matches</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="mi">2079</span><span class="p">,</span> <span class="mi">1</span><span class="p">)])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="mi">2079</span><span class="p">,</span> <span class="mi">1</span><span class="p">)]))</span>
+<span class="n">w2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones_like</span><span class="p">(</span><span class="n">top_r</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ux</span><span class="p">),</span> <span class="mi">1</span><span class="p">)])</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">top_r</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ux</span><span class="p">),</span> <span class="mi">1</span><span class="p">)]))</span>
+
+<span class="n">fig</span><span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">9</span><span class="o">/</span><span class="mf">2.54</span><span class="p">,</span> <span class="mi">8</span><span class="o">/</span><span class="mf">2.54</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">matches</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="mi">2079</span><span class="p">,</span> <span class="mi">1</span><span class="p">)],</span>  <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="n">w1</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">(</span><span class="n">top_r</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">triu_indices</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ux</span><span class="p">),</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">histtype</span><span class="o">=</span><span class="s1">&#39;step&#39;</span><span class="p">,</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.3</span><span class="p">,</span><span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.025</span><span class="p">),</span> <span class="n">weights</span><span class="o">=</span><span class="n">w2</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;Relatedness&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Density&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_73_0.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_73_0.png" />
+</div>
+</div>
+<div class="section" id="multiple-families">
+<h2>Multiple families<a class="headerlink" href="#multiple-families" title="Permalink to this headline">¶</a></h2>
+<p>The code becomes more challenging because we will need to perform
+operations on every element in this list. Luckily this is
+straightforward in Python if we use list comprehensions. For example, we
+can pull out and plot the number of offspring in each half-sibling
+array:</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">hist</span><span class="p">([</span><span class="n">prlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prlist</span><span class="p">))],</span> <span class="n">bins</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">25</span><span class="p">))</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_76_0.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_76_0.png" />
+<p>All of these families are samples from much larger half sib arrays, so
+comparing full-sibship sizes and number is even more difficult if there
+are different numbers of offspring. For this reason we can pick out only
+those families with 17 or more offspring.</p>
+<p>This cell splits genotype data into maternal families of 17 or more
+offspring, then pick 17 offspring at random (there is no meaning in the
+order of individuals in the <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> object, so taking the
+first 17 is tantamount to choosing at random). This leaves us with 18
+familes of 17 offspring.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="c1"># split into maternal families</span>
+<span class="n">mlist</span>  <span class="o">=</span> <span class="n">mothers</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">mothers</span><span class="p">)</span>
+<span class="n">prlist</span> <span class="o">=</span> <span class="n">progeny</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">mothers</span><span class="p">)</span>
+<span class="c1"># families with 20 or more offspring</span>
+<span class="n">prog17</span> <span class="o">=</span> <span class="p">[</span><span class="n">prlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prlist</span><span class="p">))</span> <span class="k">if</span> <span class="n">prlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;=</span><span class="mi">17</span><span class="p">]</span>
+<span class="n">mlist</span> <span class="o">=</span> <span class="p">[</span><span class="n">mlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">prlist</span><span class="p">))</span> <span class="k">if</span> <span class="n">prlist</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;=</span><span class="mi">17</span><span class="p">]</span>
+<span class="c1"># take the first 17 offspring</span>
+<span class="n">prog17</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">17</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">prog17</span><span class="p">]</span>
+<span class="n">mlist</span>  <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">17</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">mlist</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Calculate likelihoods of paternity for each family. This took 3 seconds
+on a 2010 Macbook Pro; your mileage may vary. In order to do so we also
+need population allele frequencies.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">allele_freqs</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">allele_freqs</span><span class="p">()</span> <span class="c1"># population allele frequencies</span>
+
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span>
+<span class="n">t0</span><span class="o">=</span><span class="n">time</span><span class="p">()</span>
+<span class="n">patlik</span> <span class="o">=</span> <span class="n">paternity_array</span><span class="p">(</span><span class="n">prog17</span><span class="p">,</span> <span class="n">mlist</span><span class="p">,</span> <span class="n">adults</span><span class="p">,</span> <span class="n">mu</span><span class="o">=</span><span class="mf">0.0013</span><span class="p">)</span>
+<span class="k">print</span> <span class="s2">&quot;Completed in {} seconds.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t0</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Completed</span> <span class="ow">in</span> <span class="mf">3.23130893707</span> <span class="n">seconds</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>The next step is clustering each family into full sibships.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">t1</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+<span class="n">sc</span> <span class="o">=</span> <span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">)</span>
+<span class="k">print</span> <span class="s2">&quot;Completed in {} seconds.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">t1</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Completed</span> <span class="ow">in</span> <span class="mf">1.0766479969</span> <span class="n">seconds</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>Calculate probability distributions for family size and number of
+families for each array.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">nfamilies</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">nfamilies</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sc</span><span class="p">]</span>
+<span class="n">nfamilies</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">nfamilies</span><span class="p">)</span>
+
+<span class="n">famsize</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">family_size</span><span class="p">()</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">sc</span><span class="p">]</span>
+<span class="n">famsize</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">famsize</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Plots below show the probability distributions for the number and sizes
+of families. Grey bars show 95% credible intervals (see CDF plots
+below). Samples of 17 offspring are divided into between four and 16
+full-sibling families consisting of between one and eight individuals.
+Most families seem to be small, with a smaller number of large families.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mf">16.9</span><span class="o">/</span><span class="mf">2.54</span><span class="p">,</span> <span class="mi">6</span><span class="o">/</span><span class="mf">2.54</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Probability density&#39;</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Number of families&#39;</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.005</span><span class="p">,</span><span class="mf">0.2</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">18</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">17.5</span><span class="p">),</span> <span class="n">nfamilies</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="n">nfamilies</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">3.5</span><span class="p">,</span><span class="mf">16.5</span><span class="p">),</span> <span class="p">(</span><span class="n">nfamilies</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="n">nfamilies</span><span class="o">.</span><span class="n">sum</span><span class="p">())[</span><span class="mi">3</span><span class="p">:</span><span class="mi">16</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;0.75&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">fs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Family size&#39;</span><span class="p">)</span>
+<span class="c1">#fs.set_ylabel(&#39;Probability density&#39;)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="o">-</span><span class="mf">0.05</span><span class="p">,</span><span class="mf">0.8</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">17</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">17.5</span><span class="p">),</span> <span class="n">famsize</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="n">famsize</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;1&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">6.5</span><span class="p">),</span> <span class="p">(</span><span class="n">famsize</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="n">famsize</span><span class="o">.</span><span class="n">sum</span><span class="p">())[:</span><span class="mi">6</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;0.75&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_86_0.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_86_0.png" />
+<p>Cumulative probability density plots demonstrate the credible intervals
+for family size and number.</p>
+<div class="highlight-ipython2 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+<span class="n">nf</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Cumulative density&#39;</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Number of families&#39;</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.05</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">18</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">nfamilies</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="n">nfamilies</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">)</span>
+<span class="n">nf</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+
+<span class="n">fs</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Cumulative density&#39;</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;Family size&#39;</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">set_xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">21</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">set_ylim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mf">1.05</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">18</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">cumsum</span><span class="p">(</span><span class="n">famsize</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">/</span><span class="n">famsize</span><span class="o">.</span><span class="n">sum</span><span class="p">()))</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.975</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="mf">0.025</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;dashed&#39;</span><span class="p">)</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">grid</span><span class="p">()</span>
+</pre></div>
+</div>
+<img alt="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_88_0.png" src="tutorials/08%20Data%20cleaning%20in%20A.%20majus_files/08%20Data%20cleaning%20in%20A.%20majus_88_0.png" />
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">faps</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00_Quickstart guide.html">Quickstart guide to FAPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01 Introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02 Genotype data.html">Genotype data in FAPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03 Paternity arrays.html">Paternity arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04 Sibship clustering.html">Sibship clustering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05 Inference about mating patterns.html">Inference about mating patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06 Simulating data.html">Simulating data and power analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07 Dealing with multiple half-sib families.html">Dealing with multiple half-sib families</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Data cleaning for <em>Antirrhinum majus</em> data set from 2012</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#data-inspection">Data inspection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#example-family-l1872">Example family: L1872</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-families">Multiple families</a></li>
+</ul>
+</li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="07 Dealing with multiple half-sib families.html" title="previous chapter">Dealing with multiple half-sib families</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2020, Tom Ellis.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="../_sources/tutorials/08 Data cleaning in A. majus.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
