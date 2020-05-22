@@ -41,11 +41,11 @@ FAPS is built using the Numpy library with additional tools from Scipy and Panda
 For simulations, it also makes use of [iPython widgets](https://github.com/jupyter-widgets/ipywidgets). iPython widgets can be a little more troublesome to get working, but are only needed for simulations, and can be switched off. See [here](https://github.com/jupyter-widgets/ipywidgets/blob/master/docs/source/user_install.md) for installation instructions.
 
 ## Using FAPS
-A user's guide is provided in this repository. This provides a fairly step-by-step guide to importing data, clustering offspring into sibship groups, and using those clusters to investigate the underlying biological processes. This was written with users in mind who have little experience of working with Python. These documents are written in [iPython](https://ipython.org/), which I highly recommend as an interactive environment for running analyses in Python.
+A user's guide is provided in this repository. This provides a fairly step-by-step guide to importing data, clustering offspring into sibship groups, and using those clusters to investigate the underlying biological processes. This was written with users in mind who have little experience of working with Python.
 
 Topics covered:
 
-1. [Intorduction](https://github.com/ellisztamas/faps/blob/master/docs/01%20Introduction.ipynb)
+1. [Introduction](https://github.com/ellisztamas/faps/blob/master/docs/01%20Introduction.ipynb)
 2. [Genotype data](https://github.com/ellisztamas/faps/blob/master/docs/02%20Genotype%20data.ipynb)
 3. [Paternity arrays](https://github.com/ellisztamas/faps/blob/master/docs/03%20Paternity%20arrays.ipynb)
 4. [Sibship clustering](https://github.com/ellisztamas/faps/blob/master/docs/04%20Sibship%20clustering.ipynb)
@@ -55,7 +55,8 @@ Topics covered:
 8. [Case study: data preparation in *Antirrhinum majus*](https://github.com/ellisztamas/faps/blob/master/docs/08%20Data%20cleaning%20in%20A.%20majus.ipynb)
 
 ## Citing FAPS
-If you use FAPS in any puiblished work please cite:
+
+If you use FAPS in any published work please cite:
 
 > Ellis, TJ, Field DL, Barton, NH (2018) Efficient inference of paternity and sibship inference given known maternity via hierarchical clustering. Molecular Ecology Resources 18:988–999. https://doi.org/10.1111/1755-0998.12782
 
@@ -78,10 +79,8 @@ Here is the relevant bibtex reference:
 
 Please report any bugs or requests that you have using the GitHub issue tracker! But before you do that, please check the user's guide folder in the docs folder to see if your question is answered there.
 
-This project was part of my PhD work. Since I have now moved on to a different institution, I am not actively working on this any more, but I will still try to respond to questions.
-
 ## Authors and license information
 
-Tom Ellis (thomas[dot]ellis[at]ebc[dot]uu[dot]se)
+Tom Ellis (thomas.ellis@gmi.oeaw.ac.at)
 
 FAPS is available under the MIT license. See LICENSE.txt for more information
