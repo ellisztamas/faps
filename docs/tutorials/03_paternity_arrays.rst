@@ -35,7 +35,7 @@ adults and six offspring typed at 50 loci.
 
     import faps as fp
     import numpy as np
-    
+
     np.random.seed(27) # this ensures you get exactly the same answers as I do.
     allele_freqs = np.random.uniform(0.3,0.5, 50)
     mypop        = fp.make_parents(4, allele_freqs, family_name='my_population')
@@ -65,7 +65,7 @@ creates an object of class ``paternityArray``.
 .. code:: ipython3
 
     error_rate = 0.0015
-    
+
     sample_af = mypop.allele_freqs()
     patlik = fp.paternity_array(
         offspring = progeny,
@@ -440,10 +440,10 @@ data need to have a specific structure:
 1. Offspring names should be given in the first column
 2. Names of the mothers are usually given in the second column.
 3. If known for some reason, names of fathers can be given as well.
-4. Likelihood information should be given *to the right* of columns
-   indicating individual or parental names, with candidates' names in
-   the column headers.
-5. The final column should specify a likelihood that the true sire of an
+4. There should then be a column for each candidate father, headed by an ID for
+   each candidate. Rows in each column should give the (log) likelihood that the
+   candidate is the sire of the offspring for that row.
+5. The final column should specify a (log) likelihood that the true sire of an
    individual has *not* been sampled. Usually this is given as the
    likelihood of drawing the paternal alleles from population allele
    frequencies.
@@ -479,5 +479,3 @@ separate text file, or you can recreate this as above:
            [ 0,  8,  0,  2],
            [ 0, 10,  0,  3],
            [ 0,  9,  0,  2]])
-
-
