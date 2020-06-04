@@ -198,8 +198,8 @@ and
     allele_freqs = np.random.uniform(0.4, 0.5, 50)
     adults = fp.make_parents(10,  allele_freqs, family_name='adult')
     progeny = fp.make_sibships(parents=adults, dam=0, sires=[1,2,3,4], family_size=5)
-    mothers = adults.subset(progeny.parent_index('m', adults.names))
-    patlik = fp.paternity_array(progeny, mothers, adults, mu=0.0015)
+    mothers = adults.subset(progeny.mothers)
+    patlik = fp.paternity_array(progeny, mothers, adults, mu=0.0015, missing_parents=0.01)
     sc = fp.sibship_clustering(patlik)
 
 A very useful tool is the ``accuracy`` subfunction for
@@ -250,7 +250,8 @@ relationships, although half-sibling relationships are unaffected.
 
 .. code:: ipython3
 
-    patlik.prob_array = patlik.adjust_prob_array(purge = 1, missing_parents=0.25)
+    patlik.purge = 'adult_1'
+    patlik.missing_parents=0.25
     sc = fp.sibship_clustering(patlik)
     sc.accuracy(progeny, adults)
 
@@ -259,7 +260,7 @@ relationships, although half-sibling relationships are unaffected.
 
 .. parsed-literal::
 
-    array([ 1.   , 28.26 ,  0.   ,  0.766,  1.   ,  0.951,  1.   ,  0.093])
+    array([ 1.   , 28.26 ,  0.   ,  0.766,  0.951,  1.   ,  1.   ,  0.093])
 
 
 
@@ -268,7 +269,7 @@ this affect things?
 
 .. code:: ipython3
 
-    patlik.prob_array = patlik.adjust_prob_array(selfing_rate=0.5)
+    patlik.selfing_rate=0.5
     sc = fp.sibship_clustering(patlik)
     sc.accuracy(progeny, adults)
 
@@ -277,7 +278,7 @@ this affect things?
 
 .. parsed-literal::
 
-    array([1., 0., 1., 1., 1., 1., 1., 0.])
+    array([ 1.   , 27.57 ,  0.   ,  0.766,  0.951,  1.   ,  1.   ,  0.093])
 
 
 
@@ -292,7 +293,8 @@ It can be tedious to put together your own simulation for every
 analysis. FAPS has an automated function that repeatedly creates
 genotype data, clusters into siblings and calls the ``accuracy``
 function. You can supply lists of variables and it will evaluate each
-combination.
+combination. There are a lot of possible inputs, so have a look at the
+help page using ``fp.make_power?``.
 
 For example, this code creates four families of five full siblings with
 a genotyping error rate of 0.0015. It considers 30, 40 and 50 loci for
@@ -312,7 +314,17 @@ have found that results tend to asymptote with 300 simulations.
     offspring    = 5
     
     np.random.seed(614)
-    eventab = fp.make_power(r, nloci, allele_freqs, nadults, sires, offspring, 0, mu)
+    eventab = fp.make_power(
+        replicates = r, 
+        nloci = nloci,
+        allele_freqs = allele_freqs,
+        candidates = nadults,
+        sires = sires,
+        offspring = offspring, 
+        missing_loci=0,
+        mu_real = mu, 
+        unsampled_input=0.01
+    )
 
 
 .. parsed-literal::
@@ -326,11 +338,11 @@ have found that results tend to asymptote with 300 simulations.
     0.15% of alleles will be mutated at random.
     Input error rates taken as the real error rates.
     No candidates to be removed.
-    No prior parameter used for the proportion of missing candidates.
+    Proportion missing canidates set to 0.01.
     Self-fertilisation rate of 0.
     Performing 1000 Monte Carlo draws for sibship inference.
     
-    Parameters set. Beginning simulations on Mon Nov 18 15:32:45 2019.
+    Parameters set. Beginning simulations on Thu Jun  4 14:35:46 2020.
 
 
 
@@ -341,7 +353,7 @@ have found that results tend to asymptote with 300 simulations.
 
 .. parsed-literal::
 
-    /home/GMI/thomas.ellis/miniconda3/envs/faps/lib/python3.7/site-packages/faps/sibshipCluster.py:249: RuntimeWarning: invalid value encountered in double_scalars
+    /home/GMI/thomas.ellis/miniconda3/envs/faps/lib/python3.7/site-packages/faps/sibshipCluster.py:252: RuntimeWarning: invalid value encountered in double_scalars
       dev = dev.sum() / ix.sum()
 
 
@@ -405,7 +417,7 @@ reality both parameters were double that amount.
     Self-fertilisation rate of 0.
     Performing 1000 Monte Carlo draws for sibship inference.
     
-    Parameters set. Beginning simulations on Mon Nov 18 15:32:47 2019.
+    Parameters set. Beginning simulations on Thu Jun  4 14:37:13 2020.
 
 
 
@@ -416,7 +428,7 @@ reality both parameters were double that amount.
 
 .. parsed-literal::
 
-    Simulations completed after 0.03 minutes.
+    Simulations completed after 0.04 minutes.
 
 
 If you want to perform downstream analysis, you can tell ``make_power``
@@ -427,16 +439,23 @@ distribution of family sizes from each ``sibshipArray``, and plots it.
 
 .. code:: ipython3
 
-    eventab, evenclusters = fp.make_power(r, nloci, allele_freqs, nadults, sires, offspring, 0, mu, return_clusters=True, verbose=False)
+    eventab, evenclusters = fp.make_power(
+        replicates = r, 
+        nloci = nloci,
+        allele_freqs = allele_freqs,
+        candidates = nadults,
+        sires = sires,
+        offspring = offspring, 
+        missing_loci=0,
+        mu_real = mu, 
+        unsampled_input=0.01,
+        return_clusters=True,
+        verbose=False
+    )
     even_famsizes = np.array([evenclusters[i].family_size() for i in range(len(evenclusters))])
     
     plt.plot(even_famsizes.mean(0))
     plt.show()
-
-
-.. parsed-literal::
-
-    No prior parameter used for the proportion of missing candidates.
 
 
 
@@ -446,7 +465,7 @@ distribution of family sizes from each ``sibshipArray``, and plots it.
 
 
 
-.. image:: 06_simulating_data_files/06_simulating_data_41_2.png
+.. image:: 06_simulating_data_files/06_simulating_data_41_1.png
 
 
 Custom simulations
@@ -484,7 +503,7 @@ mu=0.0015, but varying sample size and allele frequency.
     allele_freqs = [0.1, 0.2, 0.3, 0.4, 0.5] # draw allele frequencies 
     nadults      = [10, 100, 250, 500, 750, 1000] # size of the adults population
     mu_list      = [0.0015] #genotype error rates
-    nsims        = nreps * len(nloci) * len(allele_freqs) * len(nadults) * len(mu) # total number of simulations to run
+    nsims        = nreps * len(nloci) * len(allele_freqs) * len(nadults) * len(mu_list) # total number of simulations to run
     dt           = np.zeros([nsims, 7]) # empty array to store data
 
 This cell simulates genotype data and clusters the offspring into full
@@ -509,14 +528,14 @@ likelihoods of paternity for the candidates.
                         progeny = fp.make_offspring(adults, 100)
                         mi      = progeny.parent_index('m', adults.names) # maternal index
                         mothers = adults.subset(mi)
-                        patlik  = fp.paternity_array(progeny, mothers, adults, mu_list[m])
+                        patlik  = fp.paternity_array(progeny, mothers, adults, mu_list[m], missing_parents=0.01)
                         # Find the rank of the missing term within the array.
-                        rank    = [np.where(np.sort(patlik.prob_array[i]) == patlik.prob_array[i,-1])[0][0] for i in range(progeny.size)]
+                        rank    = [np.where(np.sort(patlik.prob_array()[i]) == patlik.prob_array()[i,-1])[0][0] for i in range(progeny.size)]
                         rank    = np.array(rank).mean() / nadults[n]
                         # get the posterior probabilty fir the missing term.
-                        prob_misisng = np.exp(patlik.prob_array[:, -1]).mean()
+                        prob_misisng = np.exp(patlik.prob_array()[:, -1]).mean()
                         #export data
-                        dt[counter] = np.array([r, nloci[l], allele_freqs[a], nadults[n], mu[m], rank, prob_misisng])
+                        dt[counter] = np.array([r, nloci[l], allele_freqs[a], nadults[n], mu_list[m], rank, prob_misisng])
                         # update counters
                         counter += 1
     
@@ -528,8 +547,8 @@ likelihoods of paternity for the candidates.
 
 .. parsed-literal::
 
-    Beginning simulations on Mon Nov 18 15:35:15 2019.
-    Completed in 0.01 hours.
+    Beginning simulations on Thu Jun  4 14:44:16 2020.
+    Completed in 0.03 hours.
 
 
 There is a strong dependency on minor allele frequency. As MAF goes from
@@ -588,7 +607,7 @@ likelihood estimator goes from 'basically useless' to 'useful'.
           <td>435.0</td>
           <td>0.0015</td>
           <td>0.000000</td>
-          <td>5.374345e-40</td>
+          <td>3.651448e-41</td>
         </tr>
         <tr>
           <td>0.2</td>
@@ -596,8 +615,8 @@ likelihood estimator goes from 'basically useless' to 'useful'.
           <td>50.0</td>
           <td>435.0</td>
           <td>0.0015</td>
-          <td>0.025398</td>
-          <td>1.876553e-22</td>
+          <td>0.012691</td>
+          <td>1.494390e-22</td>
         </tr>
         <tr>
           <td>0.3</td>
@@ -605,8 +624,8 @@ likelihood estimator goes from 'basically useless' to 'useful'.
           <td>50.0</td>
           <td>435.0</td>
           <td>0.0015</td>
-          <td>0.502693</td>
-          <td>3.586925e-15</td>
+          <td>0.373086</td>
+          <td>1.441037e-16</td>
         </tr>
         <tr>
           <td>0.4</td>
@@ -614,8 +633,8 @@ likelihood estimator goes from 'basically useless' to 'useful'.
           <td>50.0</td>
           <td>435.0</td>
           <td>0.0015</td>
-          <td>0.873260</td>
-          <td>2.947405e-12</td>
+          <td>0.801709</td>
+          <td>5.331236e-14</td>
         </tr>
         <tr>
           <td>0.5</td>
@@ -623,8 +642,8 @@ likelihood estimator goes from 'basically useless' to 'useful'.
           <td>50.0</td>
           <td>435.0</td>
           <td>0.0015</td>
-          <td>0.933174</td>
-          <td>1.354819e-11</td>
+          <td>0.890448</td>
+          <td>1.288563e-13</td>
         </tr>
       </tbody>
     </table>
@@ -685,8 +704,8 @@ In contrast, there is no effect of the number of adults.
           <td>50.0</td>
           <td>0.3</td>
           <td>0.0015</td>
-          <td>0.393540</td>
-          <td>1.012936e-12</td>
+          <td>0.344700</td>
+          <td>3.152225e-14</td>
         </tr>
         <tr>
           <td>100.0</td>
@@ -694,8 +713,8 @@ In contrast, there is no effect of the number of adults.
           <td>50.0</td>
           <td>0.3</td>
           <td>0.0015</td>
-          <td>0.471824</td>
-          <td>3.654791e-12</td>
+          <td>0.424030</td>
+          <td>4.148485e-14</td>
         </tr>
         <tr>
           <td>250.0</td>
@@ -703,8 +722,8 @@ In contrast, there is no effect of the number of adults.
           <td>50.0</td>
           <td>0.3</td>
           <td>0.0015</td>
-          <td>0.484231</td>
-          <td>3.479662e-12</td>
+          <td>0.427070</td>
+          <td>4.135763e-14</td>
         </tr>
         <tr>
           <td>500.0</td>
@@ -712,8 +731,8 @@ In contrast, there is no effect of the number of adults.
           <td>50.0</td>
           <td>0.3</td>
           <td>0.0015</td>
-          <td>0.482020</td>
-          <td>4.200998e-12</td>
+          <td>0.431514</td>
+          <td>3.911093e-14</td>
         </tr>
         <tr>
           <td>750.0</td>
@@ -721,8 +740,8 @@ In contrast, there is no effect of the number of adults.
           <td>50.0</td>
           <td>0.3</td>
           <td>0.0015</td>
-          <td>0.487319</td>
-          <td>2.906586e-12</td>
+          <td>0.433407</td>
+          <td>3.569228e-14</td>
         </tr>
         <tr>
           <td>1000.0</td>
@@ -730,8 +749,8 @@ In contrast, there is no effect of the number of adults.
           <td>50.0</td>
           <td>0.3</td>
           <td>0.0015</td>
-          <td>0.482497</td>
-          <td>4.544048e-12</td>
+          <td>0.432798</td>
+          <td>2.960739e-14</td>
         </tr>
       </tbody>
     </table>

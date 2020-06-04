@@ -1,44 +1,181 @@
 
-<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta charset="utf-8" />
-    <title>Dealing with multiple half-sib families &#8212; faps 2.2.1 documentation</title>
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Dealing with multiple half-sib families &mdash; faps 2.2.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Data cleaning for Antirrhinum majus data set from 2012" href="08_data_cleaning_in_Amajus.html" />
+    <link rel="prev" title="Simulating data and power analysis" href="06_simulating_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
    
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
-  
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
           
 
-          <div class="body" role="main">
+          
+            <a href="../index.html" class="icon icon-home"> faps
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00_quickstart_guide.html">Quickstart guide to FAPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_genotype_data.html">Genotype data in FAPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="03_paternity_arrays.html">Paternity arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_sibship_clustering.html">Sibship clustering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_inference_about_mating_patterns.html">Inference about mating patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_simulating_data.html">Simulating data and power analysis</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Dealing with multiple half-sib families</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#divide-genotype-data-into-families">Divide genotype data into families</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#import-the-data">Import the data</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#split-up-the-genotypearray">Split up the <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#paternityarray-objects-with-multiple-families"><code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> objects with multiple families</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#paternity-from-a-dictionary-of-genotypearray-objects">Paternity from a dictionary of <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> objects</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#split-up-an-existing-paternity-array">Split up an existing paternity array</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#clustering-multiple-families">Clustering multiple families</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="08_data_cleaning_in_Amajus.html">Data cleaning for <em>Antirrhinum majus</em> data set from 2012</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">faps</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Dealing with multiple half-sib families</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/07_dealing_with_multiple_half-sib_families.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="dealing-with-multiple-half-sib-families">
 <h1>Dealing with multiple half-sib families<a class="headerlink" href="#dealing-with-multiple-half-sib-families" title="Permalink to this headline">¶</a></h1>
 <p>Tom Ellis, March 2018</p>
-<p>In the previous sections on <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/02%20Genotype%20data.ipynb">genotype
+<p>In the previous sections on <a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/02_genotype_data.html">genotype
 arrays</a>,
-<a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/03%20Paternity%20arrays.ipynb">paternity
+<a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/03_paternity_arrays.html">paternity
 arrays</a>
-and <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/04%20Sibship%20clustering.ipynb">sibship
+and <a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/04_sibship_clustering.html">sibship
 clustering</a>
 we considered only a single half-sibling array. In most real-world
 situations, you would probably have multiple half-sibling arrays from
@@ -61,12 +198,12 @@ Each maternal family can be treated as independent.</p>
 available from the <a class="reference external" href="https://datarep.app.ist.ac.at/id/eprint/95">IST Austria data
 repository</a>
 (DOI:10.15479/AT:ISTA:95). For the analysis presented in that paper we
-did extensive data cleaning and checking, which is given as a <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/08%20Data%20cleaning%20in%20A.%20majus.ipynb">case
+did extensive data cleaning and checking, which is given as a <a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/08_data_cleaning_in_Amajus.html">case
 study</a>
 later in this guide. Here, we will skip this process, since it primarily
 concerns accuracy of results.</p>
-<div class="section" id="divide-geneotype-data-into-families">
-<h2>Divide geneotype data into families<a class="headerlink" href="#divide-geneotype-data-into-families" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="divide-genotype-data-into-families">
+<h2>Divide genotype data into families<a class="headerlink" href="#divide-genotype-data-into-families" title="Permalink to this headline">¶</a></h2>
 <p>There are two ways to divide data into families: by splitting up a
 <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> into families, and making a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> for
 each, or create a single <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> and split up that.</p>
@@ -84,8 +221,8 @@ fathers and the progeny.</p>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="o">%</span><span class="k">pylab</span> inline
 
-<span class="n">adults</span>  <span class="o">=</span> <span class="n">read_genotypes</span><span class="p">(</span><span class="s1">&#39;../data/parents_2012_genotypes.csv&#39;</span><span class="p">,</span> <span class="n">genotype_col</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-<span class="n">progeny</span> <span class="o">=</span> <span class="n">read_genotypes</span><span class="p">(</span><span class="s1">&#39;../data/offspring_2012_genotypes.csv&#39;</span><span class="p">,</span> <span class="n">genotype_col</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mothers_col</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">adults</span>  <span class="o">=</span> <span class="n">read_genotypes</span><span class="p">(</span><span class="s1">&#39;../../data/parents_2012_genotypes.csv&#39;</span><span class="p">,</span> <span class="n">genotype_col</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">progeny</span> <span class="o">=</span> <span class="n">read_genotypes</span><span class="p">(</span><span class="s1">&#39;../../data/offspring_2012_genotypes.csv&#39;</span><span class="p">,</span> <span class="n">genotype_col</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">mothers_col</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">Populating</span> <span class="n">the</span> <span class="n">interactive</span> <span class="n">namespace</span> <span class="kn">from</span> <span class="nn">numpy</span> <span class="ow">and</span> <span class="n">matplotlib</span>
@@ -137,9 +274,9 @@ case is a <code class="docutils literal notranslate"><span class="pre">genotypeA
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">progeny2</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;J1246&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">genotypeArray</span><span class="o">.</span><span class="n">genotypeArray</span> <span class="n">at</span> <span class="mh">0x7f5b186fd750</span><span class="o">&gt;</span><span class="p">,</span>
- <span class="s1">&#39;K1809&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">genotypeArray</span><span class="o">.</span><span class="n">genotypeArray</span> <span class="n">at</span> <span class="mh">0x7f5b18f31850</span><span class="o">&gt;</span><span class="p">,</span>
- <span class="s1">&#39;L1872&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">genotypeArray</span><span class="o">.</span><span class="n">genotypeArray</span> <span class="n">at</span> <span class="mh">0x7f5b18f31a10</span><span class="o">&gt;</span><span class="p">}</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;J1246&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">genotypeArray</span><span class="o">.</span><span class="n">genotypeArray</span> <span class="n">at</span> <span class="mh">0x7ff0cf56eed0</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;K1809&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">genotypeArray</span><span class="o">.</span><span class="n">genotypeArray</span> <span class="n">at</span> <span class="mh">0x7ff0cf5323d0</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;L1872&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">genotypeArray</span><span class="o">.</span><span class="n">genotypeArray</span> <span class="n">at</span> <span class="mh">0x7ff0cf56e450</span><span class="o">&gt;</span><span class="p">}</span>
 </pre></div>
 </div>
 <p>You can pull attributes about an individual family by indexing the key
@@ -187,16 +324,11 @@ families. You can then pass this dictionary of <code class="docutils literal not
 to <code class="docutils literal notranslate"><span class="pre">paternity_array</span></code> directly, just as if they were single objects.
 <code class="docutils literal notranslate"><span class="pre">paternity_array</span></code> detects that these are dictionaries, and returns a
 dictionary of <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> objects.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">time</span> paternity_array(progeny2, mothers2, adults, mu)
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">time</span> patlik1 = paternity_array(progeny2, mothers2, adults, mu)
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CPU</span> <span class="n">times</span><span class="p">:</span> <span class="n">user</span> <span class="mi">924</span> <span class="n">ms</span><span class="p">,</span> <span class="n">sys</span><span class="p">:</span> <span class="mf">19.4</span> <span class="n">ms</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="mi">944</span> <span class="n">ms</span>
-<span class="n">Wall</span> <span class="n">time</span><span class="p">:</span> <span class="mi">942</span> <span class="n">ms</span>
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;J1246&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">paternityArray</span><span class="o">.</span><span class="n">paternityArray</span> <span class="n">at</span> <span class="mh">0x7f5b183336d0</span><span class="o">&gt;</span><span class="p">,</span>
- <span class="s1">&#39;K1809&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">paternityArray</span><span class="o">.</span><span class="n">paternityArray</span> <span class="n">at</span> <span class="mh">0x7f5b18333690</span><span class="o">&gt;</span><span class="p">,</span>
- <span class="s1">&#39;L1872&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">paternityArray</span><span class="o">.</span><span class="n">paternityArray</span> <span class="n">at</span> <span class="mh">0x7f5b18333ad0</span><span class="o">&gt;</span><span class="p">}</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CPU</span> <span class="n">times</span><span class="p">:</span> <span class="n">user</span> <span class="mi">943</span> <span class="n">ms</span><span class="p">,</span> <span class="n">sys</span><span class="p">:</span> <span class="mf">35.2</span> <span class="n">ms</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="mi">979</span> <span class="n">ms</span>
+<span class="n">Wall</span> <span class="n">time</span><span class="p">:</span> <span class="mi">980</span> <span class="n">ms</span>
 </pre></div>
 </div>
 </div>
@@ -208,15 +340,17 @@ because <code class="docutils literal notranslate"><span class="pre">paternity_a
 datasets there is a very real chance you could exhaust the RAM on your
 computer and the machine will grind to a halt. By splitting up the
 genotype data first you can deal with small chunks at a time.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">time</span> patlik2 = paternity_array(progeny, mothers_full, adults, mu)
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mothers_full</span> <span class="o">=</span> <span class="n">adults</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">progeny</span><span class="o">.</span><span class="n">mothers</span><span class="p">)</span>
+
+<span class="o">%</span><span class="k">time</span> patlik2 = paternity_array(progeny, mothers_full, adults, mu)
 <span class="n">patlik2</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CPU</span> <span class="n">times</span><span class="p">:</span> <span class="n">user</span> <span class="mi">909</span> <span class="n">ms</span><span class="p">,</span> <span class="n">sys</span><span class="p">:</span> <span class="mi">64</span> <span class="n">ms</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="mi">973</span> <span class="n">ms</span>
-<span class="n">Wall</span> <span class="n">time</span><span class="p">:</span> <span class="mi">972</span> <span class="n">ms</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CPU</span> <span class="n">times</span><span class="p">:</span> <span class="n">user</span> <span class="mi">884</span> <span class="n">ms</span><span class="p">,</span> <span class="n">sys</span><span class="p">:</span> <span class="mf">59.4</span> <span class="n">ms</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="mi">943</span> <span class="n">ms</span>
+<span class="n">Wall</span> <span class="n">time</span><span class="p">:</span> <span class="mi">949</span> <span class="n">ms</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">paternityArray</span><span class="o">.</span><span class="n">paternityArray</span> <span class="n">at</span> <span class="mh">0x7f5b19106950</span><span class="o">&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">paternityArray</span><span class="o">.</span><span class="n">paternityArray</span> <span class="n">at</span> <span class="mh">0x7ff0cdf29810</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 <p>There doesn’t seem to be any difference in speed the two methods,
@@ -228,12 +362,14 @@ although in other cases I have found that creating a single
 <span class="n">patlik3</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">3</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;J1246&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">paternityArray</span><span class="o">.</span><span class="n">paternityArray</span> <span class="n">at</span> <span class="mh">0x7ff0cdf2c3d0</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;K1809&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">paternityArray</span><span class="o">.</span><span class="n">paternityArray</span> <span class="n">at</span> <span class="mh">0x7ff0ce35be90</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;L1872&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">paternityArray</span><span class="o">.</span><span class="n">paternityArray</span> <span class="n">at</span> <span class="mh">0x7ff0cdcd2550</span><span class="o">&gt;</span><span class="p">}</span>
 </pre></div>
 </div>
 <p>We would hope that <code class="docutils literal notranslate"><span class="pre">patlik</span></code> and <code class="docutils literal notranslate"><span class="pre">patlik3</span></code> are identical lists of
 <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> objects. We can inspect family J1246 to check:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="p">[</span><span class="s1">&#39;J1246&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">offspring</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik1</span><span class="p">[</span><span class="s1">&#39;J1246&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">offspring</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="s1">&#39;J1246_221&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_222&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_223&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_224&#39;</span><span class="p">,</span> <span class="s1">&#39;J1246_225&#39;</span><span class="p">,</span>
@@ -263,17 +399,21 @@ although in other cases I have found that creating a single
 <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> objects is being passed, and treat each
 independently. It returns a dictionary of <code class="docutils literal notranslate"><span class="pre">sibshipCluster</span></code> objects.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%%time</span>
-<span class="n">sc</span> <span class="o">=</span> <span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik</span><span class="p">)</span>
+<span class="n">sc</span> <span class="o">=</span> <span class="n">sibship_clustering</span><span class="p">(</span><span class="n">patlik1</span><span class="p">)</span>
 <span class="n">sc</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CPU</span> <span class="n">times</span><span class="p">:</span> <span class="n">user</span> <span class="mi">361</span> <span class="n">ms</span><span class="p">,</span> <span class="n">sys</span><span class="p">:</span> <span class="mi">0</span> <span class="n">ns</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="mi">361</span> <span class="n">ms</span>
-<span class="n">Wall</span> <span class="n">time</span><span class="p">:</span> <span class="mi">361</span> <span class="n">ms</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">GMI</span><span class="o">/</span><span class="n">thomas</span><span class="o">.</span><span class="n">ellis</span><span class="o">/</span><span class="n">miniconda3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">faps</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">faps</span><span class="o">/</span><span class="n">paternityArray</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">216</span><span class="p">:</span> <span class="ne">UserWarning</span><span class="p">:</span> <span class="n">Missing_parents</span> <span class="nb">set</span> <span class="n">to</span> <span class="mf">0.</span> <span class="n">Only</span> <span class="k">continue</span> <span class="k">if</span> <span class="n">you</span> <span class="n">are</span> <span class="n">sure</span> <span class="n">you</span> <span class="n">really</span> <span class="n">have</span> <span class="mi">100</span><span class="o">%</span> <span class="n">of</span> <span class="n">possible</span> <span class="n">fathers</span><span class="o">.</span>
+  <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">missing_parents</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Missing_parents set to 0. Only continue if you are sure you really have 100</span><span class="si">% o</span><span class="s2">f possible fathers.&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;J1246&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">sibshipCluster</span><span class="o">.</span><span class="n">sibshipCluster</span> <span class="n">at</span> <span class="mh">0x7f5b18d91390</span><span class="o">&gt;</span><span class="p">,</span>
- <span class="s1">&#39;K1809&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">sibshipCluster</span><span class="o">.</span><span class="n">sibshipCluster</span> <span class="n">at</span> <span class="mh">0x7f5b187116d0</span><span class="o">&gt;</span><span class="p">,</span>
- <span class="s1">&#39;L1872&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">sibshipCluster</span><span class="o">.</span><span class="n">sibshipCluster</span> <span class="n">at</span> <span class="mh">0x7f5b18711290</span><span class="o">&gt;</span><span class="p">}</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CPU</span> <span class="n">times</span><span class="p">:</span> <span class="n">user</span> <span class="mi">523</span> <span class="n">ms</span><span class="p">,</span> <span class="n">sys</span><span class="p">:</span> <span class="mi">0</span> <span class="n">ns</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="mi">523</span> <span class="n">ms</span>
+<span class="n">Wall</span> <span class="n">time</span><span class="p">:</span> <span class="mi">521</span> <span class="n">ms</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s1">&#39;J1246&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">sibshipCluster</span><span class="o">.</span><span class="n">sibshipCluster</span> <span class="n">at</span> <span class="mh">0x7ff0ce647710</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;K1809&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">sibshipCluster</span><span class="o">.</span><span class="n">sibshipCluster</span> <span class="n">at</span> <span class="mh">0x7ff0cd834150</span><span class="o">&gt;</span><span class="p">,</span>
+ <span class="s1">&#39;L1872&#39;</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">sibshipCluster</span><span class="o">.</span><span class="n">sibshipCluster</span> <span class="n">at</span> <span class="mh">0x7ff0cd834b50</span><span class="o">&gt;</span><span class="p">}</span>
 </pre></div>
 </div>
 <p>This time there is quite a substantial speed advantage to performing
@@ -284,28 +424,28 @@ number of <em>pairs</em> of relationships to consider scales quadratically.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">time</span> sibship_clustering(patlik2)
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CPU</span> <span class="n">times</span><span class="p">:</span> <span class="n">user</span> <span class="mf">1.2</span> <span class="n">s</span><span class="p">,</span> <span class="n">sys</span><span class="p">:</span> <span class="mi">0</span> <span class="n">ns</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="mf">1.2</span> <span class="n">s</span>
-<span class="n">Wall</span> <span class="n">time</span><span class="p">:</span> <span class="mf">1.2</span> <span class="n">s</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">CPU</span> <span class="n">times</span><span class="p">:</span> <span class="n">user</span> <span class="mf">1.51</span> <span class="n">s</span><span class="p">,</span> <span class="n">sys</span><span class="p">:</span> <span class="mi">0</span> <span class="n">ns</span><span class="p">,</span> <span class="n">total</span><span class="p">:</span> <span class="mf">1.51</span> <span class="n">s</span>
+<span class="n">Wall</span> <span class="n">time</span><span class="p">:</span> <span class="mf">1.5</span> <span class="n">s</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">sibshipCluster</span><span class="o">.</span><span class="n">sibshipCluster</span> <span class="n">at</span> <span class="mh">0x7f5b18e62cd0</span><span class="o">&gt;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">&lt;</span><span class="n">faps</span><span class="o">.</span><span class="n">sibshipCluster</span><span class="o">.</span><span class="n">sibshipCluster</span> <span class="n">at</span> <span class="mh">0x7ff0cdfffb50</span><span class="o">&gt;</span>
 </pre></div>
 </div>
 <p>You can index any single family to extract information about it in the
-same way as was explained in the section on <a class="reference external" href="http://localhost:8888/notebooks/docs/04%20Sibship%20clustering.ipynb">sibship
+same way as was explained in the section on <a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/04_sibship_clustering.html">sibship
 clustering</a>.
 For example, the posterior distribution of full-sibship sizes for the
 first maternal family.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">sc</span><span class="p">[</span><span class="s1">&#39;J1246&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">family_size</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">4.58202817e-001</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">1.80599061e-001</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span>
-       <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">4.63516339e-004</span><span class="p">,</span>
-       <span class="mf">1.92206595e-001</span><span class="p">,</span> <span class="mf">7.44197790e-002</span><span class="p">,</span> <span class="mf">9.20875300e-002</span><span class="p">,</span> <span class="mf">2.02070116e-003</span><span class="p">,</span>
-       <span class="mf">2.11508501e-020</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">4.58264645e-001</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">1.80578452e-001</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span>
+       <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">5.35892330e-004</span><span class="p">,</span>
+       <span class="mf">1.92140400e-001</span><span class="p">,</span> <span class="mf">7.43963548e-002</span><span class="p">,</span> <span class="mf">9.20640706e-002</span><span class="p">,</span> <span class="mf">2.02018638e-003</span><span class="p">,</span>
+       <span class="mf">2.11454618e-020</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span>
        <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span>
-       <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">1.42063904e-213</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span>
-       <span class="mf">1.00214824e-265</span><span class="p">])</span>
+       <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">1.42027713e-213</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span> <span class="mf">0.00000000e+000</span><span class="p">,</span>
+       <span class="mf">1.00189294e-265</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>As with <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> objects, to extract information about each
@@ -322,66 +462,52 @@ structures for each maternal family.</p>
 </div>
 
 
+           </div>
+           
           </div>
-          
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">faps</a></h1>
-
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="08_data_cleaning_in_Amajus.html" class="btn btn-neutral float-right" title="Data cleaning for Antirrhinum majus data set from 2012" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="06_simulating_data.html" class="btn btn-neutral float-left" title="Simulating data and power analysis" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+  
 
+  <hr/>
 
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Tom Ellis
 
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
-
-
-
+</footer>
 
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2020, Tom Ellis.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
-      
-      |
-      <a href="../_sources/tutorials/07_dealing_with_multiple_half-sib_families.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
 
-    
+    </section>
 
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
     
-  </body>
+   
+
+</body>
 </html>

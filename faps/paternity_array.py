@@ -131,7 +131,7 @@ def paternity_array(offspring, mothers, males, mu, missing_parents = 0, purge=No
         elif isinstance(purge, (list, np.ndarray, int, str)):
             # If all entries are strings, find the names of the candidates.
             if all([isinstance(x, str) for x in purge]):
-                if not all(np.isin(purge, candidates)):
+                if not all(np.atleast_1d(np.asarray(np.isin(purge, males.names)))):
                     raise ValueError("One or more names in paternityArray.purge are not found in paternityArray.candidates")
         else:
             raise TypeError("Error: purge should be a float or list of floats between zero and one.")

@@ -22,7 +22,7 @@ and individuals. It can be argued that this process was overly
 conservative, and we threw out a lot of useful data, so you need not
 necessarily be so critical of your own data.
 
-.. code:: ipython2
+.. code:: ipython3
 
     import numpy as np
     from faps import *
@@ -41,7 +41,7 @@ Data inspection
 Import genotype data for the reproductive adults and offspring. The
 latter includes information on the ID of the maternal mother.
 
-.. code:: ipython2
+.. code:: ipython3
 
     progeny = read_genotypes('../manuscript_faps/data_files/offspring_SNPs_2012.csv', mothers_col=1, genotype_col=2)
     adults  = read_genotypes('../manuscript_faps/data_files/parents_SNPs_2012.csv')
@@ -56,7 +56,7 @@ We will also import data GPS data for 2219 individuals tagged as alive
 in 2012. Since not all of these have been genotyped, we reformat the
 data to match the genotype data.
 
-.. code:: ipython2
+.. code:: ipython3
 
     gps_pos = np.genfromtxt('../manuscript_faps/data_files/amajus_GPS_2012.csv', delimiter=',', skip_header=1, usecols=[3,4]) # import CSV file
     gps_lab = np.genfromtxt('../manuscript_faps/data_files/amajus_GPS_2012.csv', delimiter=',', skip_header=1, usecols=0, dtype='str') # import CSV file
@@ -68,7 +68,7 @@ data to match the genotype data.
 imagine that these individuals could contribute to the pollen pool of
 the mothers, so let's remove these from the sample.
 
-.. code:: ipython2
+.. code:: ipython3
 
     plt.scatter(gps_pos[:,0], gps_pos[:,1])
 
@@ -85,7 +85,7 @@ the mothers, so let's remove these from the sample.
 .. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_10_1.png
 
 
-.. code:: ipython2
+.. code:: ipython3
 
     ix = [i for i in range(len(gps_lab)) if gps_pos[i,0] > -5000]
     gps_pos, gps_lab = gps_pos[ix], gps_lab[ix]
@@ -95,7 +95,7 @@ Genotype information
 
 As a sanity check, confirm that the marker names really do match.
 
-.. code:: ipython2
+.. code:: ipython3
 
     all([progeny.markers[i] == adults.markers[i] for i in range(progeny.nloci)])
 
@@ -114,7 +114,7 @@ the DNA became degraded. Reflecting this, although genotype dropouts
 (the rate at which genotype information at a single locus fails to
 amplify) is respectable for the adults, but dire for the offspring.
 
-.. code:: ipython2
+.. code:: ipython3
 
     print adults.missing_data().max()
     print progeny.missing_data().max()
@@ -130,7 +130,7 @@ amplify) is respectable for the adults, but dire for the offspring.
 Luckily a lot of this is driven by a small number of loci/individuals
 with very high dropout rates.
 
-.. code:: ipython2
+.. code:: ipython3
 
     fig = plt.figure(figsize=(10,10))
     fig.subplots_adjust(wspace=0.2, hspace=0.2)
@@ -178,7 +178,7 @@ Candidates with very few loci typed can come out as being highly
 compatible with many offspring, just because there is insufficient
 information to exclude them.
 
-.. code:: ipython2
+.. code:: ipython3
 
     print adults.missing_data(by='individual').max()
     print progeny.missing_data('individual').max()
@@ -192,7 +192,7 @@ information to exclude them.
 
 Count, then remove individuals with >5% missing data.
 
-.. code:: ipython2
+.. code:: ipython3
 
     print "Offspring:", len(np.array(progeny.names)[progeny.missing_data(1) > 0.05])
     print "Parents:", len(np.array(adults.names)[adults.missing_data(1) > 0.05])
@@ -210,7 +210,7 @@ Count, then remove individuals with >5% missing data.
 Histograms look much better. It would still worth removing some of the
 dubious loci with high drop-out rates though.
 
-.. code:: ipython2
+.. code:: ipython3
 
     fig = plt.figure(figsize=(10,10))
     fig.subplots_adjust(wspace=0.2, hspace=0.2)
@@ -255,7 +255,7 @@ dubious loci with high drop-out rates though.
 Remove the loci with dropouts >10% from both the offspring and adult
 datasets.
 
-.. code:: ipython2
+.. code:: ipython3
 
     print np.array(progeny.markers)[progeny.missing_data(0) >= 0.1]
     
@@ -273,7 +273,7 @@ one would expect. An exception is the locus with allele frequency at
 around 0.4, but heterozygosity >0.7, which is suspect, and indicative of
 a possible outlier.
 
-.. code:: ipython2
+.. code:: ipython3
 
     plt.scatter(adults.allele_freqs(), adults.heterozygosity(0))
     plt.xlabel('Allele frequency')
@@ -290,7 +290,7 @@ contribute some information, albeit little. To be on the safe side,
 let's remove loci with less than 0.2 heterozygosity, and the errant
 locus with high heterozygosity.
 
-.. code:: ipython2
+.. code:: ipython3
 
     print "Heterozygosity > 0.7:", adults.markers[adults.heterozygosity(0) >0.7]
     print "Heterozygosity < 0.2:", progeny.markers[adults.heterozygosity(0) < 0.2]
@@ -315,7 +315,7 @@ humped around 0.5, which is a good sign that parents should be readily
 distinguishable. There is nevertheless substantial spread towards zero
 and one for the progeny data however, which is less than ideal.
 
-.. code:: ipython2
+.. code:: ipython3
 
     fig = plt.figure(figsize=(10,10))
     fig.subplots_adjust(wspace=0.1, hspace=0.2)
@@ -360,14 +360,14 @@ loci for this dataset.
 In fact, effective number of loci is good. The minimum number of valid
 loci to compare is 46, and in 99% of cases there are 57 or more loci.
 
-.. code:: ipython2
+.. code:: ipython3
 
     np.unique([progeny.mothers[i] for i in range(progeny.size) if progeny.mothers[i] not in adults.names])
     ix = [i for i in range(progeny.size) if progeny.mothers[i] in adults.names]
     progeny = progeny.subset(ix)
 
 
-.. code:: ipython2
+.. code:: ipython3
 
     mothers = adults.subset(progeny.parent_index('m', adults.names))
     neloci  = effective_nloci(progeny, mothers, adults)
@@ -382,7 +382,7 @@ loci to compare is 46, and in 99% of cases there are 57 or more loci.
 Finally, print some summary statistics about the quality of the genotype
 information in the data set.
 
-.. code:: ipython2
+.. code:: ipython3
 
     print(adults.nloci)
     print progeny.missing_data(0).mean()
@@ -410,7 +410,7 @@ we need to split them up into their constituent full sib families. This
 is easy to do with ``split``, which returns a list of ``genotypeArray``
 objects.
 
-.. code:: ipython2
+.. code:: ipython3
 
     prlist = progeny.split(progeny.mothers)
     len(prlist)
@@ -429,7 +429,7 @@ detail. After the data filtering above, there are 20 offspring from
 mother L1872. Distributions of missing data, heterozygosity and allele
 frequency at each locus suggest no reason for alarm.
 
-.. code:: ipython2
+.. code:: ipython3
 
     ex_progeny = prlist[2]
     ex_mother  = adults.subset(ex_progeny.parent_index('m', adults.names))
@@ -454,7 +454,7 @@ as alive in 2012, and I allow for 10% of candidates having been missed.
 In fact the results do not depend on the parameter unless it is
 unrealistically high.
 
-.. code:: ipython2
+.. code:: ipython3
 
     allele_freqs = adults.allele_freqs() # population allele frequencies
     ex_patlik    = paternity_array(ex_progeny, ex_mother, adults, 0.0015, missing_parents=0.1)
@@ -463,7 +463,7 @@ unrealistically high.
 We can first look at the dendrogram of relatedness between individuals
 derived from the array of paternity likleihoods.
 
-.. code:: ipython2
+.. code:: ipython3
 
     from scipy.cluster.hierarchy import dendrogram
     dendrogram(ex_sc.linkage_matrix, orientation='left', color_threshold=0,
@@ -482,7 +482,7 @@ structure simply labels individuals 0 to 20 with a unique, arbitrary
 identifier. For example, individuals 2 and 3 are grouped into an
 especially large family labelled '1'.
 
-.. code:: ipython2
+.. code:: ipython3
 
     print "most-likely partition:", ex_sc.mlpartition
     print "unique families:", np.unique(ex_sc.mlpartition)
@@ -500,7 +500,7 @@ We can recover posterior probabilties of paternity for each candidate on
 each offspring using ``prob_paternity``. For most offspring, there is a
 single candidate with a probability of paternity close to one.
 
-.. code:: ipython2
+.. code:: ipython3
 
     postpat = ex_sc.prob_paternity()
     
@@ -651,7 +651,7 @@ Consistent with the results for many families (shown below), the
 posterior distributions for family size suggest many small families and
 a smaller number of larger families.
 
-.. code:: ipython2
+.. code:: ipython3
 
     fig = plt.figure(figsize=(15,6))
     
@@ -679,7 +679,7 @@ and identified a set of candidates with posterior probabilities close to
 one, it is reasonable to use these individuals to get an idea of where
 the pollen donors are to be found.
 
-.. code:: ipython2
+.. code:: ipython3
 
     ix =[i for i in range(len(gps_lab)) if gps_lab[i] in adults.names[mx]]
     gps_cands = gps_pos[ix]
@@ -692,13 +692,13 @@ the lower (southern-most) road, with two individuals on the upper
 (northern) road. This gives us no cause to doubt the validity of the
 paternity results.
 
-.. code:: ipython2
+.. code:: ipython3
 
     second = np.sort(postpat, 1)[:, 1]
     sx = np.array([np.where(second[i] == postpat[i])[0][0] for i in range(ex_progeny.size)])
     gps_sec = gps_pos[np.unique(sx)]
 
-.. code:: ipython2
+.. code:: ipython3
 
     fig = plt.figure(figsize=(16.9/2.54,6.75/2.54))
     #plt.figure(figsize=(12.5,5)
@@ -720,7 +720,7 @@ paternity results.
 We can use these data to get a very rough dispersal kernal. Most pollen
 comes from within 50m of the maternal plant.
 
-.. code:: ipython2
+.. code:: ipython3
 
     dists = np.sqrt((gps_ex[0] - gps_cands[:,0])**2 + (gps_ex[1] - gps_cands[:,1])**2)
     print "Mean dispersal =",mean(dists)
@@ -741,7 +741,7 @@ comes from within 50m of the maternal plant.
 In contrast, the second-most-likely candidates are on average more than
 800m from the maternal plant.
 
-.. code:: ipython2
+.. code:: ipython3
 
     dists2 = np.sqrt((gps_ex[0] - gps_sec[:,0])**2 + (gps_ex[1] - gps_sec[:,1])**2)
     print "Mean dispersal =",mean(dists2)
@@ -772,7 +772,7 @@ before and after sibship clustering. Top candidates have either one or
 zero missing data points. This is probably really a random draw from the
 pool of candidates, because these are the most common categories.
 
-.. code:: ipython2
+.. code:: ipython3
 
     md = ex_sc.prob_paternity()
     px = [np.where(md[i]                  == md[i].max())[0][0]                     for i in range(ex_progeny.size)]
@@ -817,7 +817,7 @@ population.
 First, calculate a matrix of pairwise relatedness between all
 individuals in the sample of candidates:
 
-.. code:: ipython2
+.. code:: ipython3
 
     matches = [(adults.geno[:,:,i][np.newaxis] == adults.geno[:,:,j][:, np.newaxis]).mean(2) for i in [0,1] for j in [0,1]]
     matches = np.array(matches)
@@ -829,7 +829,7 @@ clustering in orange (I have excluded duplicate candidates). There is no
 reason to suppose the top candidates are anything other than a random
 draw.
 
-.. code:: ipython2
+.. code:: ipython3
 
     ux = np.unique(px)
     top_r = np.array([matches[ux[i],ux] for i in range(len(ux))])
@@ -859,7 +859,7 @@ straightforward in Python if we use list comprehensions. For example, we
 can pull out and plot the number of offspring in each half-sibling
 array:
 
-.. code:: ipython2
+.. code:: ipython3
 
     plt.hist([prlist[i].size for i in range(len(prlist))], bins=np.arange(0,25))
     plt.show()
@@ -880,7 +880,7 @@ order of individuals in the ``genotypeArray`` object, so taking the
 first 17 is tantamount to choosing at random). This leaves us with 18
 familes of 17 offspring.
 
-.. code:: ipython2
+.. code:: ipython3
 
     # split into maternal families
     mlist  = mothers.split(progeny.mothers)
@@ -896,7 +896,7 @@ Calculate likelihoods of paternity for each family. This took 3 seconds
 on a 2010 Macbook Pro; your mileage may vary. In order to do so we also
 need population allele frequencies.
 
-.. code:: ipython2
+.. code:: ipython3
 
     allele_freqs = adults.allele_freqs() # population allele frequencies
     
@@ -913,7 +913,7 @@ need population allele frequencies.
 
 The next step is clustering each family into full sibships.
 
-.. code:: ipython2
+.. code:: ipython3
 
     t1 = time()
     sc = sibship_clustering(patlik)
@@ -928,7 +928,7 @@ The next step is clustering each family into full sibships.
 Calculate probability distributions for family size and number of
 families for each array.
 
-.. code:: ipython2
+.. code:: ipython3
 
     nfamilies = [x.nfamilies() for x in sc]
     nfamilies = np.array(nfamilies)
@@ -942,7 +942,7 @@ below). Samples of 17 offspring are divided into between four and 16
 full-sibling families consisting of between one and eight individuals.
 Most families seem to be small, with a smaller number of large families.
 
-.. code:: ipython2
+.. code:: ipython3
 
     fig = plt.figure(figsize=(16.9/2.54, 6/2.54))
     fig.subplots_adjust(wspace=0.3, hspace=0.1)
@@ -973,7 +973,7 @@ Most families seem to be small, with a smaller number of large families.
 Cumulative probability density plots demonstrate the credible intervals
 for family size and number.
 
-.. code:: ipython2
+.. code:: ipython3
 
     fig = plt.figure(figsize=(15, 6))
     fig.subplots_adjust(wspace=0.3, hspace=0.1)

@@ -16,11 +16,12 @@ This notebook will examine how to:
 3. Make some basic inferences about the size and number of full
    sibships, and who is related to whom.
 
-If the goal of your study is to say something about how specific
-phenotypes or geography influence patterns of mating, you can then use
-your ``sibshipArray`` to `sample likely mating
-events <https://github.com/ellisztamas/faps/blob/master/docs/05%20Inference%20about%20mating%20patterns.ipynb>`__,
-accounting fo uncertainty in sibship structure.
+Note that this tutorial only deals with the case where you have a single
+maternal family. If you have multiple families, you can apply what is
+here to each one, but you'll have to iterate over those families. See
+the specific
+`tutorial <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/07_dealing_with_multiple_half-sib_families.html>`__
+on that.
 
 Generating a ``sibshipCluster`` object
 --------------------------------------
@@ -43,8 +44,8 @@ create three full sibships of five offspring. We then generate a
 .. code:: ipython3
 
     progeny = fp.make_sibships(adults, 0, [1,2,3], 5, 'x')
-    mothers = adults.subset(progeny.parent_index('m', adults.names))
-    patlik  = fp.paternity_array(progeny, mothers, adults, mu = 0.0015)
+    mothers = adults.subset(progeny.mothers)
+    patlik  = fp.paternity_array(progeny, mothers, adults, mu = 0.0015, missing_parents=0.01)
 
 It is straightforward to cluster offspring into full sibships. For now
 we'll stick with the default number of Monte Carlo draws.
@@ -96,18 +97,18 @@ bifurcation in the dendrogram).
     array([[ 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1],
            [ 2,  2,  2,  2,  2,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2],
            [ 3,  3,  3,  3,  3,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2],
-           [ 4,  4,  4,  4,  4,  1,  1,  2,  1,  1,  3,  3,  3,  3,  3],
-           [ 5,  5,  5,  5,  5,  1,  1,  3,  1,  2,  4,  4,  4,  4,  4],
-           [ 5,  6,  5,  5,  5,  1,  1,  3,  1,  2,  4,  4,  4,  4,  4],
-           [ 6,  7,  6,  6,  6,  1,  1,  3,  1,  2,  4,  5,  4,  4,  4],
-           [ 7,  8,  7,  7,  7,  1,  1,  4,  2,  3,  5,  6,  5,  5,  5],
-           [ 8,  9,  8,  8,  8,  1,  2,  5,  3,  4,  6,  7,  6,  6,  6],
-           [ 8, 10,  9,  8,  8,  1,  2,  5,  3,  4,  6,  7,  6,  6,  6],
-           [ 8, 11, 10,  9,  8,  1,  2,  5,  3,  4,  6,  7,  6,  6,  6],
-           [ 9, 12, 11, 10,  9,  1,  2,  5,  3,  4,  7,  8,  6,  6,  6],
-           [10, 13, 12, 11, 10,  1,  2,  5,  3,  4,  8,  9,  6,  6,  7],
-           [11, 14, 13, 12, 11,  1,  2,  5,  3,  4,  9, 10,  6,  7,  8],
-           [11, 15, 14, 13, 12,  1,  2,  5,  3,  4,  9, 10,  6,  7,  8]],
+           [ 4,  4,  4,  4,  4,  1,  2,  1,  1,  1,  3,  3,  3,  3,  3],
+           [ 5,  5,  5,  5,  5,  1,  3,  1,  1,  2,  4,  4,  4,  4,  4],
+           [ 5,  5,  5,  6,  5,  1,  3,  1,  1,  2,  4,  4,  4,  4,  4],
+           [ 6,  6,  6,  7,  6,  1,  3,  1,  1,  2,  5,  4,  4,  4,  4],
+           [ 7,  7,  7,  8,  7,  1,  4,  1,  2,  3,  6,  5,  5,  5,  5],
+           [ 7,  8,  7,  9,  7,  1,  4,  1,  2,  3,  6,  5,  5,  5,  5],
+           [ 8,  9,  8, 10,  8,  1,  5,  2,  3,  4,  7,  6,  6,  6,  6],
+           [ 8, 10,  8, 11,  9,  1,  5,  2,  3,  4,  7,  6,  6,  6,  6],
+           [ 8, 11,  9, 12, 10,  1,  5,  2,  3,  4,  7,  6,  6,  6,  6],
+           [ 9, 12, 10, 13, 11,  1,  5,  2,  3,  4,  8,  7,  6,  6,  6],
+           [10, 13, 11, 14, 12,  1,  5,  2,  3,  4,  9,  8,  7,  6,  6],
+           [11, 14, 12, 15, 13,  1,  5,  2,  3,  4, 10,  9,  8,  6,  7]],
           dtype=int32)
 
 
@@ -147,11 +148,11 @@ most consistent with the data. This is of course the true partition.
 
 .. parsed-literal::
 
-    [-4.23560188e+02 -1.94067281e+02 -2.70500804e-04 -8.55784873e+00
+    [-3.84493727e+02 -1.82424133e+02 -6.91144774e-06            -inf
                 -inf            -inf            -inf            -inf
                 -inf            -inf            -inf            -inf
                 -inf            -inf            -inf]
-    [1.12248824e-184 5.22016966e-085 9.99807953e-001 1.92047026e-004
+    [1.03872159e-167 5.94577504e-080 1.00000000e+000 0.00000000e+000
      0.00000000e+000 0.00000000e+000 0.00000000e+000 0.00000000e+000
      0.00000000e+000 0.00000000e+000 0.00000000e+000 0.00000000e+000
      0.00000000e+000 0.00000000e+000 0.00000000e+000]
@@ -179,7 +180,7 @@ wherever possible. We can check:
 
 .. parsed-literal::
 
-    0.9999999999999999
+    1.0
 
 
 
@@ -350,9 +351,9 @@ the array. We use 1000 candidate males and 50 loci.
     allele_freqs = np.random.uniform(0.3,0.5,30)
     adults  = fp.make_parents(1000, allele_freqs, family_name='a')
     progeny = fp.make_offspring(adults, dam_list=dam, sire_list=sires)
-    mothers = adults.subset(progeny.parent_index('m', adults.names))
+    mothers = adults.subset(progeny.mothers)
     
-    patlik  = fp.paternity_array(progeny, mothers, adults, mu)
+    patlik  = fp.paternity_array(progeny, mothers, adults, mu= 0.0015, missing_parents=0.01)
     sc = fp.sibship_clustering(patlik)
 
 Number of families
@@ -374,10 +375,10 @@ families.
 
 .. parsed-literal::
 
-    array([1.54459956e-94, 2.57811788e-60, 9.18372901e-44, 7.72547191e-06,
-           7.47533669e-01, 2.23504324e-01, 2.89124365e-02, 4.18453104e-05,
-           0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
-           0.00000000e+00, 0.00000000e+00, 0.00000000e+00])
+    array([6.09528844e-103, 4.68985495e-065, 6.19307208e-047, 9.97886140e-007,
+           7.57314645e-001, 2.17024167e-001, 2.47376286e-002, 9.22561282e-004,
+           0.00000000e+000, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000,
+           0.00000000e+000, 0.00000000e+000, 0.00000000e+000])
 
 
 
@@ -423,10 +424,10 @@ uncertainty in partition structure.
 
 .. parsed-literal::
 
-    array([2.36420142e-01, 1.95030543e-01, 1.86762685e-01, 2.32277965e-01,
-           1.49508665e-01, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
-           3.06124300e-44, 0.00000000e+00, 1.28905894e-60, 0.00000000e+00,
-           0.00000000e+00, 0.00000000e+00, 1.54459956e-94])
+    array([2.34867440e-001, 1.94932407e-001, 1.87748944e-001, 2.30988031e-001,
+           1.51463178e-001, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000,
+           2.06435736e-047, 0.00000000e+000, 2.34492747e-065, 0.00000000e+000,
+           0.00000000e+000, 0.00000000e+000, 6.09528844e-103])
 
 
 

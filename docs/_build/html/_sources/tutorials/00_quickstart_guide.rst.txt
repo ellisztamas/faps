@@ -10,7 +10,7 @@ example. The work flow is as follows:
 1. Import marker data on offspring and parents
 2. Create a matrix of paternity of each individual offspring
 3. Cluster offspring into full sibships.
-4. ????
+4. '????'
 5. Profit.
 
 It goes without saying that to understand what the code is doing and get

@@ -1,43 +1,184 @@
 
-<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta charset="utf-8" />
-    <title>Paternity arrays &#8212; faps 2.2.1 documentation</title>
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Paternity arrays &mdash; faps 2.2.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Sibship clustering" href="04_sibship_clustering.html" />
+    <link rel="prev" title="Genotype data in FAPS" href="02_genotype_data.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
    
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
-  
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
           
 
-          <div class="body" role="main">
+          
+            <a href="../index.html" class="icon icon-home"> faps
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00_quickstart_guide.html">Quickstart guide to FAPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01_introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="02_genotype_data.html">Genotype data in FAPS</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Paternity arrays</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#creating-a-paternityarray-from-genotype-data">Creating a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> from genotype data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#paternityarray-structure"><code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> structure</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-attributes">Basic attributes</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#representation-of-matrix-g">Representation of matrix <strong>G</strong></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#modifying-a-paternityarray">Modifying a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#selfing-rate">Selfing rate</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#removing-individual-candidates">Removing individual candidates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#reducing-the-number-of-candidates">Reducing the number of candidates</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#modifying-arrays-on-creation">Modifying arrays on creation</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#importing-a-paternityarray">Importing a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="04_sibship_clustering.html">Sibship clustering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_inference_about_mating_patterns.html">Inference about mating patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_simulating_data.html">Simulating data and power analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_dealing_with_multiple_half-sib_families.html">Dealing with multiple half-sib families</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_data_cleaning_in_Amajus.html">Data cleaning for <em>Antirrhinum majus</em> data set from 2012</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">faps</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Paternity arrays</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/03_paternity_arrays.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="paternity-arrays">
 <h1>Paternity arrays<a class="headerlink" href="#paternity-arrays" title="Permalink to this headline">¶</a></h1>
 <p>Tom Ellis, March 2017</p>
 <p>Paternity arrays are the what sibship clustering is built on in FAPS.
 They contain information about the probability that each candidate male
-is the father of each individual offspring. This information is stored
-in a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> object, along with other related information. A
+is the father of each individual offspring - this is what the FAPS paper
+refers to as matrix <strong>G</strong>. This information is stored in a
+<code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> object, along with other related information. A
 <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> can either be imported directly, or created from
 genotype data.</p>
 <p>This notebook will examine how to:</p>
@@ -47,9 +188,15 @@ genotype data.</p>
 <li><p>Read and write a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> to disk, or import a custom
 <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code>.</p></li>
 </ol>
-<p>Once you have made your <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code>, the [next
-step]((<a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/04%20Sibship%20clustering.ipynb">https://github.com/ellisztamas/faps/blob/master/docs/04%20Sibship%20clustering.ipynb</a>)
+<p>Once you have made your <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code>, the <a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/04_sibship_clustering.html">next
+step</a>
 is to cluster the individuals in your array into full sibship groups.</p>
+<p>Note that this tutorial only deals with the case where you have a
+<code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> object for a single maternal family. If you have
+multiple families, you can apply what is here to each one, but you’ll
+have to iterate over those families. See the specific
+<a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/07_dealing_with_multiple_half-sib_families.html">tutorial</a>
+on that.</p>
 <div class="section" id="creating-a-paternityarray-from-genotype-data">
 <h2>Creating a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> from genotype data<a class="headerlink" href="#creating-a-paternityarray-from-genotype-data" title="Permalink to this headline">¶</a></h2>
 <p>To create a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> from genotype data we need to specficy
@@ -74,18 +221,11 @@ mother.</p>
 </pre></div>
 </div>
 <p>To create the <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> we also need to supply information on
-the genotyping error rate (mu), and population allele frequencies. In
-toy example we know the error rate to be zero. However, in reality this
-will almost never be true, and moreover, sibship clustering becomes
-unstable when errors are zero. With that in mind, <code class="docutils literal notranslate"><span class="pre">fp.paternity_array</span></code>
-will throw an error when this is included.</p>
-<p>For allele frequencies, we can either take the population allele
-frequencies defined above, or estimate them from the data, which will
-give slightly different answers. The function <code class="docutils literal notranslate"><span class="pre">paternity_array</span></code>
-creates an object of class <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code>.</p>
+the genotyping error rate (mu). In this toy example we know the error
+rate to be zero. However, in reality this will almost never be true, and
+moreover, sibship clustering becomes unstable when errors are zero, so
+we will use a small number for the error rate.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">error_rate</span> <span class="o">=</span> <span class="mf">0.0015</span>
-
-<span class="n">sample_af</span> <span class="o">=</span> <span class="n">mypop</span><span class="o">.</span><span class="n">allele_freqs</span><span class="p">()</span>
 <span class="n">patlik</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">paternity_array</span><span class="p">(</span>
     <span class="n">offspring</span> <span class="o">=</span> <span class="n">progeny</span><span class="p">,</span>
     <span class="n">mothers</span> <span class="o">=</span> <span class="n">mothers</span><span class="p">,</span>
@@ -93,13 +233,11 @@ creates an object of class <code class="docutils literal notranslate"><span clas
     <span class="n">mu</span><span class="o">=</span><span class="n">error_rate</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>Note that if you try running the above cell but with mu=0, it will run,
-but throw a warning. The reason is that setting mu to zero tends to make
-sibship clustering unstable, so it automatically sets mu to a very small
-number.</p>
 </div>
 <div class="section" id="paternityarray-structure">
 <h2><code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> structure<a class="headerlink" href="#paternityarray-structure" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="basic-attributes">
+<h3>Basic attributes<a class="headerlink" href="#basic-attributes" title="Permalink to this headline">¶</a></h3>
 <p>A <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> inherits information about individuals from found
 in a <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code>. For example, labels of the candidates, mothers
 and offspring.</p>
@@ -115,6 +253,18 @@ and offspring.</p>
  <span class="s1">&#39;myprogeny_5&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
+</div>
+<div class="section" id="representation-of-matrix-g">
+<h3>Representation of matrix <strong>G</strong><a class="headerlink" href="#representation-of-matrix-g" title="Permalink to this headline">¶</a></h3>
+<p>The FAPS paper began with matrix <strong>G</strong> that gives probabilities that
+each individual is sired by each candidate father, or that the true
+father is absent from the sample. Recall that this matrix had a row for
+every offspring and a column for every candidate father, plus and
+additional column for the probability that the father was unsampled, and
+that these rows sum to one. The relative weight given to these two
+sections of <strong>G</strong> is determined by our prior expectation <em>p</em> about what
+proportion of true fathers were sampled. This section will examine how
+that is matrix is constructed.</p>
 <p>The most important part of the <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> is the likelihood
 array, which represent the log likelihood that each candidate male is
 the true father of each offspring individual. In this case it will be a
@@ -139,7 +289,7 @@ rows one to three, and the third column in rows four to six).</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> also includes information that the true sire is
 not in the sample of candidate males. In this case this is not helpful,
 because we know sampling is complete, but in real examples is seldom the
-case. By default this is defined as the liklihood of generating the
+case. By default this is defined as the likelihood of generating the
 offspring genotypes given the known mothers genotype and alleles drawn
 from population allele frequencies. Here, values for the six offspring
 are higher than the likelihoods for the non-sires, indicating that they
@@ -152,86 +302,178 @@ individual.</p>
        <span class="o">-</span><span class="mf">177.57516224</span><span class="p">,</span> <span class="o">-</span><span class="mf">182.36957151</span><span class="p">])</span>
 </pre></div>
 </div>
-<p>This becomes more informative when we combine likelihoods about sampled
-and unsampled fathers. For fractional analyses we really want to know
-the probability that the father was unsampled vs sampled, and how
-probable it is that a single candidate is the true sire. To do this,
-<code class="docutils literal notranslate"><span class="pre">patlik.lik_array</span></code> is concatenate with values in
-<code class="docutils literal notranslate"><span class="pre">patlik.lik_absent</span></code>, then normalises the array so that values in each
-row sum to one. Printing the shape of the array demonstrates that we
-have gained a column.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="o">.</span><span class="n">shape</span>
+<p>The numbers in the two previous cells are (log) <em>likelihoods</em>, either of
+paternity, or that the father was missing. These are estimated from the
+marker data and are not normalised to probabilities. To join these bits
+of information together, we also need to specify our <em>prior</em> belief
+about the proportion of fathers you think you sampled based on your
+domain expertise in the system, which should be a float between 0 and 1.</p>
+<p>Let’s assume that we think we missed 10% of the fathers and set that as
+an attribute of the <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> object:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">missing_parents</span> <span class="o">=</span> <span class="mf">0.1</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+<p>The function <code class="docutils literal notranslate"><span class="pre">prob_array</span></code> creates the <strong>G</strong> matrix by multiplying
+<code class="docutils literal notranslate"><span class="pre">lik_absent</span></code> by 0.1 and <code class="docutils literal notranslate"><span class="pre">lik_array</span></code> by 0.9 (i.e. 1-0.1), then
+normalising the rows to sum to one. This returns a matrix with an extra
+column than <code class="docutils literal notranslate"><span class="pre">lik_array</span></code> had.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">patlik</span><span class="o">.</span><span class="n">lik_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">()</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>If we sum the rows we see that they do indeed add up to one now.
-Probabilities are stored as log probabilities, so we have to
-exponentiate first.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
+<span class="p">(</span><span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that FAPS is doing this on the log scale under the hood. To check
+its working, we can check that rows sum to one.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">())</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
 </pre></div>
 </div>
+<p>If we were sure we really had sampled every single father, we could set
+the proportion of missing fathers to 0. This will throw a warning urging
+you to be cautious about that, but will run. We can see that the last
+column has been set to negative infinity, which is log(0).</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">missing_parents</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">GMI</span><span class="o">/</span><span class="n">thomas</span><span class="o">.</span><span class="n">ellis</span><span class="o">/</span><span class="n">miniconda3</span><span class="o">/</span><span class="n">envs</span><span class="o">/</span><span class="n">faps</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">python3</span><span class="o">.</span><span class="mi">7</span><span class="o">/</span><span class="n">site</span><span class="o">-</span><span class="n">packages</span><span class="o">/</span><span class="n">faps</span><span class="o">/</span><span class="n">paternityArray</span><span class="o">.</span><span class="n">py</span><span class="p">:</span><span class="mi">216</span><span class="p">:</span> <span class="ne">UserWarning</span><span class="p">:</span> <span class="n">Missing_parents</span> <span class="nb">set</span> <span class="n">to</span> <span class="mf">0.</span> <span class="n">Only</span> <span class="k">continue</span> <span class="k">if</span> <span class="n">you</span> <span class="n">are</span> <span class="n">sure</span> <span class="n">you</span> <span class="n">really</span> <span class="n">have</span> <span class="mi">100</span><span class="o">%</span> <span class="n">of</span> <span class="n">possible</span> <span class="n">fathers</span><span class="o">.</span>
+  <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">missing_parents</span> <span class="o">==</span><span class="mi">0</span><span class="p">:</span> <span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Missing_parents set to 0. Only continue if you are sure you really have 100</span><span class="si">% o</span><span class="s2">f possible fathers.&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">7.12205605e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.56279553e+01</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">4.49310715e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">7.32842883e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.17433496e+01</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">5.80265236e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">7.63378661e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.61375919e+01</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">5.56301926e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">4.19074566e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.67252040e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">3.81282152e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">2.89212082e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.30061406e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-13</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">3.92499719e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">4.19074566e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.88001437e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">3.16350910e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>You can also set the proportion of missing fathers directly when you
+create the paternity array.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">paternity_array</span><span class="p">(</span>
+    <span class="n">offspring</span> <span class="o">=</span> <span class="n">progeny</span><span class="p">,</span>
+    <span class="n">mothers</span> <span class="o">=</span> <span class="n">mothers</span><span class="p">,</span>
+    <span class="n">males</span><span class="o">=</span> <span class="n">mypop</span><span class="p">,</span>
+    <span class="n">mu</span><span class="o">=</span><span class="n">error_rate</span><span class="p">,</span>
+    <span class="n">missing_parents</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
 <div class="section" id="modifying-a-paternityarray">
 <h3>Modifying a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code><a class="headerlink" href="#modifying-a-paternityarray" title="Permalink to this headline">¶</a></h3>
-<p>We can alter the information in <code class="docutils literal notranslate"><span class="pre">patlik.prob_array</span></code> to reflect
-different prior beliefs about the dataset. (In contrast, it’s seldom a
-good idea to manipulate the likelihoods from genetic data contained in
-<code class="docutils literal notranslate"><span class="pre">patlik.lik_array</span></code>).</p>
-<p>For example, often the mother is included in the sample of candidate
-males, either because you are using the same array for multiple
-families, or self-fertilisation is a biological possibility. In a lot of
-cases though the mother cannot simultaneously be the sperm/pollen donor,
-and it is necessary to set the rate of self-fertilisation to zero (the
-natural logarithm of zero is negative infinity). Here, only the first
-three columns are shown.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">adjust_prob_array</span><span class="p">(</span><span class="n">selfing_rate</span><span class="o">=</span><span class="mi">0</span><span class="p">)[:,</span> <span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+<p>In the previous example we saw how to set the proportion of missing
+fathers by changing the attributes of the <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> object.
+There are a few other attributes that can be set that will modify the
+<strong>G</strong> matrix before passing this on to cluster offspring into sibships.</p>
+<div class="section" id="selfing-rate">
+<h4>Selfing rate<a class="headerlink" href="#selfing-rate" title="Permalink to this headline">¶</a></h4>
+<p>Often the mother is included in the sample of candidate males, either
+because you are using the same array for multiple families, or
+self-fertilisation is a biological possibility. In a lot of cases though
+the mother cannot simultaneously be the sperm/pollen donor, and it is
+necessary to set the rate of self-fertilisation to zero (the natural
+logarithm of zero is negative infinity). This can be done simply by
+setting the attribute <code class="docutils literal notranslate"><span class="pre">selfing_rate</span></code> to zero:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">selfing_rate</span><span class="o">=</span><span class="mi">0</span>
+<span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.56279553e+01</span><span class="p">],</span>
-       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.17433496e+01</span><span class="p">],</span>
-       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.98951966e-13</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.61375919e+01</span><span class="p">],</span>
-       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.67252040e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">],</span>
-       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.30061406e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">],</span>
-       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.88001437e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">]])</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.56279553e+01</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">4.49310715e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.62498710e+01</span><span class="p">],</span>
+       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.17433496e+01</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">5.80265236e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.10524110e+01</span><span class="p">],</span>
+       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.61375919e+01</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">5.56301926e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.14335090e+01</span><span class="p">],</span>
+       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.67252040e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">3.81282152e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.60162965e+01</span><span class="p">],</span>
+       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.30061406e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">3.92499719e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.87967980e+01</span><span class="p">],</span>
+       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.88001437e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">3.16350910e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.63473291e+01</span><span class="p">]])</span>
 </pre></div>
 </div>
-<p>The likelihoods for the mother have changed to 0 (negative infinity on
-the log scale). You can set any selfing rate between zero and one if you
-have a good idea of what the value should be and how much it varies.
-Otherwise it may be better to estimate the selfing rate from the data,
-or else estimate it some other way.</p>
-<p><code class="docutils literal notranslate"><span class="pre">adjust_prob_array</span></code> always refers back to the original
-<code class="docutils literal notranslate"><span class="pre">patlik.lik_array</span></code> and <code class="docutils literal notranslate"><span class="pre">patlik.lik_absent</span></code>, which remain unchanged.
-Calling <code class="docutils literal notranslate"><span class="pre">adjust_prob_array</span></code> will not alter the data stored for
-<code class="docutils literal notranslate"><span class="pre">patlik.prob_array</span></code> unless you assign it yourself.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span> <span class="o">=</span> <span class="n">patlik</span><span class="o">.</span><span class="n">adjust_prob_array</span><span class="p">(</span><span class="n">selfing_rate</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<p>This has set the prior probability of paternity of the mother (column
+zero above) to negative infinity (i.e log(zero)). You can set any
+selfing rate between zero and one if you have a good idea of what the
+value should be and how much it varies. For example, <em>Arabidopsis
+thaliana</em> selfs most of the time, so we could set a selfing rate of 95%.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">selfing_rate</span><span class="o">=</span><span class="mf">0.95</span>
+<span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">()</span>
 </pre></div>
 </div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">7.12718537e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.56279553e+01</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">4.49310715e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.62498710e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">7.33355816e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.17433496e+01</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">5.80265236e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.10524110e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">7.63891594e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.61375919e+01</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">5.56301926e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.14335090e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">4.19587499e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.67252040e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">3.81282152e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.60162965e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">2.89725015e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.30061406e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.55795385e-13</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">3.92499719e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.87967980e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">4.19587499e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.88001437e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">,</span>
+        <span class="o">-</span><span class="mf">3.16350910e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.63473291e+01</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>However, notice that despite the strong prior favouring the mother, she
+still doesn’t have the highest probablity of paternity for any
+offspring. That’s because the signal from the genetic markers is so
+strong that the true fathers still come out on top.</p>
+</div>
+<div class="section" id="removing-individual-candidates">
+<h4>Removing individual candidates<a class="headerlink" href="#removing-individual-candidates" title="Permalink to this headline">¶</a></h4>
 <p>You can also set likelihoods for particular individuals to zero
 manually. You might want to do this if you wanted to test the effects of
 incomplete sampling on your results, or if you had a good reason to
 suspect that some candidates could not possibly be the sire (for
 example, if the data are multigenerational, and the candidate was born
-after the offspring).</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">adjust_prob_array</span><span class="p">(</span><span class="n">purge</span> <span class="o">=</span> <span class="s1">&#39;my_population_0&#39;</span><span class="p">)</span>
+after the offspring). Let’s remove candidate 3:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">purge</span> <span class="o">=</span> <span class="s1">&#39;my_population_3&#39;</span>
+<span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">()</span>
+</pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">7.12718537e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.56279553e+01</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.62498710e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">7.33355816e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.17433496e+01</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.10524110e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">7.63891594e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.61375919e+01</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.14335090e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">4.19587499e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.67252040e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.60162965e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">2.89725015e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.30061406e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.55795385e-13</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.87967980e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">4.19587499e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.88001437e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.63473291e+01</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>This also works using a list of candidates.</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">purge</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;my_population_0&#39;</span><span class="p">,</span> <span class="s1">&#39;my_population_3&#39;</span><span class="p">]</span>
+<span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.56279553e+01</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">4.49310715e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.40526464e+01</span><span class="p">],</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.62498710e+01</span><span class="p">],</span>
        <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.17433496e+01</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">5.80265236e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.88551864e+01</span><span class="p">],</span>
-       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.98951966e-13</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.61375919e+01</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">5.56301926e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.92362844e+01</span><span class="p">],</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.10524110e+01</span><span class="p">],</span>
+       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.61375919e+01</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.14335090e+01</span><span class="p">],</span>
        <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.67252040e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">3.81282152e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.38190719e+01</span><span class="p">],</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.60162965e+01</span><span class="p">],</span>
        <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.30061406e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">3.92499719e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.65995734e+01</span><span class="p">],</span>
-       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.88001437e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">3.16350910e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.41501045e+01</span><span class="p">]])</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.87967980e+01</span><span class="p">],</span>
+       <span class="p">[</span>           <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.88001437e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.63473291e+01</span><span class="p">]])</span>
 </pre></div>
 </div>
 <p>This has removed the first individual (notice that this is identical to
@@ -239,43 +481,27 @@ the previous example, because in this case the first individual is the
 mother). Alternatively you can supply a float between zero and one,
 which will be interpreted as a proportion of the candidates to be
 removed at random, which can be useful for simulations.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patprob2</span> <span class="o">=</span> <span class="n">patlik</span><span class="o">.</span><span class="n">adjust_prob_array</span><span class="p">(</span><span class="n">purge</span><span class="o">=</span><span class="mf">0.4</span><span class="p">)</span>
-<span class="n">np</span><span class="o">.</span><span class="n">isinf</span><span class="p">(</span><span class="n">patprob2</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># proportion missing along each row.</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">purge</span> <span class="o">=</span> <span class="mf">0.4</span>
+<span class="n">patlik</span><span class="o">.</span><span class="n">prob_array</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">3.50219828e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.93780843e+01</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.83889187e-09</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">3.26893724e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.09714044e+00</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.06201843e-01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">4.49556505e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.47040829e+01</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">4.19587499e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.60162965e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">2.89725015e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.55795385e-13</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.87967980e+01</span><span class="p">],</span>
+       <span class="p">[</span><span class="o">-</span><span class="mf">4.19587499e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
+                   <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.63473291e+01</span><span class="p">]])</span>
 </pre></div>
 </div>
-<p>You can specify the proportion <span class="math notranslate nohighlight">\(\theta\)</span> of the population of
-candidate males which are missing with the option <code class="docutils literal notranslate"><span class="pre">missing_parents</span></code>.
-The likelihoods for non-sampled parents will be weighted by
-<span class="math notranslate nohighlight">\(\theta\)</span>, and likelihoods for sampled candidates by
-<span class="math notranslate nohighlight">\(1-\theta\)</span>.</p>
-<p>Of course, rows still need to sum to one. Luckily <code class="docutils literal notranslate"><span class="pre">adjust_prob_array</span></code>
-does that automatically.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">patprob2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mf">1.</span><span class="p">])</span>
-</pre></div>
-</div>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">adjust_prob_array</span><span class="p">(</span><span class="n">missing_parents</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">7.12205605e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.56279553e+01</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">4.49310715e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.62498710e+01</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">7.32842883e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.17433496e+01</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">5.80265236e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.10524110e+01</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">7.63378661e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">,</span> <span class="o">-</span><span class="mf">7.61375919e+01</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">5.56301926e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.14335090e+01</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">4.19074566e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.67252040e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">3.81282152e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.60162965e+01</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">2.89212082e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">6.30061406e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-13</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">3.92499719e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.87967980e+01</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">4.19074566e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.88001437e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">3.16350910e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.63473291e+01</span><span class="p">]])</span>
-</pre></div>
-</div>
+<div class="section" id="reducing-the-number-of-candidates">
+<h4>Reducing the number of candidates<a class="headerlink" href="#reducing-the-number-of-candidates" title="Permalink to this headline">¶</a></h4>
 <p>You might want to remove candidates who have an a priori very low
 probability of paternity, for example to reduce the memory requirements
 of the <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code>. One simple rule is to exclude any candidates
@@ -283,21 +509,7 @@ with more than some arbritray number of loci with opposing homozygous
 genotypes relative to the offspring (you want to allow for a small
 number, in case there are genotyping errors). This is done with
 <code class="docutils literal notranslate"><span class="pre">max_clashes</span></code>.</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">adjust_prob_array</span><span class="p">(</span><span class="n">max_clashes</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-</pre></div>
-</div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="mf">7.12205605e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">5.56279553e+01</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">4.49310715e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.40526464e+01</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">7.32842883e+01</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.17433496e+01</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">5.80265236e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.88551864e+01</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">7.63378661e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">1.98951966e-13</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">5.56301926e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.92362844e+01</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">4.19074566e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">,</span>  <span class="mf">0.00000000e+00</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">3.81282152e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.38190719e+01</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">2.89212082e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-13</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">3.92499719e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">3.65995734e+01</span><span class="p">],</span>
-       <span class="p">[</span><span class="o">-</span><span class="mf">4.19074566e+01</span><span class="p">,</span>            <span class="o">-</span><span class="n">inf</span><span class="p">,</span> <span class="o">-</span><span class="mf">2.84217094e-14</span><span class="p">,</span>
-        <span class="o">-</span><span class="mf">3.16350910e+01</span><span class="p">,</span> <span class="o">-</span><span class="mf">4.41501045e+01</span><span class="p">]])</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">max_clashes</span><span class="o">=</span><span class="mi">3</span>
 </pre></div>
 </div>
 <p>The option <code class="docutils literal notranslate"><span class="pre">max_clashes</span></code> refers back to a matrix that counts the
@@ -315,7 +527,8 @@ matrix is created automatically ad can be called with:</p>
        <span class="p">[</span> <span class="mi">0</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>  <span class="mi">2</span><span class="p">]])</span>
 </pre></div>
 </div>
-<p>You can recreate this manually with:</p>
+<p>If you import a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> object, this isn’t automatically
+generated, but you can recreate this manually with:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fp</span><span class="o">.</span><span class="n">incompatibilities</span><span class="p">(</span><span class="n">mypop</span><span class="p">,</span> <span class="n">progeny</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -331,6 +544,23 @@ matrix is created automatically ad can be called with:</p>
 each candidate father. The first column is for the mother, which is why
 everything is zero.</p>
 </div>
+<div class="section" id="modifying-arrays-on-creation">
+<h4>Modifying arrays on creation<a class="headerlink" href="#modifying-arrays-on-creation" title="Permalink to this headline">¶</a></h4>
+<p>You can also set the attributes we just described by setting them when
+you create the <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> object. For example:</p>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">paternity_array</span><span class="p">(</span>
+    <span class="n">offspring</span> <span class="o">=</span> <span class="n">progeny</span><span class="p">,</span>
+    <span class="n">mothers</span> <span class="o">=</span> <span class="n">mothers</span><span class="p">,</span>
+    <span class="n">males</span><span class="o">=</span> <span class="n">mypop</span><span class="p">,</span>
+    <span class="n">mu</span><span class="o">=</span><span class="n">error_rate</span><span class="p">,</span>
+    <span class="n">missing_parents</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">purge</span> <span class="o">=</span> <span class="s1">&#39;my_population_3&#39;</span><span class="p">,</span>
+    <span class="n">selfing_rate</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
 </div>
 <div class="section" id="importing-a-paternityarray">
 <h2>Importing a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code><a class="headerlink" href="#importing-a-paternityarray" title="Permalink to this headline">¶</a></h2>
@@ -340,7 +570,7 @@ such as microsatellite markers or a funky ploidy system. In this case
 you can create your own matrix of paternity likelihoods and import this
 directly as a <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code>. Firstly, we can save the array we made
 before to disk by supplying a path to save to:</p>
-<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;../data/mypatlik.csv&#39;</span><span class="p">)</span>
+<div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;../../data/mypatlik.csv&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>We can reimport it again using <code class="docutils literal notranslate"><span class="pre">read_paternity_array</span></code>. This function
@@ -359,7 +589,7 @@ likelihood of drawing the paternal alleles from population allele
 frequencies.</p></li>
 </ol>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">patlik</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read_paternity_array</span><span class="p">(</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;../data/mypatlik.csv&#39;</span><span class="p">,</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;../../data/mypatlik.csv&#39;</span><span class="p">,</span>
     <span class="n">mothers_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">likelihood_col</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
@@ -382,70 +612,57 @@ separate text file, or you can recreate this as above:</p>
        <span class="p">[</span> <span class="mi">0</span><span class="p">,</span>  <span class="mi">9</span><span class="p">,</span>  <span class="mi">0</span><span class="p">,</span>  <span class="mi">2</span><span class="p">]])</span>
 </pre></div>
 </div>
+<p>However, this step is not essential.</p>
 </div>
 </div>
 
 
+           </div>
+           
           </div>
-          
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">faps</a></h1>
-
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="04_sibship_clustering.html" class="btn btn-neutral float-right" title="Sibship clustering" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="02_genotype_data.html" class="btn btn-neutral float-left" title="Genotype data in FAPS" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+  
 
+  <hr/>
 
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Tom Ellis
 
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
-
-
-
+</footer>
 
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2020, Tom Ellis.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
-      
-      |
-      <a href="../_sources/tutorials/03_paternity_arrays.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
 
-    
+    </section>
 
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
     
-  </body>
+   
+
+</body>
 </html>

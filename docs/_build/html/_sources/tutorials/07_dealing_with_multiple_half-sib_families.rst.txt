@@ -4,11 +4,11 @@ Dealing with multiple half-sib families
 Tom Ellis, March 2018
 
 In the previous sections on `genotype
-arrays <https://github.com/ellisztamas/faps/blob/master/docs/02%20Genotype%20data.ipynb>`__,
+arrays <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/02_genotype_data.html>`__,
 `paternity
-arrays <https://github.com/ellisztamas/faps/blob/master/docs/03%20Paternity%20arrays.ipynb>`__
+arrays <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/03_paternity_arrays.html>`__
 and `sibship
-clustering <https://github.com/ellisztamas/faps/blob/master/docs/04%20Sibship%20clustering.ipynb>`__
+clustering <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/04_sibship_clustering.html>`__
 we considered only a single half-sibling array. In most real-world
 situations, you would probably have multiple half-sibling arrays from
 multiple mothers.
@@ -34,12 +34,12 @@ available from the `IST Austria data
 repository <https://datarep.app.ist.ac.at/id/eprint/95>`__
 (DOI:10.15479/AT:ISTA:95). For the analysis presented in that paper we
 did extensive data cleaning and checking, which is given as a `case
-study <https://github.com/ellisztamas/faps/blob/master/docs/08%20Data%20cleaning%20in%20A.%20majus.ipynb>`__
+study <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/08_data_cleaning_in_Amajus.html>`__
 later in this guide. Here, we will skip this process, since it primarily
 concerns accuracy of results.
 
-Divide geneotype data into families
------------------------------------
+Divide genotype data into families
+----------------------------------
 
 There are two ways to divide data into families: by splitting up a
 ``genotypeArray`` into families, and making a ``paternityArray`` for
@@ -64,8 +64,8 @@ fathers and the progeny.
     import matplotlib.pyplot as plt
     %pylab inline
     
-    adults  = read_genotypes('../data/parents_2012_genotypes.csv', genotype_col=1)
-    progeny = read_genotypes('../data/offspring_2012_genotypes.csv', genotype_col=2, mothers_col=1)
+    adults  = read_genotypes('../../data/parents_2012_genotypes.csv', genotype_col=1)
+    progeny = read_genotypes('../../data/offspring_2012_genotypes.csv', genotype_col=2, mothers_col=1)
 
 
 .. parsed-literal::
@@ -139,9 +139,9 @@ case is a ``genotypeArray`` object for each maternal family.
 
 .. parsed-literal::
 
-    {'J1246': <faps.genotypeArray.genotypeArray at 0x7f5b186fd750>,
-     'K1809': <faps.genotypeArray.genotypeArray at 0x7f5b18f31850>,
-     'L1872': <faps.genotypeArray.genotypeArray at 0x7f5b18f31a10>}
+    {'J1246': <faps.genotypeArray.genotypeArray at 0x7ff0cf56eed0>,
+     'K1809': <faps.genotypeArray.genotypeArray at 0x7ff0cf5323d0>,
+     'L1872': <faps.genotypeArray.genotypeArray at 0x7ff0cf56e450>}
 
 
 
@@ -220,23 +220,13 @@ dictionary of ``paternityArray`` objects.
 
 .. code:: ipython3
 
-    %time paternity_array(progeny2, mothers2, adults, mu)
+    %time patlik1 = paternity_array(progeny2, mothers2, adults, mu)
 
 
 .. parsed-literal::
 
-    CPU times: user 924 ms, sys: 19.4 ms, total: 944 ms
-    Wall time: 942 ms
-
-
-
-
-.. parsed-literal::
-
-    {'J1246': <faps.paternityArray.paternityArray at 0x7f5b183336d0>,
-     'K1809': <faps.paternityArray.paternityArray at 0x7f5b18333690>,
-     'L1872': <faps.paternityArray.paternityArray at 0x7f5b18333ad0>}
-
+    CPU times: user 943 ms, sys: 35.2 ms, total: 979 ms
+    Wall time: 980 ms
 
 
 Split up an existing paternity array
@@ -251,21 +241,23 @@ genotype data first you can deal with small chunks at a time.
 
 .. code:: ipython3
 
+    mothers_full = adults.subset(progeny.mothers)
+    
     %time patlik2 = paternity_array(progeny, mothers_full, adults, mu)
     patlik2
 
 
 .. parsed-literal::
 
-    CPU times: user 909 ms, sys: 64 ms, total: 973 ms
-    Wall time: 972 ms
+    CPU times: user 884 ms, sys: 59.4 ms, total: 943 ms
+    Wall time: 949 ms
 
 
 
 
 .. parsed-literal::
 
-    <faps.paternityArray.paternityArray at 0x7f5b19106950>
+    <faps.paternityArray.paternityArray at 0x7ff0cdf29810>
 
 
 
@@ -286,7 +278,9 @@ We split up the ``paternity_array`` in the same way as a
 
 .. parsed-literal::
 
-    3
+    {'J1246': <faps.paternityArray.paternityArray at 0x7ff0cdf2c3d0>,
+     'K1809': <faps.paternityArray.paternityArray at 0x7ff0ce35be90>,
+     'L1872': <faps.paternityArray.paternityArray at 0x7ff0cdcd2550>}
 
 
 
@@ -295,7 +289,7 @@ We would hope that ``patlik`` and ``patlik3`` are identical lists of
 
 .. code:: ipython3
 
-    patlik['J1246'].offspring
+    patlik1['J1246'].offspring
 
 
 
@@ -339,23 +333,29 @@ independently. It returns a dictionary of ``sibshipCluster`` objects.
 .. code:: ipython3
 
     %%time
-    sc = sibship_clustering(patlik)
+    sc = sibship_clustering(patlik1)
     sc
 
 
 .. parsed-literal::
 
-    CPU times: user 361 ms, sys: 0 ns, total: 361 ms
-    Wall time: 361 ms
+    /home/GMI/thomas.ellis/miniconda3/envs/faps/lib/python3.7/site-packages/faps/paternityArray.py:216: UserWarning: Missing_parents set to 0. Only continue if you are sure you really have 100% of possible fathers.
+      if self.missing_parents ==0: warn("Missing_parents set to 0. Only continue if you are sure you really have 100% of possible fathers.")
+
+
+.. parsed-literal::
+
+    CPU times: user 523 ms, sys: 0 ns, total: 523 ms
+    Wall time: 521 ms
 
 
 
 
 .. parsed-literal::
 
-    {'J1246': <faps.sibshipCluster.sibshipCluster at 0x7f5b18d91390>,
-     'K1809': <faps.sibshipCluster.sibshipCluster at 0x7f5b187116d0>,
-     'L1872': <faps.sibshipCluster.sibshipCluster at 0x7f5b18711290>}
+    {'J1246': <faps.sibshipCluster.sibshipCluster at 0x7ff0ce647710>,
+     'K1809': <faps.sibshipCluster.sibshipCluster at 0x7ff0cd834150>,
+     'L1872': <faps.sibshipCluster.sibshipCluster at 0x7ff0cd834b50>}
 
 
 
@@ -372,21 +372,21 @@ number of *pairs* of relationships to consider scales quadratically.
 
 .. parsed-literal::
 
-    CPU times: user 1.2 s, sys: 0 ns, total: 1.2 s
-    Wall time: 1.2 s
+    CPU times: user 1.51 s, sys: 0 ns, total: 1.51 s
+    Wall time: 1.5 s
 
 
 
 
 .. parsed-literal::
 
-    <faps.sibshipCluster.sibshipCluster at 0x7f5b18e62cd0>
+    <faps.sibshipCluster.sibshipCluster at 0x7ff0cdfffb50>
 
 
 
 You can index any single family to extract information about it in the
 same way as was explained in the section on `sibship
-clustering <http://localhost:8888/notebooks/docs/04%20Sibship%20clustering.ipynb>`__.
+clustering <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/04_sibship_clustering.html>`__.
 For example, the posterior distribution of full-sibship sizes for the
 first maternal family.
 
@@ -399,13 +399,13 @@ first maternal family.
 
 .. parsed-literal::
 
-    array([4.58202817e-001, 0.00000000e+000, 1.80599061e-001, 0.00000000e+000,
-           0.00000000e+000, 0.00000000e+000, 0.00000000e+000, 4.63516339e-004,
-           1.92206595e-001, 7.44197790e-002, 9.20875300e-002, 2.02070116e-003,
-           2.11508501e-020, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000,
+    array([4.58264645e-001, 0.00000000e+000, 1.80578452e-001, 0.00000000e+000,
+           0.00000000e+000, 0.00000000e+000, 0.00000000e+000, 5.35892330e-004,
+           1.92140400e-001, 7.43963548e-002, 9.20640706e-002, 2.02018638e-003,
+           2.11454618e-020, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000,
            0.00000000e+000, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000,
-           0.00000000e+000, 1.42063904e-213, 0.00000000e+000, 0.00000000e+000,
-           1.00214824e-265])
+           0.00000000e+000, 1.42027713e-213, 0.00000000e+000, 0.00000000e+000,
+           1.00189294e-265])
 
 
 

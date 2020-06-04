@@ -1,35 +1,169 @@
 
-<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta charset="utf-8" />
-    <title>Genotype data in FAPS &#8212; faps 2.2.1 documentation</title>
-    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
-    <script type="text/javascript" src="../_static/jquery.js"></script>
-    <script type="text/javascript" src="../_static/underscore.js"></script>
-    <script type="text/javascript" src="../_static/doctools.js"></script>
-    <script type="text/javascript" src="../_static/language_data.js"></script>
-    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Genotype data in FAPS &mdash; faps 2.2.1 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script type="text/javascript" src="../_static/jquery.js"></script>
+        <script type="text/javascript" src="../_static/underscore.js"></script>
+        <script type="text/javascript" src="../_static/doctools.js"></script>
+        <script type="text/javascript" src="../_static/language_data.js"></script>
+        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Paternity arrays" href="03_paternity_arrays.html" />
+    <link rel="prev" title="Introduction" href="01_introduction.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
    
-  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
-  
-  
-  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
-
-  </head><body>
-  
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
           
 
-          <div class="body" role="main">
+          
+            <a href="../index.html" class="icon icon-home"> faps
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="00_quickstart_guide.html">Quickstart guide to FAPS</a></li>
+<li class="toctree-l1"><a class="reference internal" href="01_introduction.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Genotype data in FAPS</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#genotypearray-objects"><code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> objects</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#basic-genotype-information">Basic genotype information</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#information-on-individuals">Information on individuals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#information-on-markers">Information on markers</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#importing-genotype-data">Importing genotype data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#multiple-families">Multiple families</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="03_paternity_arrays.html">Paternity arrays</a></li>
+<li class="toctree-l1"><a class="reference internal" href="04_sibship_clustering.html">Sibship clustering</a></li>
+<li class="toctree-l1"><a class="reference internal" href="05_inference_about_mating_patterns.html">Inference about mating patterns</a></li>
+<li class="toctree-l1"><a class="reference internal" href="06_simulating_data.html">Simulating data and power analysis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="07_dealing_with_multiple_half-sib_families.html">Dealing with multiple half-sib families</a></li>
+<li class="toctree-l1"><a class="reference internal" href="08_data_cleaning_in_Amajus.html">Data cleaning for <em>Antirrhinum majus</em> data set from 2012</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">faps</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html">Docs</a> &raquo;</li>
+        
+      <li>Genotype data in FAPS</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../_sources/tutorials/02_genotype_data.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
   <div class="section" id="genotype-data-in-faps">
 <h1>Genotype data in FAPS<a class="headerlink" href="#genotype-data-in-faps" title="Permalink to this headline">¶</a></h1>
@@ -47,22 +181,29 @@ information is contained in them.</p></li>
 </ol>
 <p>Checking genotype data is an important step before committing to a full
 analysis. A case study of data checking and cleaning using an empirical
-dataset is given in <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/08%20Data%20cleaning%20in%20A.%20majus.ipynb">section
-8</a>.
-In the <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/03%20Paternity%20arrays.ipynb">next
+dataset is given in
+<a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/08_data_cleaning_in_Amajus.html">here</a>.
+In the <a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/03_paternity_arrays.html">next
 section</a>
 we’ll see how to combine genotype information on offspring and a set of
 candidate parents to create an array of likelihoods of paternity for
-dyads of offspring and candidate fathers. Also relevant is the section
-on <a class="reference external" href="https://github.com/ellisztamas/faps/blob/master/docs/06%20Simulating%20data.ipynb">simulating data and power
-analysis</a>.</p>
+dyads of offspring and candidate fathers.</p>
+<p>Note that the first half of this tutorial only deals with the case where
+you have a <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> object for a single maternal family. If you
+have multiple families, you can apply what is here to each one, but at
+some point you’ll have to iterate over those families. See
+<a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/02_genotype_data.html#multiple-families">below</a>
+and the specific
+<a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/07_dealing_with_multiple_half-sib_families.html">tutorial</a>
+on that.</p>
 <p>Currently, FAPS <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> objects assume you are using
 biallelic, unlinked SNPs for a diploid. If your system deviates from
 these criteria in some way you can also skip this stage by creating your
 own array of paternity likelihoods using an appropriate likelihood
 function, and importing this directly as a <code class="docutils literal notranslate"><span class="pre">paternityArrays</span></code>. See the
-next section for more on <code class="docutils literal notranslate"><span class="pre">paternityArray</span></code> objects and how they should
-look.</p>
+next section for more on <code class="docutils literal notranslate"><span class="pre">`paternityArray</span></code>
+objects &lt;<a class="reference external" href="https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/03_paternity_arrays.html">https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/03_paternity_arrays.html</a>&gt;`__
+and how they should look.</p>
 <div class="section" id="genotypearray-objects">
 <h2><code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> objects<a class="headerlink" href="#genotypearray-objects" title="Permalink to this headline">¶</a></h2>
 <div class="section" id="basic-genotype-information">
@@ -92,15 +233,15 @@ not one):</p>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-       <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+       <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
-       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+       <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]])</span>
 </pre></div>
 </div>
 <p>You could subset the array by indexes the genotypes, for example by
@@ -109,15 +250,15 @@ taking only the first two individuals and the first five loci:</p>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
         <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]],</span>
 
        <span class="p">[[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
         <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+        <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
         <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]]])</span>
 </pre></div>
 </div>
@@ -134,8 +275,8 @@ new <code class="docutils literal notranslate"><span class="pre">genotypeArray</
 </pre></div>
 </div>
 </div>
-<div class="section" id="information-on-indivuals">
-<h3>Information on indivuals<a class="headerlink" href="#information-on-indivuals" title="Permalink to this headline">¶</a></h3>
+<div class="section" id="information-on-individuals">
+<h3>Information on individuals<a class="headerlink" href="#information-on-individuals" title="Permalink to this headline">¶</a></h3>
 <p>A <code class="docutils literal notranslate"><span class="pre">genotypeArray</span></code> contains other useful information about the
 individuals:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">mypop</span><span class="o">.</span><span class="n">names</span><span class="p">)</span> <span class="c1"># individual names</span>
@@ -221,7 +362,7 @@ allele frequencies for each locus:</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mypop</span><span class="o">.</span><span class="n">allele_freqs</span><span class="p">()</span>
 </pre></div>
 </div>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.3</span><span class="p">,</span> <span class="mf">0.9</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.</span> <span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">])</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">array</span><span class="p">([</span><span class="mf">0.6</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.7</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">])</span>
 </pre></div>
 </div>
 <p>We can also check for missing data and heterozygosity for each marker
@@ -231,7 +372,7 @@ and individual. By default, data for each marker are returned:</p>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span><span class="p">]</span>
-<span class="p">[</span><span class="mf">0.6</span> <span class="mf">0.6</span> <span class="mf">0.2</span> <span class="mf">0.4</span> <span class="mf">0.8</span> <span class="mf">0.6</span> <span class="mf">0.4</span> <span class="mf">0.</span>  <span class="mf">0.4</span> <span class="mf">0.4</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">0.8</span> <span class="mf">0.4</span> <span class="mf">0.8</span> <span class="mf">0.4</span> <span class="mf">1.</span>  <span class="mf">0.4</span> <span class="mf">0.6</span> <span class="mf">0.4</span> <span class="mf">0.4</span> <span class="mf">0.4</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>To get summaries for each individual:</p>
@@ -240,7 +381,7 @@ and individual. By default, data for each marker are returned:</p>
 </pre></div>
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span> <span class="mf">0.</span><span class="p">]</span>
-<span class="p">[</span><span class="mf">0.4</span> <span class="mf">0.5</span> <span class="mf">0.5</span> <span class="mf">0.4</span> <span class="mf">0.4</span><span class="p">]</span>
+<span class="p">[</span><span class="mf">0.4</span> <span class="mf">0.6</span> <span class="mf">0.6</span> <span class="mf">0.7</span> <span class="mf">0.5</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>In this instance there is no missing data, because data are simulated to
@@ -277,7 +418,7 @@ stored, the two other arguments specify the column containing names of
 the mothers, and the first column containing genotype data of the
 offspring.</p>
 <div class="highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">offspring</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read_genotypes</span><span class="p">(</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;../data/offspring_2012_genotypes.csv&#39;</span><span class="p">,</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="s1">&#39;../../data/offspring_2012_genotypes.csv&#39;</span><span class="p">,</span>
     <span class="n">mothers_col</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">genotype_col</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </pre></div>
@@ -452,66 +593,52 @@ to downstream functions. This snippet shows the first ten items.</p>
 </div>
 
 
+           </div>
+           
           </div>
-          
-        </div>
-      </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-<h1 class="logo"><a href="../index.html">faps</a></h1>
-
-
-
-
-
-
-
-
-<h3>Navigation</h3>
-
-<div class="relations">
-<h3>Related Topics</h3>
-<ul>
-  <li><a href="../index.html">Documentation overview</a><ul>
-  </ul></li>
-</ul>
-</div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="../search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="03_paternity_arrays.html" class="btn btn-neutral float-right" title="Paternity arrays" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="01_introduction.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
+  
 
+  <hr/>
 
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2020, Tom Ellis
 
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
-
-
-
+</footer>
 
         </div>
       </div>
-      <div class="clearer"></div>
-    </div>
-    <div class="footer">
-      &copy;2020, Tom Ellis.
-      
-      |
-      Powered by <a href="http://sphinx-doc.org/">Sphinx 2.2.1</a>
-      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
-      
-      |
-      <a href="../_sources/tutorials/02_genotype_data.rst.txt"
-          rel="nofollow">Page source</a>
-    </div>
 
-    
+    </section>
 
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
     
-  </body>
+   
+
+</body>
 </html>

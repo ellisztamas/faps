@@ -17,23 +17,31 @@ This notebook will examine how to:
 
 Checking genotype data is an important step before committing to a full
 analysis. A case study of data checking and cleaning using an empirical
-dataset is given in `section
-8 <https://github.com/ellisztamas/faps/blob/master/docs/08%20Data%20cleaning%20in%20A.%20majus.ipynb>`__.
+dataset is given in
+`here <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/08_data_cleaning_in_Amajus.html>`__.
 In the `next
-section <https://github.com/ellisztamas/faps/blob/master/docs/03%20Paternity%20arrays.ipynb>`__
+section <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/03_paternity_arrays.html>`__
 we'll see how to combine genotype information on offspring and a set of
 candidate parents to create an array of likelihoods of paternity for
-dyads of offspring and candidate fathers. Also relevant is the section
-on `simulating data and power
-analysis <https://github.com/ellisztamas/faps/blob/master/docs/06%20Simulating%20data.ipynb>`__.
+dyads of offspring and candidate fathers.
+
+Note that the first half of this tutorial only deals with the case where
+you have a ``genotypeArray`` object for a single maternal family. If you
+have multiple families, you can apply what is here to each one, but at
+some point you'll have to iterate over those families. See
+`below <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/02_genotype_data.html#multiple-families>`__
+and the specific
+`tutorial <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/07_dealing_with_multiple_half-sib_families.html>`__
+on that.
 
 Currently, FAPS ``genotypeArray`` objects assume you are using
 biallelic, unlinked SNPs for a diploid. If your system deviates from
 these criteria in some way you can also skip this stage by creating your
 own array of paternity likelihoods using an appropriate likelihood
 function, and importing this directly as a ``paternityArrays``. See the
-next section for more on ``paternityArray`` objects and how they should
-look.
+next section for more on ```paternityArray``
+objects <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/03_paternity_arrays.html>`__
+and how they should look.
 
 ``genotypeArray`` objects
 -------------------------
@@ -75,15 +83,15 @@ not one):
 .. parsed-literal::
 
     array([[1, 1],
+           [1, 0],
+           [0, 0],
+           [0, 0],
            [0, 1],
-           [1, 1],
+           [1, 0],
            [0, 1],
-           [0, 1],
            [0, 0],
            [0, 0],
-           [0, 0],
-           [0, 0],
-           [0, 1]])
+           [0, 0]])
 
 
 
@@ -100,15 +108,15 @@ taking only the first two individuals and the first five loci:
 .. parsed-literal::
 
     array([[[1, 1],
-            [0, 1],
-            [1, 1],
-            [0, 1],
+            [1, 0],
+            [0, 0],
+            [0, 0],
             [0, 1]],
     
            [[0, 1],
-            [0, 0],
             [1, 1],
-            [0, 0],
+            [0, 1],
+            [0, 1],
             [0, 1]]])
 
 
@@ -130,8 +138,8 @@ new ``genotypeArray`` for the individuals of interest.
     ['my_population_1' 'my_population_3' 'my_population_4']
 
 
-Information on indivuals
-~~~~~~~~~~~~~~~~~~~~~~~~
+Information on individuals
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 A ``genotypeArray`` contains other useful information about the
 individuals:
@@ -258,7 +266,7 @@ allele frequencies for each locus:
 
 .. parsed-literal::
 
-    array([0.5, 0.3, 0.9, 0.2, 0.4, 0.5, 0.2, 0. , 0.2, 0.4])
+    array([0.6, 0.4, 0.4, 0.4, 0.5, 0.2, 0.7, 0.2, 0.4, 0.2])
 
 
 
@@ -274,7 +282,7 @@ and individual. By default, data for each marker are returned:
 .. parsed-literal::
 
     [0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
-    [0.6 0.6 0.2 0.4 0.8 0.6 0.4 0.  0.4 0.4]
+    [0.8 0.4 0.8 0.4 1.  0.4 0.6 0.4 0.4 0.4]
 
 
 To get summaries for each individual:
@@ -288,7 +296,7 @@ To get summaries for each individual:
 .. parsed-literal::
 
     [0. 0. 0. 0. 0.]
-    [0.4 0.5 0.5 0.4 0.4]
+    [0.4 0.6 0.6 0.7 0.5]
 
 
 In this instance there is no missing data, because data are simulated to
@@ -329,7 +337,7 @@ offspring.
 .. code:: ipython3
 
     offspring = fp.read_genotypes(
-        path = '../data/offspring_2012_genotypes.csv',
+        path = '../../data/offspring_2012_genotypes.csv',
         mothers_col=1,
         genotype_col=2)
 
