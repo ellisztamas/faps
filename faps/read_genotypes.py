@@ -20,7 +20,7 @@ def read_genotypes(path, genotype_col = 1, mothers_col=None, fathers_col=None, d
         genotype information for each locus, with a single column for each marker.
         The header row should include names for each locus, or else be left blank.
         Homozygotes should be labelled 0 or 2, and heterozygotes as 1. Missing
-        data should be labelled 'NA'.
+        data should be labelled as 'NA' or -9 (negative nine).
     genotype_col: int
         indicate the column index where genotype information begins.
     mothers_col: int
