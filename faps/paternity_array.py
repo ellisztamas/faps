@@ -5,7 +5,7 @@ from faps.transition_probability import transition_probability
 from faps.incompatibilities import incompatibilities
 from warnings import warn
 
-def paternity_array(offspring, mothers, males, mu, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None, covariate=None):
+def paternity_array(offspring, mothers, males, mu, missing_parents = 0, purge=None, selfing_rate=None, max_clashes=None, covariate=None):
     """
     Construct a paternityArray object for the offspring given known mothers
     and a set of candidate fathers using genotype data. Currently only SNP
@@ -31,20 +31,22 @@ def paternity_array(offspring, mothers, males, mu, purge=None, missing_parents=N
         Point estimate of the genotyping error rate. Clustering is unstable if
         mu_input is set to exactly zero. Any zero values will therefore be set
         to a very small number close to zero (10^-12).
-    purge: float between zero or one, int, array-like, optional
-        Individuals who can be removed from the paternity array a priori. If
-        a float is given, that proportion of individuals is removed from the
-        array at random. Alternatively an integer or vector of integers
-        indexing specific individuals can be supplied.
-    missing_parents : float between zero and one, or 'NA', optional
+    missing_parents : float between zero and one
         Input value for the proportion of adults who are missing from the sample.
         This is used to weight the probabilties of paternity for each father
-        relative to the probability that a father was not sampled. If this is
-        given as 'NA', no weighting is performed.
+        relative to the probability that a father was not sampled. Defaults to
+        zero, but you should definitely change this.
+    purge: vector of str, or float between zero and one, optional
+        Individuals who can be removed from the paternity array a priori. If
+        a float is given, that proportion of individuals is removed from the
+        array at random. Alternatively a string or vector of strings containing
+        names of specific candidate fathers can be supplied.
     selfing_rate: float between zero and one, optional
         Input value for the prior probability of self-fertilisation.
     max_clashes: int, optional
-        Maximum number of opposing homozygous loci for each parent-offspring.
+        Maximum number of double-homozygous incompatibilities allowed between
+        offspring and candidate fathers. Dyads with more incompatibilities than
+        this will have their probability set to zero.
     covariate: 1-d array, or list of 1-d arrays, optional
         Vector of (log) probabilities of paternity based on non-genetic
         information, with one element for every candidate father. If this is a
@@ -62,29 +64,77 @@ def paternity_array(offspring, mothers, males, mu, purge=None, missing_parents=N
 
     Examples
     --------
+    from faps import *
+    import numpy as np
+
     # Generate a population of adults
     allele_freqs = np.random.uniform(0.3,0.5,50)
-    adults = make_parents(100, allele_freqs)
+    adults = make_parents(20, allele_freqs)
 
     # Mate the first adult to the next three.
     mother = adults.subset(0)
-    progeny = make_sibships(males, 0, [1,2,3], 5, 'x')
+    progeny = make_sibships(adults, 0, [1,2,3], 5, 'x')
     # Create paternityArray
-    patlik = paternity_array(progeny, mother, adults, mu=0.0013)
+    patlik = paternity_array(
+        progeny,
+        mother,
+        adults,
+        mu=0.0013,
+        missing_parents=0.2
+    )
+    # View posterior probabilities of paternity (G matrix in the FAPS paper)
+    patlik.prob_array()
 
-    # Example with multiple half-sib families
-    progeny = make_offspring(parents = adults,
-                             dam_list=[7,7,1,8,8,0],
-                             sire_list=[2,4,6,3,0,7])
-    # Split mothers and progeny up by half-sib array.
-    mothers = adults.split(progeny.mothers)
-    progeny = progeny.split(progeny.mothers)
-    # Create paternity array for each family
-    paternity_array(progeny, mothers, adults, mu = 0.0013)
+    # Change some parameters that will affect the G matrix.
+    patlik.missing_parents = 0.3
+    patlik.selfing_rate = 0
+    # Explicitly set some candidates to have probabilities of paternity to zero
+    patlik.purge = 'base_0' # Another way to remove the mother
+    patlik.purge = ['base_15', 'base_16', 'base_17'] # remove a list of specific candidates
+    patlik.purge = 0.2 # Throw two candidates out at random
+
+    # Another way to do the previous steps in a direct call to paternity_array.
+    paternity_array(
+        progeny,
+        mother,
+        adults,
+        mu=0.0013,
+        missing_parents=0.2,
+        selfing_rate=0,
+        purge = 0.2
+    )
     """
     if mu == 0:
         mu = 10**-12
         warn('Setting error rate to exactly zero causes clustering to be unstable. mu set to 10e-12')
+
+    # Check missing_parents
+    if not isinstance(missing_parents, (int, float)):
+        raise TypeError("missing_parents should be between 0 and 1.")
+    if missing_parents < 0 or missing_parents >1:
+        raise ValueError("missing_parents must be between 0 and 1!")
+    if missing_parents ==1:
+        warn("Missing_parents set to 100%. Are you sure this is what you mean?")
+    # Check selfing_rate
+    if selfing_rate is not None:
+        if not isinstance(selfing_rate, (int, float)):
+            raise TypeError("selfing_rate should be between 0 and 1.")
+        if selfing_rate < 0 or selfing_rate >1:
+            raise ValueError("selfing_rate must be between 0 and 1.")
+        if selfing_rate == 1: warn("selfing_rate set to 100%. Are you sure that is what you meant?")
+    # Check purge
+    if purge is not None:
+        if isinstance(purge, float):
+            if purge <= 0 or purge >= 1:
+                raise ValueError("purge must be between zero and one.")
+        # If one or more integers is given, remove candidates at those indices
+        elif isinstance(purge, (list, np.ndarray, int, str)):
+            # If all entries are strings, find the names of the candidates.
+            if all([isinstance(x, str) for x in purge]):
+                if not all(np.isin(purge, candidates)):
+                    raise ValueError("One or more names in paternityArray.purge are not found in paternityArray.candidates")
+        else:
+            raise TypeError("Error: purge should be a float or list of floats between zero and one.")
 
     #If a single halfsib family is given.
     if isinstance(offspring, genotypeArray) & isinstance(mothers, genotypeArray):

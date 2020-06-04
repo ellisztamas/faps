@@ -32,16 +32,16 @@ class paternityArray(object):
         Point estimate of the genotyping error rate. Note that sibship clustering
         is unstable if mu_input is set to exactly zero. Any zero values will
         therefore be set to a very small number close to zero (10^-12).
-    purge: float between zero or one, int, array-like, optional
-        Individuals who can be removed from the paternity array a priori. If
-        a float is given, that proportion of individuals is removed from the
-        array at random. Alternatively an integer or vector of integers
-        indexing specific individuals can be supplied.
-    missing_parents : float between zero and one, or 'NA', optional
+    missing_parents : float between zero and one
         Input value for the proportion of adults who are missing from the sample.
         This is used to weight the probabilties of paternity for each father
-        relative to the probability that a father was not sampled. If this is
-        given as 'NA', no weighting is performed.
+        relative to the probability that a father was not sampled. Defaults to
+        zero, but you should definitely change this.
+    purge: vector of str, or float between zero and one, optional
+        Individuals who can be removed from the paternity array a priori. If
+        a float is given, that proportion of individuals is removed from the
+        array at random. Alternatively a string or vector of strings containing
+        names of specific candidate fathers can be supplied.
     selfing_rate: float between zero and one, optional
         Input value for the prior probability of self-fertilisation.
     clashes: array, optional
@@ -49,7 +49,7 @@ class paternityArray(object):
         possible parent-offspring dyads. This should have a row for every offspring
         and a column for every candidate father, and hence be the same shape as
         the `likelihood` array.
-    max_clashes: integer
+    max_clashes: int, optional
         Maximum number of double-homozygous incompatibilities allowed between
         offspring and candidate fathers. Dyads with more incompatibilities than
         this will have their probability set to zero.
@@ -62,7 +62,7 @@ class paternityArray(object):
         `lik_absent` appended, with rows normalised to sum to one.
     """
 
-    def __init__(self, likelihood, lik_absent, offspring, mothers, fathers, candidates, mu=None, purge=None, missing_parents=None, selfing_rate=None, clashes = None, max_clashes = None, covariate=0):
+    def __init__(self, likelihood, lik_absent, offspring, mothers, fathers, candidates, missing_parents=0, mu=None, purge=None, selfing_rate=None, clashes = None, max_clashes = None, covariate=0):
         self.mu         = mu
         self.offspring  = offspring
         self.mothers    = mothers
@@ -72,7 +72,12 @@ class paternityArray(object):
         self.lik_absent = lik_absent
         self.clashes    = clashes
         self.covariate  = covariate
-        self.prob_array = self.adjust_prob_array(purge, missing_parents, selfing_rate, max_clashes)
+        self.mu         = mu
+        self.purge      = purge
+        self.missing_parents = missing_parents
+        self.selfing_rate = selfing_rate
+        self.max_clashes = max_clashes
+        #self.prob_array = self.adjust_prob_array(purge, missing_parents, selfing_rate, max_clashes)
 
     def add_covariate(self, covariate):
         """
@@ -111,7 +116,7 @@ class paternityArray(object):
             raise TypeError("covariate should be a 1-d NumPy array.")
 
 
-    def adjust_prob_array(self, purge=None, missing_parents=None, selfing_rate=None, max_clashes=None):
+    def prob_array(self):
         """
         Construct an array of log posterior probabilities that each offspring is sired
         by each of the candidate males in the sample, or that the true father is not
@@ -122,22 +127,7 @@ class paternityArray(object):
 
         Parameters
         ----------
-        purge: float, array, optional
-            Individuals who can be removed from the paternity array a priori. If
-            a float between zero and one is given, that proportion of individuals
-            is removed from the array at random. Alternatively, give a vector of
-            integers or names indexing candidate fathers to be removed.
-        missing_parents : float between zero and one, or 'NA', optional
-            Input value for the proportion of adults who are missing from the sample.
-            This is used to weight the probabilties of paternity for each father
-            relative to the probability that a father was not sampled. If this is
-            given as 'NA', no weighting is performed.
-        selfing_rate: float between zero and one, optional
-            Input value for the prior probability of self-fertilisation.
-        max_clashes: integer
-            Maximum number of double-homozygous incompatibilities allowed between
-            offspring and candidate fathers. Dyads with more incompatibilities than
-            this will have their probability set to zero.
+        None.
 
         Returns
         -------
@@ -159,79 +149,108 @@ class paternityArray(object):
         mother = adults.subset(0)
         progeny = make_sibships(adults, 0, [1,2,3], 5, 'x')
         # Create paternityArray
-        patlik = paternity_array(progeny, mother, adults, mu=0.0013)
+        patlik = paternity_array(
+            progeny,
+            mother,
+            adults,
+            mu=0.0013,
+            missing_parents=0.2
+        )
+        # View posterior probabilities of paternity (G matrix in the FAPS paper)
+        patlik.prob_array()
 
-        # Set values for candidates 14 to 16 to zero.
-        purge = ['base_14', 'base_15', 'base_16']
-        patlik.prob_array = patlik.adjust_prob_array(purge=purge)
-        # All values in columns 14 to 16 now -Inf.
-        patlik.prob_array[:, 14:17]
-        # Other columns are unaffected.
-        patlik.prob_array[:, 17:20]
+        # Change some parameters that will affect the G matrix.
+        patlik.missing_parents = 0.3
+        patlik.selfing_rate = 0
+        # Explicitly set some candidates to have probabilities of paternity to zero
+        patlik.purge = 'base_0' # Another way to remove the mother
+        patlik.purge = ['base_15', 'base_16', 'base_17'] # remove a list of specific candidates
+        patlik.purge = 0.2 # Throw two candidates out at random
+
+        # Another way to do the previous steps in a direct call to paternity_array.
+        paternity_array(
+            progeny,
+            mother,
+            adults,
+            mu=0.0013,
+            missing_parents=0.2,
+            selfing_rate=0,
+            purge = 0.2
+        )
         """
         new_array = np.append(self.lik_array, self.lik_absent[:,np.newaxis], 1)
 
         # set log lik of individuals to be purged to -Inf
-        if purge is not None:
+        if self.purge is not None:
             nc = len(self.candidates)
             # If a float is given, remove candidates at random.
-            if isinstance(purge, float):
-                if purge < 0 or purge > 1:
+            if isinstance(self.purge, float):
+                if self.purge <= 0 or self.purge >= 1:
                     raise ValueError(" Error: purge must be between zero and one.")
                 # Random set of candidate indices to be purged.
-                ix = np.random.choice(range(nc), np.round(purge*nc).astype('int'), replace=False)
+                ix = np.random.choice(range(nc), np.round(self.purge*nc).astype('int'), replace=False)
                 with(np.errstate(divide='ignore')):
                     new_array[:, ix] = np.log(0)
 
             # If one or more integers is given, remove candidates at those indices
-            elif isinstance(purge, (list, np.ndarray, int, str)):
-                if isinstance(purge, (int, str)):
-                    purge = [purge]
+            elif isinstance(self.purge, (list, np.ndarray, int, str)):
+                if isinstance(self.purge, (int, str)):
+                    self.purge = [self.purge]
                 # If all entries are strings, find the names of the candidates.
-                if all([isinstance(x, str) for x in purge]):
-                    purge = [np.where(x == self.candidates)[0][0] for x in purge]
+                if all([isinstance(x, str) for x in self.purge]):
+                    if not all(np.isin(self.purge, self.candidates)):
+                        raise ValueError("One or more names in paternityArray.purge are not found in paternityArray.candidates")
+                    self.purge = [np.where(x == self.candidates)[0][0] for x in self.purge]
                 with(np.errstate(divide='ignore')):
-                    new_array[:, purge] = np.log(0)
+                    new_array[:, self.purge] = np.log(0)
             else:
                 raise TypeError("Error: purge should be a float or list of floats between zero and one.")
 
         # correct for input parameter for proportion of missing fathers.
-        if missing_parents is not None and missing_parents is not 'NA':
-            # apply correction for the prior on number of missing parents.
-            if missing_parents < 0 or missing_parents >1:
-                raise ValueError("missing_parents must be between 0 and 1!")
-            # if missing_parents is between zero and one, correct the likelihoods.
-            if missing_parents >0 and missing_parents <=1:
-                if missing_parents ==1: warn("Missing_parents set to 100%.")
-                new_array[:, -1] = new_array[:, -1] + np.log(  missing_parents)
-                new_array[:,:-1] = new_array[:,:-1] + np.log(1-missing_parents)
-            # if missing_parents is 0, set the term for unrelated fathers to zero.
-            if missing_parents == 0:
-                with(np.errstate(divide='ignore')): new_array[:,-1] = np.log(0)
+        if not isinstance(self.missing_parents, (int, float)):
+            raise TypeError("missing_parents should be between 0 and 1.")
+        # apply correction for the prior on number of missing parents.
+        if self.missing_parents < 0 or self.missing_parents >1:
+            raise ValueError("missing_parents must be between 0 and 1!")
+        # if missing_parents is between zero and one, correct the likelihoods.
+        if self.missing_parents >= 0 and self.missing_parents <= 1:
+            if self.missing_parents ==0: warn("Missing_parents set to 0. Only continue if you are sure you really have 100% of possible fathers.")
+            if self.missing_parents ==1: warn("Missing_parents set to 100%. Are you sure this is what you mean?")
+            with(np.errstate(divide='ignore')):
+                new_array[:, -1] = new_array[:, -1] + np.log(  self.missing_parents)
+                new_array[:,:-1] = new_array[:,:-1] + np.log(1-self.missing_parents)
+        # if missing_parents is 0, set the term for unrelated fathers to zero.
+        if self.missing_parents == 0:
+            with(np.errstate(divide='ignore')): new_array[:,-1] = np.log(0)
 
         # correct for selfing rate.
-        if selfing_rate is not None:
-            # apply correction for the prior on number of missing parents.
-            if selfing_rate < 0 or selfing_rate >1:
-                raise ValueError("Error: selfing_rate must be between 0 and 1.")
-            if selfing_rate >=0 and selfing_rate <=1:
-                if selfing_rate == 1: warn("Warning: selfing_rate set to 100%.")
+        if self.selfing_rate is not None:
+            if not isinstance(self.selfing_rate, (int, float)):
+                raise TypeError("selfing_rate should be between 0 and 1.")
+            if self.selfing_rate < 0 or self.selfing_rate >1:
+                raise ValueError("selfing_rate must be between 0 and 1.")
+            if self.selfing_rate >=0 and self.selfing_rate <=1:
+                if self.selfing_rate == 1: warn("selfing_rate set to 100%. Are you sure that is what you meant?")
 
                 ix = range(len(self.offspring))
                 with np.errstate(divide='ignore'):
                     maternal_pos = [np.where(np.array(self.candidates) == self.mothers[i])[0][0] for i in ix] # positions of the mothers
-                    new_array[ix, maternal_pos] += np.log(selfing_rate)
+                    new_array[ix, maternal_pos] += np.log(self.selfing_rate)
 
         # set the likelihood dyads with many incompatibilities to zero
-        if max_clashes is not None:
+        if self.max_clashes is not None:
+            if not isinstance(self.max_clashes, int):
+                raise TypeError("paternityArray.max_clashes should be a positive integer")
+            if self.max_clashes <= 0:
+                raise ValueError("paternityArray.max_clashes should be greater than zero.")
             if self.clashes is None:
-                raise TypeError("Unable to adjust for number of incompatible homozygous loci because `clashes` is not given.")
+                raise TypeError("Unable to adjust for number of incompatible homozygous loci because `paternityArray.clashes` is `None`.")
             elif self.clashes.shape != self.lik_array.shape:
                 raise ValueError("Shape of the likelihood array does not match that of the array of clashes.")
             else:
                 inc = np.append(self.clashes, np.zeros(self.lik_absent.shape)[:,np.newaxis], 1) # add an extra column so the shapes match
                 with np.errstate(divide='ignore'):
-                    ix = np.log(inc <= max_clashes) # index elements to alter
+                    ix = np.log(inc <= self.max_clashes) # index elements to alter
                 new_array = new_array + ix
 
         # normalise so rows sum to one.

@@ -31,7 +31,8 @@ def read_genotypes(path, genotype_col = 1, mothers_col=None, fathers_col=None, d
     delimiter The symbol used to separate values in the text file. Defaults to
         commas.
 
-    RETURNS:
+    Returns
+    -------
     A genotypeArray object.
     """
     # Import genotype data
