@@ -57,7 +57,7 @@ def pairwise_lik_fullsibs(paternity_array, use_covariates = False, exp = False):
     # Matrix of pairwise probabilities of being full siblings.
     fullpairs = pairwise_lik_fullsibs(patlik)
     """
-    paternity_probs = paternity_array.prob_array
+    paternity_probs = paternity_array.prob_array()
     # pull out the number of offspring and parents
     noffs     = paternity_probs.shape[0]
     nparents  = paternity_probs.shape[1]

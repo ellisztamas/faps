@@ -2,7 +2,7 @@ import numpy as np
 from faps.paternityArray import paternityArray
 from pandas import read_csv
 
-def read_paternity_array(path, missing_parents, mothers_col=1, likelihood_col = 2, fathers_col=None, delimiter=","):
+def read_paternity_array(path, mothers_col=1, likelihood_col = 2, fathers_col=None, delimiter=","):
     """
     Import a text file containing of log likelihoods of paternity.
 

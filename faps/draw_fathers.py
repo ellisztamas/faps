@@ -48,7 +48,7 @@ def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000
             elif isinstance(paternity_array.covariate, np.ndarray):
                 if len(paternity_array.covariate.shape) > 1:
                     raise ValueError("covariate should be a 1-d array, but has shape {}".format(covariate.shape))
-                if paternity_array.prob_array.shape[1] != len(paternity_array.covariate):
+                if paternity_array.prob_array().shape[1] != len(paternity_array.covariate):
                     raise ValueError("Length of vector of covariates ({}) does not match the number of fathers ({})".format(len(paternity_array.candidates), paternity_array.covariate.shape[0]))
                 if not all(paternity_array.covariate <= 0):
                     warn("Not all values in covariate are less or equal to zero. Is it possible probabilities have not been log transformed?")
@@ -60,7 +60,7 @@ def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000
 
         nfathers  = len(paternity_array.candidates)+1
         # multiply likelihoods for individuals within each full sibship, then normalise rows to sum to 1.
-        prob_array = squash_siblings(paternity_array.prob_array, partition)
+        prob_array = squash_siblings(paternity_array.prob_array(), partition)
         prob_array = prob_array + covar
         prob_array = np.exp(prob_array - alogsumexp(prob_array,1)[:, np.newaxis])
 

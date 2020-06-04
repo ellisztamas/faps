@@ -71,7 +71,7 @@ def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False)
         elif isinstance(paternity_array.covariate, np.ndarray):
             if len(paternity_array.covariate.shape) > 1:
                 raise ValueError("covariate should be a 1-d array, but has shape {}".format(covariate.shape))
-            if paternity_array.prob_array.shape[1] != len(paternity_array.covariate):
+            if paternity_array.prob_array().shape[1] != len(paternity_array.covariate):
                 raise ValueError("Length of vector of covariates ({}) does not match the number of fathers ({})".format(len(paternity_array.candidates), paternity_array.covariate.shape[0]))
             if not all(paternity_array.covariate <= 0):
                 warn("Not all values in covariate are less or equal to zero. Is it possible probabilities have not been log transformed?")
@@ -103,13 +103,13 @@ def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False)
     unique_families = [np.array(up) for up in unique_families] # coerce back to numpy arrays
 
     # Calculate likelihoods of paternity for each family.
-    siblik = np.array([paternity_array.prob_array[uf].sum(0) for uf in unique_families])
+    siblik = np.array([paternity_array.prob_array()[uf].sum(0) for uf in unique_families])
     siblik = siblik + covar
     sibprob= siblik - alogsumexp(siblik, 1)[:, np.newaxis]
     sibprob= np.exp(sibprob)
 
     # Draw ndraws fathers for each full sibship.
-    candidates = np.arange(paternity_array.prob_array.shape[1])
+    candidates = np.arange(paternity_array.prob_array().shape[1])
     draw_dads = np.array([np.random.choice(candidates, ndraws, replace=True, p=s) for s in sibprob], dtype=np.int64)
 
     # Loop over each partition and pull out the rows in siblik for each full sibship within it.

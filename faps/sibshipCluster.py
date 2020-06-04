@@ -40,7 +40,7 @@ class sibshipCluster(object):
     """
     def __init__(self, paternity_array, linkage_matrix, partitions, lik_partitions, paths, path_likelihoods, path_probs):
         self.candidates       = paternity_array.candidates
-        self.paternity_array  = paternity_array.prob_array
+        self.paternity_array  = paternity_array.prob_array()
         self.partitions       = partitions
         self.linkage_matrix   = linkage_matrix
         self.lik_partitions   = lik_partitions
@@ -454,8 +454,8 @@ class sibshipCluster(object):
         """
         if not isinstance(paternity_array, paternityArray):
             raise TypeError('paternity_array should be a paternityArray.')
-        elif paternity_array.prob_array.shape != self.paternity_array.shape:
-            raise ValueError('Number of offspring in paternity ({}) does not match the sibshipCluster ({}).'.format(paternity_array.prob_array.shape, self.paternity_array.shape))
+        elif paternity_array.prob_array().shape != self.paternity_array.shape:
+            raise ValueError('Number of offspring in paternity ({}) does not match the sibshipCluster ({}).'.format(paternity_array.prob_array().shape, self.paternity_array.shape))
 
         if not isinstance(unit_draws, int):
             raise ValueError('unit_draws should be an integer.')

@@ -77,7 +77,6 @@ class paternityArray(object):
         self.missing_parents = missing_parents
         self.selfing_rate = selfing_rate
         self.max_clashes = max_clashes
-        #self.prob_array = self.adjust_prob_array(purge, missing_parents, selfing_rate, max_clashes)
 
     def add_covariate(self, covariate):
         """
