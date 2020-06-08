@@ -1,7 +1,7 @@
 Sibship clustering
 ==================
 
-Tom Ellis, March 2017
+Tom Ellis, March 2017, updated June 2020
 
 FAPS uses information in a ``paternityArray`` to generate plausible
 full-sibship configurations. This information is stored as a
@@ -52,7 +52,35 @@ we'll stick with the default number of Monte Carlo draws.
 
 .. code:: ipython3
 
-    sc = fp.sibship_clustering(patlik, ndraws=1000)
+    sc = fp.sibship_clustering(patlik)
+
+The default number of Monte Carlo draws is 1000, which seems to work in
+most cases. I have dropped it to 100 in cases where I wanted to call
+``sibship_clustering`` many times, such as in an MCMC loop, when finding
+every possible candidate wasn't a priority. You could also use more
+draws if you really wanted to be sure you had completely sampled the
+space of compatible candidate fathers. Speeds are unlikely to increase
+linearly with number of draws:
+
+.. code:: ipython3
+
+    %timeit fp.sibship_clustering(patlik, ndraws=100)
+    %timeit fp.sibship_clustering(patlik, ndraws=1000)
+    %timeit fp.sibship_clustering(patlik, ndraws=10000)
+
+
+.. parsed-literal::
+
+    28.1 ms ± 233 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
+    48.7 ms ± 840 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
+    305 ms ± 1.81 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+
+
+We discussed this in figure 5 of the FAPS paper should you be interested
+in more on this.
+
+Sibling relationships
+---------------------
 
 Sibship clustering calculates likelihoods that each pair of offspring
 are full siblings, then builds a dendrogram from this. We can visualise
@@ -68,7 +96,9 @@ this dendrogram if we so wish, although the output is not pretty.
 
 
 
-.. image:: 04_sibship_clustering_files/04_sibship_clustering_11_0.png
+.. parsed-literal::
+
+    <Figure size 640x480 with 1 Axes>
 
 
 Offspring individuals are labelled by their *index* in the array. Since
@@ -97,18 +127,18 @@ bifurcation in the dendrogram).
     array([[ 1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1,  1],
            [ 2,  2,  2,  2,  2,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2],
            [ 3,  3,  3,  3,  3,  1,  1,  1,  1,  1,  2,  2,  2,  2,  2],
-           [ 4,  4,  4,  4,  4,  1,  2,  1,  1,  1,  3,  3,  3,  3,  3],
-           [ 5,  5,  5,  5,  5,  1,  3,  1,  1,  2,  4,  4,  4,  4,  4],
-           [ 5,  5,  5,  6,  5,  1,  3,  1,  1,  2,  4,  4,  4,  4,  4],
-           [ 6,  6,  6,  7,  6,  1,  3,  1,  1,  2,  5,  4,  4,  4,  4],
-           [ 7,  7,  7,  8,  7,  1,  4,  1,  2,  3,  6,  5,  5,  5,  5],
-           [ 7,  8,  7,  9,  7,  1,  4,  1,  2,  3,  6,  5,  5,  5,  5],
-           [ 8,  9,  8, 10,  8,  1,  5,  2,  3,  4,  7,  6,  6,  6,  6],
-           [ 8, 10,  8, 11,  9,  1,  5,  2,  3,  4,  7,  6,  6,  6,  6],
-           [ 8, 11,  9, 12, 10,  1,  5,  2,  3,  4,  7,  6,  6,  6,  6],
-           [ 9, 12, 10, 13, 11,  1,  5,  2,  3,  4,  8,  7,  6,  6,  6],
-           [10, 13, 11, 14, 12,  1,  5,  2,  3,  4,  9,  8,  7,  6,  6],
-           [11, 14, 12, 15, 13,  1,  5,  2,  3,  4, 10,  9,  8,  6,  7]],
+           [ 4,  4,  4,  4,  4,  1,  1,  2,  1,  1,  3,  3,  3,  3,  3],
+           [ 5,  5,  5,  5,  5,  1,  1,  3,  1,  2,  4,  4,  4,  4,  4],
+           [ 5,  6,  5,  5,  5,  1,  1,  3,  1,  2,  4,  4,  4,  4,  4],
+           [ 6,  7,  6,  6,  6,  1,  1,  3,  1,  2,  4,  5,  4,  4,  4],
+           [ 7,  8,  7,  7,  7,  1,  1,  4,  2,  3,  5,  6,  5,  5,  5],
+           [ 8,  9,  8,  8,  8,  1,  2,  5,  3,  4,  6,  7,  6,  6,  6],
+           [ 8, 10,  9,  8,  8,  1,  2,  5,  3,  4,  6,  7,  6,  6,  6],
+           [ 8, 11, 10,  9,  8,  1,  2,  5,  3,  4,  6,  7,  6,  6,  6],
+           [ 9, 12, 11, 10,  9,  1,  2,  5,  3,  4,  7,  8,  6,  6,  6],
+           [10, 13, 12, 11, 10,  1,  2,  5,  3,  4,  8,  9,  6,  6,  7],
+           [11, 14, 13, 12, 11,  1,  2,  5,  3,  4,  9, 10,  6,  7,  8],
+           [11, 15, 14, 13, 12,  1,  2,  5,  3,  4,  9, 10,  6,  7,  8]],
           dtype=int32)
 
 
@@ -148,11 +178,11 @@ most consistent with the data. This is of course the true partition.
 
 .. parsed-literal::
 
-    [-3.84493727e+02 -1.82424133e+02 -6.91144774e-06            -inf
+    [-4.23560188e+02 -1.94067281e+02 -2.70500804e-04 -8.55784873e+00
                 -inf            -inf            -inf            -inf
                 -inf            -inf            -inf            -inf
                 -inf            -inf            -inf]
-    [1.03872159e-167 5.94577504e-080 1.00000000e+000 0.00000000e+000
+    [1.12248824e-184 5.22016966e-085 9.99807953e-001 1.92047026e-004
      0.00000000e+000 0.00000000e+000 0.00000000e+000 0.00000000e+000
      0.00000000e+000 0.00000000e+000 0.00000000e+000 0.00000000e+000
      0.00000000e+000 0.00000000e+000 0.00000000e+000]
@@ -180,7 +210,7 @@ wherever possible. We can check:
 
 .. parsed-literal::
 
-    1.0
+    0.9999999999999999
 
 
 
@@ -200,137 +230,28 @@ against the spirit of fractional analyses though...
 
 
 
-How many Monte Carlo draws?
----------------------------
-
-Calculating the likelihood of a partition structure is challenging in a
-fractional framework because we need to allow for the possibility of
-every candidate to be the sire of every putative full sibship, but also
-disallow the possibility that two full sibships share a single father.
-In the absence of a simple closed form estimator, FAPS uses Monte Carlo
-simulations to draw possible fathers for each sibship proportional to
-rows in the ``paternityArray``, removes cases where multiple sibships
-share a father, and calculates likelihoods for the remaining cases.
-
-The downside of this is that when the number of candidate fathers
-becomes large, many Monte Carlo draws are needed to properly sample the
-space of possible fathers. In the example above with 100 candidates,
-increasing the number of draws makes no difference. If we make a much
-larger example with 5000 candidates, 40 SNP loci, and fairly high
-genotype-error rates, then increasing the number of draws means we are
-able to find valid configurations for more partition structures.
+For information about fine scale relationships, ``sc.full_sib_matrix()``
+returns an :math:`n*n` matrix, where :math:`n` is the number of
+offspring. Each element describes the (log) probability that a pair of
+individuals are full siblings, averaged over partition structures and
+paternity configurations. If we plot this using a heatmap you can
+clearly see the five full sibships jump out as blocks of yellow (>90%
+probability of being full siblings) against a sea of purple (near zero
+probability of being full siblings).
 
 .. code:: ipython3
 
-    np.random.seed(625)
-    mu = 0.003 # genotype error rate
-    allele_freqs = np.random.uniform(0.3,0.5,40)
-    adults  = fp.make_parents(5000, allele_freqs, family_name='a').mutations(mu)
-    progeny = fp.make_sibships(adults, 0, [1,2,3,4], 5, 'x').mutations(mu)
-    mothers = adults.subset(progeny.parent_index('m', adults.names))
-    patlik  = fp.paternity_array(progeny, mothers, adults, mu)
-    
-    print(fp.sibship_clustering(patlik, ndraws=100).lik_partitions)
-    print(fp.sibship_clustering(patlik, ndraws=1000).lik_partitions)
-    print(fp.sibship_clustering(patlik, ndraws=10000).lik_partitions)
-    print(fp.sibship_clustering(patlik, ndraws=100000).lik_partitions)
+    sibmat = sc.full_sib_matrix()
+    plt.pcolor(np.exp(sibmat))
+    plt.colorbar()
+    plt.show()
 
 
-.. parsed-literal::
 
-    [-300.14878498 -223.32087212 -114.4050134    -4.11643151   -3.71512582
-       -3.75496706   -4.55420875   -5.66053219   -7.20170101          -inf
-              -inf          -inf          -inf          -inf          -inf
-              -inf          -inf          -inf          -inf          -inf]
-    [-300.14878498 -223.32087212 -114.4050134    -4.11643151   -3.63203028
-       -3.64187977   -4.32445671   -5.49924599   -6.34217909   -8.7652386
-      -12.6240141   -18.72828861          -inf          -inf          -inf
-              -inf          -inf          -inf          -inf          -inf]
-    [-300.14878498 -223.32087212 -114.4050134    -4.11643151   -3.62330471
-       -3.60846699   -4.23459848   -5.35178042   -6.16195154   -7.87753285
-       -9.99059002  -17.09906634          -inf          -inf          -inf
-              -inf          -inf          -inf          -inf          -inf]
-    [-300.14878498 -223.32087212 -114.4050134    -4.11643151   -3.62020844
-       -3.59839194   -4.21567429   -5.30184998   -6.05007985   -7.37517016
-       -8.82810609  -12.82691499  -15.60558542  -18.85505458          -inf
-              -inf          -inf          -inf          -inf          -inf]
+.. image:: 04_sibship_clustering_files/04_sibship_clustering_30_0.png
 
 
-Notice that the extra partitions idenitified are towards the end of the
-list. These tend to be partitions where true full-sib families are
-(erroneously) split into smaller groups, especially singleton families.
-Likelihoods for the extra partitions are not increasing, so most of the
-probability weight remains around partitions which are quite close to
-the true partition.
-
-Now consider a slightly different case where every offspring really is
-in a full sibship of its own (i.e. the true partition is
-``[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]``,
-which will be at the end of the lists of partitons). Likelihoods
-increase as we look from the start to the end of each list, and the
-final partition is the most likely for 100, 1000 and 10000 Monte Carlo
-draws.
-
-.. code:: ipython3
-
-    np.random.seed(763)
-    mu = 0.003 # genotype error rate
-    allele_freqs = np.random.uniform(0.3,0.5,50)
-    
-    adults = fp.make_parents(5000, allele_freqs, family_name='a').mutations(mu)
-    progeny = fp.make_sibships(
-        parents = adults,
-        dam     = 0,
-        sires   = np.arange(20),
-        family_size = 1,
-        family_name='x'
-    ).mutations(mu)
-    mothers = adults.subset(progeny.parent_index('m', adults.names))
-    patlik  = fp.paternity_array(progeny, mothers, adults, mu)
-    
-    print(fp.sibship_clustering(patlik, ndraws=100).lik_partitions)
-    print(fp.sibship_clustering(patlik, ndraws=1000).lik_partitions)
-    print(fp.sibship_clustering(patlik, ndraws=10000).lik_partitions)
-    print(fp.sibship_clustering(patlik, ndraws=100000).lik_partitions)
-
-
-.. parsed-literal::
-
-    [-5.10167863e+02 -4.70469862e+02 -4.41730003e+02 -4.12169267e+02
-     -3.38687892e+02 -3.13903372e+02 -2.65817267e+02 -2.46135927e+02
-     -2.22143385e+02 -1.86506965e+02 -1.54572426e+02 -1.32405700e+02
-     -1.12142708e+02 -8.41154677e+01 -6.68572681e+01 -4.96377301e+01
-     -3.29178143e+01 -1.79947014e+01 -5.78805754e+00 -2.80263898e-01]
-    [-5.10165728e+02 -4.70469862e+02 -4.41730003e+02 -4.12169206e+02
-     -3.38686789e+02 -3.13897222e+02 -2.65814805e+02 -2.46096265e+02
-     -2.22102475e+02 -1.86468403e+02 -1.54562471e+02 -1.32390225e+02
-     -1.12127150e+02 -8.41008586e+01 -6.68293139e+01 -4.96112779e+01
-     -3.28708075e+01 -1.79307196e+01 -5.72126058e+00 -1.19751137e-01]
-    [-5.10165600e+02 -4.70469830e+02 -4.41729592e+02 -4.12168347e+02
-     -3.38685737e+02 -3.13895043e+02 -2.65812508e+02 -2.46087689e+02
-     -2.22094041e+02 -1.86458265e+02 -1.54559457e+02 -1.32386598e+02
-     -1.12123513e+02 -8.40971259e+01 -6.68212498e+01 -4.96018329e+01
-     -3.28607984e+01 -1.79152119e+01 -5.70440426e+00 -4.94517515e-02]
-    [-5.10165600e+02 -4.70469798e+02 -4.41729527e+02 -4.12168104e+02
-     -3.38685627e+02 -3.13894453e+02 -2.65811908e+02 -2.46085972e+02
-     -2.22092092e+02 -1.86456407e+02 -1.54558425e+02 -1.32385102e+02
-     -1.12121855e+02 -8.40955517e+01 -6.68180370e+01 -4.95986164e+01
-     -3.28571819e+01 -1.79097544e+01 -5.69722040e+00 -2.17152577e-02]
-
-
-So how many Monte Carlo draws are necessary? The short answer is: it
-probably doesn't matter. In the original FAPS paper (figure 5 in that
-paper) we found that increasing the number of Monte Carlo draws does
-increase the amount of probability space explored, but these regions
-tend to be areas of low probability. Likely configurations are found
-first, and increasing the number of draws doesn't increase overall
-accuracy of inferred sibship relationships.
-
-A good rule is to use the default setting of 1000 draws. If you are
-concerned about this effect you can also change the number to 100 or
-10,000 and see if this alters your downstream analyses. You can also
-test this explicitly with simulations using the `power analysis
-tools <https://github.com/ellisztamas/faps/blob/master/docs/06%20Simulating%20data.ipynb>`__.
+Note that real datasets seldom look this tidy!
 
 Inferring family structure
 --------------------------
@@ -400,7 +321,7 @@ all the probability denisty is around :math:`x=5` families.
 
 
 
-.. image:: 04_sibship_clustering_files/04_sibship_clustering_38_0.png
+.. image:: 04_sibship_clustering_files/04_sibship_clustering_39_0.png
 
 
 Family size
@@ -412,8 +333,8 @@ as the number of offspring in the array. ``family_size`` returns the
 posterior probability of observing one or more families of size 1, 2,
 ... , 15. It will be clear that we are unable to distinguish a single
 sibship with high probability from multiple families of the same size,
-each with low probability; this is the price we pay for integrating out
-uncertainty in partition structure.
+each with low probability; this is the price we pay for being able to
+integrate out uncertainty in partition structure.
 
 .. code:: ipython3
 
@@ -444,30 +365,424 @@ family of sizes one, two, three, four and five.
 
 
 
-.. image:: 04_sibship_clustering_files/04_sibship_clustering_43_0.png
+.. image:: 04_sibship_clustering_files/04_sibship_clustering_44_0.png
 
 
-Sibling relationships
-~~~~~~~~~~~~~~~~~~~~~
+Identifying fathers
+-------------------
 
-Often we want to know who is related to whom. ``sc.full_sib_matrix()``
-returns an :math:`n*n` matrix, where :math:`n` is the number of
-offspring. Each element describes the log probability that a pair of
-individuals are full siblings. If we plot this using a heatmap you can
-clearly see the five full sibships jump out as blocks of yellow (>90%
-probability of being full siblings) against a sea of purple (near zero
-probability of being full siblings).
+Mating events
+~~~~~~~~~~~~~
+
+We very frequently want to know who the fathers of the offspring were to
+say something about mating events. There are several levels of
+complexity. Firstly, you can use the ``sires`` method to return a list
+of all the males who could possibly have mated with the mother.. This is
+essentially identifying **mating events**, but doesn't say anything
+about the paternity of individual offspring. For many applications, that
+may be all you need because it's the mating events that are the unit of
+interest, not the number of offspring per se.
+
+Once you have a ``sibshipCluster`` object, doing this is easy:
 
 .. code:: ipython3
 
-    sibmat = sc.full_sib_matrix()
-    plt.pcolor(np.exp(sibmat))
-    plt.colorbar()
-    plt.show()
+    sc.sires()
 
 
 
-.. image:: 04_sibship_clustering_files/04_sibship_clustering_46_0.png
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+    
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+    
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>position</th>
+          <th>label</th>
+          <th>log_prob</th>
+          <th>prob</th>
+          <th>offspring</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>1</td>
+          <td>a_1</td>
+          <td>3.330669e-16</td>
+          <td>1.000000e+00</td>
+          <td>4.945498e+00</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>2</td>
+          <td>a_2</td>
+          <td>4.996004e-16</td>
+          <td>1.000000e+00</td>
+          <td>4.000000e+00</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>3</td>
+          <td>a_3</td>
+          <td>3.330669e-16</td>
+          <td>1.000000e+00</td>
+          <td>2.995992e+00</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>4</td>
+          <td>a_4</td>
+          <td>3.330669e-16</td>
+          <td>1.000000e+00</td>
+          <td>1.999999e+00</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>5</td>
+          <td>a_5</td>
+          <td>-1.164911e-01</td>
+          <td>8.900380e-01</td>
+          <td>8.872125e-01</td>
+        </tr>
+        <tr>
+          <td>5</td>
+          <td>17</td>
+          <td>a_17</td>
+          <td>-1.144896e+01</td>
+          <td>1.066056e-05</td>
+          <td>2.987473e-06</td>
+        </tr>
+        <tr>
+          <td>6</td>
+          <td>87</td>
+          <td>a_87</td>
+          <td>-2.207630e+00</td>
+          <td>1.099610e-01</td>
+          <td>1.126593e-01</td>
+        </tr>
+        <tr>
+          <td>7</td>
+          <td>254</td>
+          <td>a_254</td>
+          <td>-2.230188e+00</td>
+          <td>1.075082e-01</td>
+          <td>2.385890e-02</td>
+        </tr>
+        <tr>
+          <td>8</td>
+          <td>257</td>
+          <td>a_257</td>
+          <td>-3.580195e+00</td>
+          <td>2.787027e-02</td>
+          <td>6.023169e-03</td>
+        </tr>
+        <tr>
+          <td>9</td>
+          <td>288</td>
+          <td>a_288</td>
+          <td>-7.355141e+00</td>
+          <td>6.392971e-04</td>
+          <td>1.791514e-04</td>
+        </tr>
+        <tr>
+          <td>10</td>
+          <td>376</td>
+          <td>a_376</td>
+          <td>-2.900265e+00</td>
+          <td>5.500863e-02</td>
+          <td>1.201891e-02</td>
+        </tr>
+        <tr>
+          <td>11</td>
+          <td>388</td>
+          <td>a_388</td>
+          <td>-3.611815e+00</td>
+          <td>2.700280e-02</td>
+          <td>6.031984e-03</td>
+        </tr>
+        <tr>
+          <td>12</td>
+          <td>407</td>
+          <td>a_407</td>
+          <td>-1.551630e+02</td>
+          <td>4.107187e-68</td>
+          <td>1.683410e-05</td>
+        </tr>
+        <tr>
+          <td>13</td>
+          <td>555</td>
+          <td>a_555</td>
+          <td>-8.472447e+00</td>
+          <td>2.091525e-04</td>
+          <td>5.861120e-05</td>
+        </tr>
+        <tr>
+          <td>14</td>
+          <td>631</td>
+          <td>a_631</td>
+          <td>-5.044193e+00</td>
+          <td>6.446661e-03</td>
+          <td>1.519225e-03</td>
+        </tr>
+        <tr>
+          <td>15</td>
+          <td>639</td>
+          <td>a_639</td>
+          <td>-4.414452e+00</td>
+          <td>1.210118e-02</td>
+          <td>1.378957e-03</td>
+        </tr>
+        <tr>
+          <td>16</td>
+          <td>668</td>
+          <td>a_668</td>
+          <td>-7.049834e+00</td>
+          <td>8.675530e-04</td>
+          <td>1.006159e-04</td>
+        </tr>
+        <tr>
+          <td>17</td>
+          <td>671</td>
+          <td>a_671</td>
+          <td>-6.550688e+00</td>
+          <td>1.429132e-03</td>
+          <td>3.553637e-04</td>
+        </tr>
+        <tr>
+          <td>18</td>
+          <td>680</td>
+          <td>a_680</td>
+          <td>-4.393632e+00</td>
+          <td>1.235578e-02</td>
+          <td>1.382046e-03</td>
+        </tr>
+        <tr>
+          <td>19</td>
+          <td>690</td>
+          <td>a_690</td>
+          <td>-7.362603e+00</td>
+          <td>6.345446e-04</td>
+          <td>1.778198e-04</td>
+        </tr>
+        <tr>
+          <td>20</td>
+          <td>693</td>
+          <td>a_693</td>
+          <td>-4.351071e+00</td>
+          <td>1.289300e-02</td>
+          <td>3.034105e-03</td>
+        </tr>
+        <tr>
+          <td>21</td>
+          <td>736</td>
+          <td>a_736</td>
+          <td>-1.316034e+01</td>
+          <td>1.925462e-06</td>
+          <td>4.897118e-07</td>
+        </tr>
+        <tr>
+          <td>22</td>
+          <td>797</td>
+          <td>a_797</td>
+          <td>-7.578541e+00</td>
+          <td>5.113068e-04</td>
+          <td>2.581523e-04</td>
+        </tr>
+        <tr>
+          <td>23</td>
+          <td>839</td>
+          <td>a_839</td>
+          <td>-1.003268e+01</td>
+          <td>4.394039e-05</td>
+          <td>8.842509e-05</td>
+        </tr>
+        <tr>
+          <td>24</td>
+          <td>852</td>
+          <td>a_852</td>
+          <td>-1.141146e+01</td>
+          <td>1.106793e-05</td>
+          <td>2.869368e-05</td>
+        </tr>
+        <tr>
+          <td>25</td>
+          <td>871</td>
+          <td>a_871</td>
+          <td>-5.982310e+00</td>
+          <td>2.522992e-03</td>
+          <td>7.070227e-04</td>
+        </tr>
+        <tr>
+          <td>26</td>
+          <td>963</td>
+          <td>a_963</td>
+          <td>-7.278814e+00</td>
+          <td>6.900035e-04</td>
+          <td>6.951732e-04</td>
+        </tr>
+        <tr>
+          <td>27</td>
+          <td>965</td>
+          <td>a_965</td>
+          <td>-7.583015e+00</td>
+          <td>5.090240e-04</td>
+          <td>1.426447e-04</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
 
 
-Note that real datasets seldom look this tidy!
+
+The columns in the output tell you several bits of information. The most
+interesting of these are:
+
+1. **label** is the name of the candidate father
+2. **prob** is the probability that the male sired at least one
+   offspring with the mother, as a weighted average over partition
+   structures. For example,
+3. **offspring** shows the expected number of offspring sired by the
+   male, as a weighted average over partition structures. Specifically,
+   it's the sum over rows from ``prob_paternity``; see below.
+
+Note that if you have multiple maternal families the output will look a
+bit different. See the `tutorial on multiple maternal
+families <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/07_dealing_with_multiple_half-sib_families.html#clustering-multiple-families>`__
+for more.
+
+We can check this table makes sense by reviewing who the real fathers
+really are. This snippet gives a list of the names of the five true
+fathers, followed by the number of offspring sired by each.
+
+.. code:: ipython3
+
+    np.unique(patlik.fathers, return_counts=True)
+
+
+
+
+.. parsed-literal::
+
+    (array(['a_1', 'a_2', 'a_3', 'a_4', 'a_5'], dtype='<U5'),
+     array([5, 4, 3, 2, 1]))
+
+
+
+The first five rows of the table above show that these fathers have
+posterior probabilities of paternity of one or close to one, and seem to
+have sired the correct numbers of offspring each. Of note is that
+although a\_1 to a\_4 have posterior probabilities of exactly one, the
+posterior probability for a\_5 is slightly less than one. This is
+because the first four fathers sired multiple offspring, and there is
+shared information between siblings about the father, but this is not
+the case for father a\_5.
+
+After the true fathers there are a long list of extra candidates with
+very low posterior probabilities of paternity. In this case we know they
+are not true fathers, but in real life we would not, and we would like
+to account for this uncertainty.
+
+Paternity of individuals
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are interested in the paternity of individual offspring we can
+look at the output of the ``prob_paternity`` method of
+``sibshipCluster`` objects. This returns a matrix with a row for every
+offspring and a column for every candidate, plus an extra column for
+absent fathers.
+
+.. code:: ipython3
+
+    sc.prob_paternity().shape
+
+
+
+
+.. parsed-literal::
+
+    (15, 1001)
+
+
+
+Rows sum to one, so each row can be interpreted as a Dirichlet
+distribution:
+
+.. code:: ipython3
+
+    np.exp(sc.prob_paternity()).sum(axis=1)
+
+
+
+
+.. parsed-literal::
+
+    array([1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1., 1.])
+
+
+
+This is similar to ``patlik.prob_array()`` in that each element is
+interpreted as the probability of that the offspring in a given row was
+sired by the father in a given column, except that the elements in the
+matrix are now averaged over partition structures. For example, compare
+the rows for the first five offspring, who are all full siblings, for
+the first three candidates before and after clustering into sibships:
+
+.. code:: ipython3
+
+    # Before
+    patlik.prob_array()[:5, :3]
+
+
+
+
+.. parsed-literal::
+
+    array([[-3.38800429e+01, -1.40506263e-01, -3.16818671e+01],
+           [-2.86253234e+01, -3.09240212e-03, -3.13437568e+01],
+           [-3.96961398e+01, -1.51388217e-01, -3.16927491e+01],
+           [-3.30893781e+01, -3.77506793e-02, -2.56419899e+01],
+           [-2.81879852e+01, -2.53663440e-01, -3.24829336e+01]])
+
+
+
+.. code:: ipython3
+
+    # After 
+    sc.prob_paternity()[:5, :3]
+
+
+
+
+.. parsed-literal::
+
+    array([[-1.02401752e+02, -1.11022302e-16, -9.54746212e+01],
+           [-1.02401752e+02, -1.11022302e-16, -9.54746212e+01],
+           [-4.66844966e+01, -1.29615385e-04, -3.86811058e+01],
+           [-1.02401752e+02, -1.11022302e-16, -9.54746212e+01],
+           [-2.96039788e+01, -5.59067869e-02, -3.38989272e+01]])
+
+
+
+In both cases you can see that the mother has low support as a father
+(left-most column), and the true father (middle column) has the highest
+support (these are log probabilities, so negative values closest to zero
+reflect stronger support). However, comparing the two show the added
+power gained from incorporating information about sibling relationships
+into identifying the fathers; log probabilties for the true father are
+orders of magnitude smaller in the second array than the first.

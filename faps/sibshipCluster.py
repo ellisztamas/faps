@@ -326,12 +326,11 @@ class sibshipCluster(object):
 
         Returns
         -------
-        A dictionary with three values for each drawn father:
-        'position': Integer position in the list of candidate fathers.
-        'label'   : Value of the father in the list of labels. By default,
-            the candidates name is returned.
-        'log_prob': Log probability that the candidate is the true sire of
-            at least one offspring in the maternal family.
+        DataFrame giving mother (taken from the keys of the input dictionary),
+        fathers (inherited from each sibshipCluster object), probabilties of
+        having sired at least one offspring, and the expected number of
+        offspring.
+
 
         Examples
         --------
@@ -374,6 +373,10 @@ class sibshipCluster(object):
                     'log_prob' : list(output.values())
                 })
         output['prob'] = np.exp(output['log_prob'])
+        # Get the expected number of offspring for each mating event
+        noffs = self.prob_paternity()[:, output['position']]
+        noffs = alogsumexp(noffs, axis=0)
+        output['offspring'] = np.exp(noffs)
         # Return DataFrame of information on sires
         return output
 

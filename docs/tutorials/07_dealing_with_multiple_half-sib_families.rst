@@ -139,9 +139,9 @@ case is a ``genotypeArray`` object for each maternal family.
 
 .. parsed-literal::
 
-    {'J1246': <faps.genotypeArray.genotypeArray at 0x7ff0cf56eed0>,
-     'K1809': <faps.genotypeArray.genotypeArray at 0x7ff0cf5323d0>,
-     'L1872': <faps.genotypeArray.genotypeArray at 0x7ff0cf56e450>}
+    {'J1246': <faps.genotypeArray.genotypeArray at 0x7fe0e58052d0>,
+     'K1809': <faps.genotypeArray.genotypeArray at 0x7fe0e5805950>,
+     'L1872': <faps.genotypeArray.genotypeArray at 0x7fe0e5805050>}
 
 
 
@@ -220,13 +220,13 @@ dictionary of ``paternityArray`` objects.
 
 .. code:: ipython3
 
-    %time patlik1 = paternity_array(progeny2, mothers2, adults, mu)
+    %time patlik1 = paternity_array(progeny2, mothers2, adults, mu, missing_parents=0.01)
 
 
 .. parsed-literal::
 
-    CPU times: user 943 ms, sys: 35.2 ms, total: 979 ms
-    Wall time: 980 ms
+    CPU times: user 893 ms, sys: 7.99 ms, total: 901 ms
+    Wall time: 899 ms
 
 
 Split up an existing paternity array
@@ -249,15 +249,15 @@ genotype data first you can deal with small chunks at a time.
 
 .. parsed-literal::
 
-    CPU times: user 884 ms, sys: 59.4 ms, total: 943 ms
-    Wall time: 949 ms
+    CPU times: user 863 ms, sys: 84 ms, total: 947 ms
+    Wall time: 947 ms
 
 
 
 
 .. parsed-literal::
 
-    <faps.paternityArray.paternityArray at 0x7ff0cdf29810>
+    <faps.paternityArray.paternityArray at 0x7fe0e58bbb90>
 
 
 
@@ -278,9 +278,9 @@ We split up the ``paternity_array`` in the same way as a
 
 .. parsed-literal::
 
-    {'J1246': <faps.paternityArray.paternityArray at 0x7ff0cdf2c3d0>,
-     'K1809': <faps.paternityArray.paternityArray at 0x7ff0ce35be90>,
-     'L1872': <faps.paternityArray.paternityArray at 0x7ff0cdcd2550>}
+    {'J1246': <faps.paternityArray.paternityArray at 0x7fe0dd4b4e10>,
+     'K1809': <faps.paternityArray.paternityArray at 0x7fe0dd4b4890>,
+     'L1872': <faps.paternityArray.paternityArray at 0x7fe0dc8c03d0>}
 
 
 
@@ -339,23 +339,17 @@ independently. It returns a dictionary of ``sibshipCluster`` objects.
 
 .. parsed-literal::
 
-    /home/GMI/thomas.ellis/miniconda3/envs/faps/lib/python3.7/site-packages/faps/paternityArray.py:216: UserWarning: Missing_parents set to 0. Only continue if you are sure you really have 100% of possible fathers.
-      if self.missing_parents ==0: warn("Missing_parents set to 0. Only continue if you are sure you really have 100% of possible fathers.")
-
-
-.. parsed-literal::
-
-    CPU times: user 523 ms, sys: 0 ns, total: 523 ms
-    Wall time: 521 ms
+    CPU times: user 499 ms, sys: 0 ns, total: 499 ms
+    Wall time: 497 ms
 
 
 
 
 .. parsed-literal::
 
-    {'J1246': <faps.sibshipCluster.sibshipCluster at 0x7ff0ce647710>,
-     'K1809': <faps.sibshipCluster.sibshipCluster at 0x7ff0cd834150>,
-     'L1872': <faps.sibshipCluster.sibshipCluster at 0x7ff0cd834b50>}
+    {'J1246': <faps.sibshipCluster.sibshipCluster at 0x7fe0de42bf90>,
+     'K1809': <faps.sibshipCluster.sibshipCluster at 0x7fe0e3917790>,
+     'L1872': <faps.sibshipCluster.sibshipCluster at 0x7fe0e57a8550>}
 
 
 
@@ -372,15 +366,15 @@ number of *pairs* of relationships to consider scales quadratically.
 
 .. parsed-literal::
 
-    CPU times: user 1.51 s, sys: 0 ns, total: 1.51 s
-    Wall time: 1.5 s
+    CPU times: user 1.48 s, sys: 2.64 ms, total: 1.49 s
+    Wall time: 1.48 s
 
 
 
 
 .. parsed-literal::
 
-    <faps.sibshipCluster.sibshipCluster at 0x7ff0cdfffb50>
+    <faps.sibshipCluster.sibshipCluster at 0x7fe0e6a5cc10>
 
 
 
@@ -399,13 +393,13 @@ first maternal family.
 
 .. parsed-literal::
 
-    array([4.58264645e-001, 0.00000000e+000, 1.80578452e-001, 0.00000000e+000,
-           0.00000000e+000, 0.00000000e+000, 0.00000000e+000, 5.35892330e-004,
-           1.92140400e-001, 7.43963548e-002, 9.20640706e-002, 2.02018638e-003,
-           2.11454618e-020, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000,
+    array([4.57906541e-001, 0.00000000e+000, 1.80697820e-001, 0.00000000e+000,
+           0.00000000e+000, 0.00000000e+000, 0.00000000e+000, 2.81585310e-004,
+           1.92238646e-001, 7.46085991e-002, 9.22427026e-002, 2.02410615e-003,
+           2.11864904e-020, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000,
            0.00000000e+000, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000,
-           0.00000000e+000, 1.42027713e-213, 0.00000000e+000, 0.00000000e+000,
-           1.00189294e-265])
+           0.00000000e+000, 1.42303289e-213, 0.00000000e+000, 0.00000000e+000,
+           1.00383692e-265])
 
 
 
@@ -426,3 +420,145 @@ structures for each maternal family.
     {'J1246': 25, 'K1809': 25, 'L1872': 26}
 
 
+
+Paternity for many arrays
+-------------------------
+
+Since paternity is likely to be a common aim, there is a handy function
+for calling the ``sires`` method on a list of ``sibshipCluster``
+objects.
+
+.. code:: ipython3
+
+    summarise_sires(sc)
+
+
+
+
+.. raw:: html
+
+    <div>
+    <style scoped>
+        .dataframe tbody tr th:only-of-type {
+            vertical-align: middle;
+        }
+    
+        .dataframe tbody tr th {
+            vertical-align: top;
+        }
+    
+        .dataframe thead th {
+            text-align: right;
+        }
+    </style>
+    <table border="1" class="dataframe">
+      <thead>
+        <tr style="text-align: right;">
+          <th></th>
+          <th>mother</th>
+          <th>father</th>
+          <th>log_prob</th>
+          <th>prob</th>
+          <th>offspring</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0</td>
+          <td>J1246</td>
+          <td>M0551</td>
+          <td>-489.404687</td>
+          <td>2.846066e-213</td>
+          <td>9.925957e-05</td>
+        </tr>
+        <tr>
+          <td>1</td>
+          <td>J1246</td>
+          <td>M0554</td>
+          <td>-4.833608</td>
+          <td>7.957758e-03</td>
+          <td>9.030774e-04</td>
+        </tr>
+        <tr>
+          <td>2</td>
+          <td>J1246</td>
+          <td>M0570</td>
+          <td>-0.387012</td>
+          <td>6.790830e-01</td>
+          <td>6.410034e-01</td>
+        </tr>
+        <tr>
+          <td>3</td>
+          <td>J1246</td>
+          <td>M1077</td>
+          <td>-6.021227</td>
+          <td>2.426690e-03</td>
+          <td>2.602961e-03</td>
+        </tr>
+        <tr>
+          <td>4</td>
+          <td>J1246</td>
+          <td>M1103</td>
+          <td>-6.063947</td>
+          <td>2.325205e-03</td>
+          <td>2.494105e-03</td>
+        </tr>
+        <tr>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+          <td>...</td>
+        </tr>
+        <tr>
+          <td>62</td>
+          <td>L1872</td>
+          <td>M0878</td>
+          <td>-3.022599</td>
+          <td>4.867454e-02</td>
+          <td>2.358130e-03</td>
+        </tr>
+        <tr>
+          <td>63</td>
+          <td>L1872</td>
+          <td>M0880</td>
+          <td>0.000000</td>
+          <td>1.000000e+00</td>
+          <td>2.000000e+00</td>
+        </tr>
+        <tr>
+          <td>64</td>
+          <td>L1872</td>
+          <td>M0819</td>
+          <td>0.000000</td>
+          <td>1.000000e+00</td>
+          <td>9.000000e+00</td>
+        </tr>
+        <tr>
+          <td>65</td>
+          <td>L1872</td>
+          <td>M0204</td>
+          <td>-929.421064</td>
+          <td>0.000000e+00</td>
+          <td>7.428108e-09</td>
+        </tr>
+        <tr>
+          <td>66</td>
+          <td>L1872</td>
+          <td>M0124</td>
+          <td>-176.623401</td>
+          <td>1.965312e-77</td>
+          <td>8.497702e-08</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>67 rows × 5 columns</p>
+    </div>
+
+
+
+The output is similar to that of ``sires()`` except that it gives labels
+for mother and father separately, replacing the ``label`` column. The
+``prob`` and ``offspring`` columns have the same interpretation as for
+single ``sibshipCluster`` objects.

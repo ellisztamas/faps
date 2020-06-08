@@ -1,7 +1,7 @@
 Paternity arrays
 ================
 
-Tom Ellis, March 2017
+Tom Ellis, March 2017, updated June 2020
 
 Paternity arrays are the what sibship clustering is built on in FAPS.
 They contain information about the probability that each candidate male
