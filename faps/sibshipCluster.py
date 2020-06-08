@@ -52,6 +52,42 @@ class sibshipCluster(object):
         self.path_likelihoods = path_likelihoods
         self.path_probs       = path_probs
 
+    def add_covariate(self, covariate):
+        """
+        Include a vector of (log) probabilities associated with covariates that
+        provide additional information about paternity beyond that provided by
+        genetic information (e.g. geographic distances).
+
+        Parameters
+        ----------
+        covariate: 1-d array
+            Vector of (log) probabilities of paternity based on non-genetic
+            information, with one element for every candidate father. If this is a
+            function of multiple sources they should be multiplied and included in
+            this vector. If a list of offspring arrays have been supplied, this
+            should be a list of vectors.
+
+        Returns
+        -------
+        No output is printed; the covariate is added to the paternityArray as
+        the attribute 'covariate'. Any existing information is overwritten. The
+        vector is appended with an additional zero to allow for the final column
+        of a the prob_array item in a paternityArray that accounts for the
+        probability of missing fathers.
+        """
+        if isinstance(covariate, np.ndarray):
+            if len(covariate.shape) > 1:
+                raise ValueError("covariate should be a 1-d array, but has shape {}".format(covariate.shape))
+            if len(self.candidates) != covariate.shape[0]:
+                raise ValueError("Length of vector of covariates ({}) does not match the number of fathers ({})".format(len(self.candidates), covariate.shape[0]))
+            if not all(covariate <= 0):
+                warn("Not all values in covariate are less or equal to zero. Is it possible probabilities have not been log transformed?")
+            covariate = np.append(covariate, 0)
+            self.covariate = covariate
+            return None
+        else:
+            raise TypeError("covariate should be a 1-d NumPy array.")
+    
     def accuracy(self, progeny, adults):
         """
         Summarise statistics about the accuracy of sibship reconstruction when
