@@ -169,16 +169,16 @@ class sibshipCluster(object):
 
     def full_sib_matrix(self, exp=False):
         """
-        Create a matrix of log posterior probabilities that pairs of offspring are
-        full siblings. This sums over the probabilities of each partition in which
-        two individuals are full siblings, multiplied by the probability of that
-        partition.
+        Create a matrix of log posterior probabilities that pairs of offspring
+        are full siblings. This sums over the probabilities of each partition
+        in which two individuals are full siblings, multiplied by the
+        probability of that partition.
 
-        By default, this creates a 3-dimensional matrix of log probabilities and
-        sums using logsumexp, which preserves values in log space. Alternatively
-        values can be exponentiated and summed directly, which will be less
-        demanding on memory and the processor for large arrays, but probably at some
-        cost to accuracy.
+        By default, this creates a 3-dimensional matrix of log probabilities
+        and sums using logsumexp, which preserves values in log space.
+        Alternatively values can be exponentiated and summed directly, which
+        will be less demanding on memory and the processor for large arrays,
+        but probably at some cost to accuracy.
 
         Parameters
         ----------
@@ -188,8 +188,8 @@ class sibshipCluster(object):
 
         Returns
         -------
-        An n*n array of log probabilities, where n is the number of offspring in the
-        `sibshipCluster`.
+        An n*n array of log probabilities, where n is the number of offspring
+        in the `sibshipCluster` object.
         """
         if exp is True:
             sibmat = np.zeros([self.noffspring, self.noffspring])
