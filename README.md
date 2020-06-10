@@ -23,17 +23,47 @@ At present only biallelic diploid SNPs in half sibling arrays are supported. FAP
 There are however a number of extensions which I would be happy to attempt, but that I cannot justify investing time in unless someone has a specific need for it. For example, support for microsatellites, polyploids, bi-parental inference, or sibship inference without access to parental information. If any of these directions would be of use to you, please let me know by email, or better by filing an issue on GitHub directly.
 
 ## Installation
-The best way to install FAPS is to use Python's package manager, Pip. Instructions to do so can be found at that projects [documentation page](https://pip.pypa.io/en/stable/installing/). Windows users might also consider [pip-Win](https://sites.google.com/site/pydatalog/python/pip-for-windows)
 
-### From PyPi
+### With Pip
+The easiest way to install FAPS is to use Python's package manager, Pip. Instructions to install Pip so can be found at that projects [documentation page](https://pip.pypa.io/en/stable/installing/). Windows users might also consider [pip-Win](https://sites.google.com/site/pydatalog/python/pip-for-windows)
+
 To download the stable release run `pip install faps` in the command line.
 If Python is unable to locate the package, try `pip install fap --user`.
 
-### From GitHub
-Download the .zip or tarball file, and unpack it. In a command line move into the folder this creates and run `pip install .`
+Be aware that when you have multiple versions of Python on your computer, including implementations like Jupyter, Pip might not be installing things to folders where Python is looking. It's useful to check Python is using the correct version of FAPS by opening Python and running
+```
+import faps as fp
+fp.__version__
+```
+If this isn't showing the version you expected, install FAPS with a conda environments instead.
 
-### The messy way
-Download the package from the repository by hitting 'clone or download'. Copy the contents of the folder FAPS to the directory where you are running your analyses, then import the package in your Python script.
+### With conda
+Conda environments let you be explicit about what versions of each package you
+would like to use for a given project, and can be cleaner to use when you have
+multiple versions of Python on your machine.
+
+If you haven't already, [install Conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) (the lightweight Miniconda is fine). Next install the FAPS Conda environment:
+
+1. copy the contents of [this Conda environment file]https://raw.githubusercontent.com/ellisztamas/faps/master/faps.yml) to a text file named `faps.yml`.
+2. In the folder you saved that file to, run:
+```
+conda env create -f faps.yml
+```
+3. Acivate the environment
+```
+conda activate faps
+```
+4. You can now open Python or Jupyter and begin using FAPS. It's best to double check the package version:
+```
+import faps as fp
+fp.__version__
+```
+
+See the [Conda environments documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#) for more details.
+
+# Remove an environment
+conda remove --name myenv --all
+
 
 ### Dependencies
 FAPS is built using the Numpy library with additional tools from Scipy and Pandas. If you install with pip, dependencies should be installed automatically.
