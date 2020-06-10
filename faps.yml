@@ -4,5 +4,9 @@ channels:
 dependencies:
   - numpy
   - scipy
+  - pip
+  - pip:
+    - faps
+    - fastcluster
 prefix: /home/GMI/thomas.ellis/miniconda3/envs/faps
 
