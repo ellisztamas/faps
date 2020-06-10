@@ -49,15 +49,21 @@ If you haven't already, [install Conda](https://docs.conda.io/projects/conda/en/
 ```
 conda env create -f faps.yml
 ```
-3. Acivate the environment
+3. Acivate the environment. You'll need to do this every time you use FAPS.
 ```
 conda activate faps
 ```
-4. You can now open Python or Jupyter and begin using FAPS. It's best to double check the package version:
+4. You can now open Python or Jupyter and begin using FAPS. It's best to double check the package version is what you think it should be:
 ```
 import faps as fp
 fp.__version__
 ```
+5. Deactivate the environment again when you want to use something else.
+```
+conda deactivate
+```
+
+** Important:** you need to activate the environment every time you use Python.
 
 See the [Conda environments documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#) for more details.
 
