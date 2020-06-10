@@ -63,7 +63,7 @@ fp.__version__
 conda deactivate
 ```
 
-** Important:** you need to activate the environment every time you use Python.
+**Important:** you need to activate the environment every time you use FAPS in Python.
 
 See the [Conda environments documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#) for more details.
 
