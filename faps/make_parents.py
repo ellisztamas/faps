@@ -1,7 +1,8 @@
 import numpy as np
 from faps.genotypeArray import genotypeArray
+from faps.calculate_geno_probs import calculate_geno_probs
 
-def make_parents(size, allele_freqs, family_name = 'base'):
+def make_parents(size, allele_freqs, mu=1e-12, family_name = 'base'):
     """
     Draw a base population of reproductive individuals from population allele frequencies.
 
@@ -9,10 +10,12 @@ def make_parents(size, allele_freqs, family_name = 'base'):
     ----------
     size: integer
         Number of individuals to create.
-
     allele_freqs: array-like
         Vector of allele frequencies.
-
+    mu: float or 1-d array between 0 and 1
+        Per locus genotype error rate; the probability that the called
+        genotype is incorrect. Alternatively, supply a vector of error rates
+        for each locus. Defaults to 1e-12.
     family_name: str, optional
         String denoting the name for this family.
 
@@ -33,4 +36,14 @@ def make_parents(size, allele_freqs, family_name = 'base'):
         maternal_names    = np.repeat('NA', size)
         paternal_names    = np.repeat('NA', size)
 
-        return genotypeArray(genomes, offspring_names, maternal_names, paternal_names, np.arange(len(allele_freqs)))
+        geno_probs = calculate_geno_probs(genomes, mu)
+
+        geno = genotypeArray(
+            geno    = genomes,
+            geno_probs = geno_probs,
+            names   = offspring_names,
+            mothers = maternal_names,
+            fathers = paternal_names,
+            markers = np.arange(len(allele_freqs))
+        )
+        return geno

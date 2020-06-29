@@ -5,7 +5,7 @@ from faps.transition_probability import transition_probability
 from faps.incompatibilities import incompatibilities
 from warnings import warn
 
-def paternity_array(offspring, mothers, males, mu, missing_parents = 0, purge=None, selfing_rate=None, max_clashes=None, covariate=None):
+def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, purge=None, selfing_rate=None, max_clashes=None, covariate=None):
     """
     Construct a paternityArray object for the offspring given known mothers
     and a set of candidate fathers using genotype data. Currently only SNP
@@ -30,7 +30,7 @@ def paternity_array(offspring, mothers, males, mu, missing_parents = 0, purge=No
     mu: float between zero and one
         Point estimate of the genotyping error rate. Clustering is unstable if
         mu_input is set to exactly zero. Any zero values will therefore be set
-        to a very small number close to zero (10^-12).
+        to a very small number close to zero (1e-12). Defaults to 1e-12
     missing_parents : float between zero and one
         Input value for the proportion of adults who are missing from the sample.
         This is used to weight the probabilties of paternity for each father
@@ -105,7 +105,7 @@ def paternity_array(offspring, mothers, males, mu, missing_parents = 0, purge=No
     )
     """
     if mu == 0:
-        mu = 10**-12
+        mu = 1e-12
         warn('Setting error rate to exactly zero causes clustering to be unstable. mu set to 10e-12')
 
     # Check missing_parents
@@ -147,7 +147,8 @@ def paternity_array(offspring, mothers, males, mu, missing_parents = 0, purge=No
                                 offspring=offspring.names,
                                 mothers=offspring.mothers,
                                 fathers=offspring.fathers,
-                                candidates=males.names, mu=mu,
+                                candidates=males.names,
+                                mu=mu,
                                 purge=purge,
                                 missing_parents=missing_parents,
                                 selfing_rate=selfing_rate,

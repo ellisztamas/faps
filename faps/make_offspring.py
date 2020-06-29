@@ -1,7 +1,8 @@
 import numpy as np
 from faps.genotypeArray import genotypeArray
+from faps.calculate_geno_probs import calculate_geno_probs
 
-def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, family_name='offs'):
+def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, mu=1e-12, family_name='offs'):
     """
     Mate individuals in a base population to create simulated offspring. Lists of
     specific sires and dams can be provided with the options dam_list and
@@ -23,7 +24,10 @@ def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, family_na
         forth). If used these two lists must be of the same length. If no
         arguments are given for either list, parents are mated at random with
         replacement, and the possibility of self-fertilisation.
-
+    mu: float or 1-d array between 0 and 1
+        Per locus genotype error rate; the probability that the called
+        genotype is incorrect. Alternatively, supply a vector of error rates
+        for each locus. Defaults to 1e-12.
     family_name: str, optional
         String denoting the name for this family.
 
@@ -68,8 +72,11 @@ def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, family_na
     maternal_names    = parents.subset(dam_list).names
     paternal_names    = parents.subset(sire_list).names
 
+    geno_probs = calculate_geno_probs(offs_genotypes, mu)
+
     return genotypeArray(
         geno = offs_genotypes,
+        geno_probs = geno_probs,
         names = offspring_names,
         mothers = maternal_names,
         fathers = paternal_names,

@@ -1,5 +1,6 @@
 import numpy as np
 from warnings import warn
+from faps.calculate_geno_probs import calculate_geno_probs
 
 class genotypeArray(object):
     """
@@ -37,8 +38,9 @@ class genotypeArray(object):
     nfamilies: int
         Number of full-sib families, based on the names of parents.
     """
-    def __init__(self, geno, names, mothers, fathers, markers=None):
+    def __init__(self, geno, geno_probs, names, mothers, fathers, markers=None):
         self.geno      = geno
+        self.geno_probs= geno_probs
         self.names     = names
         self.mothers   = mothers
         self.fathers   = fathers
@@ -56,6 +58,88 @@ class genotypeArray(object):
         """
         diploid = self.geno.sum(2) * 0.5
         return np.array([diploid[:,i][diploid[:,i] >= 0].mean() for i in range(self.nloci)])
+
+    def drop(self, individuals):
+        """
+        Remove specific individuals from the genotype array.
+
+        Parameters
+        ----------
+        individuals: an integer or list of integers indexing the individuals to be removed.
+
+        Returns
+        -------
+        A genotype array with the target individuals removed.
+        """
+        # If indices are given
+        if isinstance(individuals, int):
+            if individuals > self.size or individuals < 0:
+                raise ValueError("The index for the individual to drop is greater than the number of individuals, or less than zero.")
+            individuals = [individuals]
+        # If a names are given, find the positions in the list of names
+        if isinstance(individuals, str):
+            if individuals not in self.names:
+                raise ValueError("The name for the individual to drop is not present in the list of names for this genotypeArray object.")
+            individuals = [individuals]
+        if all(isinstance(x, str) for x in individuals):
+            if (~np.isin(individuals, self.names)).any():
+                raise ValueError("The name of one or more individuals to drop is not present in the list of names for this genotypeArray object.")
+            individuals = [np.where(self.names == x)[0][0] for x in individuals]
+
+        if any([i < 0 or i > self.size for i in individuals]):
+            raise ValueError("One or more indices for individuals to drop is greater than the total number of individuals, or less than zero.")
+        
+        # Indices of candidates to keep.
+        new_index = ~np.isin(np.arange(self.size), individuals)
+        new_index = np.where(new_index)[0]
+
+        # create new genotypeArray.
+        output = genotypeArray(
+            geno = self.geno[new_index],
+            geno_probs = self.geno_probs[new_index],
+            names = self.names[new_index],
+            mothers = self.mothers[new_index],
+            fathers = self.fathers[new_index]
+            )
+        return output
+
+    def dropouts(self, dr):
+        """
+        Add allelic dropouts to an array of genotypic data.
+
+        Parameters
+        ----------
+        dr: float
+            Diploid dropout rate.
+
+        Returns
+        -------
+        A copy of the input genotype data, but with dropouts. Alleles which dropout are
+        given as -9, in contrast to useful data which can only be 0 or 1 (or 2 for diploid
+        genotypes).
+        """
+
+        # pick data points to dropout
+        vals = np.random.binomial(1, dr, self.size * self.nloci)
+        positions = np.reshape(vals, [ self.size, self.nloci])
+        positions = positions.astype("bool")
+
+        # make a copy of the genotype data, just in case
+        new_geno       = np.copy(self.geno)
+        new_geno_probs = np.copy(self.geno_probs)
+        # insert missing data into parental genotypes
+        new_geno[positions] = -9
+        new_geno_probs[positions] = -9
+
+        output = genotypeArray(
+            geno = new_geno,
+            geno_probs = new_geno_probs,
+            names = self.names,
+            mothers = self.mothers,
+            fathers = self.fathers
+            )
+
+        return output
 
     def heterozygosity(self, by='marker'):
         """
@@ -103,6 +187,45 @@ class genotypeArray(object):
         else:
             raise ValueError("`by` should be either 'marker' or 'individual'.")
 
+    def mutations(self, mu):
+        """
+        Introduce mutations at random to an array of genotype data for multiple individuals.
+        For all alleles present draw mutations given error rate mu, then swap zeroes and
+        ones in the array.
+
+        Parameters
+        ----------
+        mu: float
+            Haploid genotyping error rate.
+
+        Returns
+        -------
+        A copy of the input genotype data, but with point mutations added.
+        """
+        # make a copy of the data, and make it an integer
+        new_alleles = np.copy(self.geno)
+
+        # for an array of the same shape as newAlleles, draw mutations at each
+        # position with probability mu.
+        vals = np.random.binomial(1, mu, self.size * self.nloci * 2)
+        mutate = np.reshape(vals, [ self.size, self.nloci, 2])
+        mutate = (mutate == 1)
+        # swap zeroes and ones.
+        new_alleles[mutate] ^= 1
+
+        # Apply to geno_probs
+        new_geno_probs = calculate_geno_probs(new_alleles, mu=mu)
+
+        output = genotypeArray(
+            geno = new_alleles,
+            geno_probs = new_geno_probs,
+            names = self.names,
+            mothers= self.mothers,
+            fathers = self.fathers
+            )
+
+        return output
+
     def parent_index(self, parent, parent_names):
         """
         Finds the position of parental names in a vector of possible parental
@@ -146,182 +269,6 @@ class genotypeArray(object):
         else:
             raise ValueError("parent must be 'mother', 'father', or 'parents'.")
 
-    def true_partition(self):
-        """
-        For families of known parentage, usually simulated data, create a full sibship partition
-        vector from the identities of known mothers and fathers contained in variables 'mothers'
-        and 'fathers' of a genotype array.
-
-        If one or more individuals has at least one missing parent they will be assigned to the
-        same full sibship group.
-
-        Returns
-        -------
-        An array of integers with an entry for each offspring individual. Individuals are labelled
-        according to their full sibling group.
-        """
-        if 'NA' in self.mothers or 'NA' in self.fathers:
-            warn('Warning: one or more individuals has at least one parent of unkown identity.')
-            warn('All such individuals will be assigned to the same sibship group.')
-
-        # concatenate mother and father names to create a vector of parent pairs.
-        #parentage = np.array([str(self.mothers[o]) + '/' + str(self.fathers[o]) for o in range(noffs)])
-        possible_families = np.unique(self.parents) # get a list of all unique parent pairs
-
-        partitions = np.zeros(self.size).astype('int') # empty vector of zeros.
-        for o in range(self.nfamilies):
-            # for every possible family label individuals with an identical integer.
-            partitions[self.parents == possible_families[o]] += o
-
-        return partitions
-
-    def subset(self, individuals=None, loci=None):
-        """
-        Subset the genotype array by individual or number of loci.
-
-        To subset by both individuals and loci, call the function twice.
-
-        Parameters
-        ----------
-        individuals: int, str, or a vector thereof
-            Either a list of individual names, or integers indexing those
-            individuals.
-
-        loci: int, str, or a vector thereof
-            Either a list of individual markers, or integers indexing those
-            individuals.
-        Returns
-        -------
-        A genotype array with only the target individuals included.
-        """
-        # if no subsetting indices are given, return the whole object.
-        if individuals is None and loci is None:
-            return self
-
-        # Subset individuals if necessary
-        if individuals is not None:
-            # If only a single individual is given, make it a list.
-            if isinstance(individuals, int):
-                individuals = [individuals]
-            if isinstance(individuals, str):
-                individuals = [individuals]
-            # If a names are given, find the positions in the list of names
-            if all(isinstance(x, str) for x in individuals):
-                individuals = [np.where(self.names == x)[0][0] for x in individuals]
-            # Subset the genotypeArray
-            output = genotypeArray(
-                geno    = self.geno[individuals],
-                names   = self.names[individuals],
-                mothers = self.mothers[individuals],
-                fathers = self.fathers[individuals],
-                markers = self.markers)
-
-        # Subset loci if necessary
-        if loci is not None:
-            # If only a single locus is given, make it a list.
-            if isinstance(loci, int):
-                loci = [loci]
-            if isinstance(loci, str):
-                loci = [loci]
-            # If a marker names are given, find the positions in the list of names
-            if all(isinstance(x, str) for x in loci):
-                loci = [np.where(self.markersz == x)[0][0] for x in loci]
-            # If an array of boolean values are given, make to a list
-            if isinstance(loci, np.ndarray):
-                if np.result_type(loci) == 'bool':
-                    loci = np.arange(len(loci))[loci]
-                loci = loci.tolist()
-            # Subset the genotypeArray
-            output = genotypeArray(
-                geno    = self.geno[:,loci],
-                names   = self.names,
-                mothers = self.mothers,
-                fathers = self.fathers,
-                markers = self.markers[loci])
-        return output
-
-    def drop(self, individuals):
-        """
-        Remove specific individuals from the genotype array.
-
-        Parameters
-        ----------
-        individuals: an integer or list of integers indexing the individuals to be removed.
-
-        Returns
-        -------
-        A genotype array with the target individuals removed.
-        """
-        if isinstance(individuals, int):
-            individuals = [individuals]
-        index = range(self.names.shape[0]) # list of indices for each individual.
-        # remove the target individual's indices.
-        new_index = [i for j, i in enumerate(index) if j not in individuals]
-        # create new genotypeArray.
-        output = genotypeArray(self.geno[new_index], self.names[new_index],
-                        self.mothers[new_index], self.fathers[new_index])
-        return output
-
-    def mutations(self, mu):
-        """
-        Introduce mutations at random to an array of genotype data for multiple individuals.
-        For all alleles present draw mutations given error rate mu, then swap zeroes and
-        ones in the array.
-
-        Parameters
-        ----------
-        mu: float
-            Haploid genotyping error rate.
-
-        Returns
-        -------
-        A copy of the input genotype data, but with point mutations added.
-        """
-        ninds    = self.geno.shape[0]
-        nloci    = self.geno.shape[1]
-        nalleles = self.geno.shape[2]
-
-        new_alleles = np.copy(self.geno).astype(int) # make a copy of the data, and make it an integer
-        # for an array of the same shape as newAlleles, draw mutations at each position with probability mu.
-        mutate = np.reshape(np.random.binomial(1,mu,ninds*nloci*nalleles),[ninds,nloci,nalleles]) == 1
-        new_alleles[mutate] ^= 1 # swap zeroes and ones.
-
-        output = genotypeArray(new_alleles, self.names, self.mothers, self.fathers)
-
-        return output
-
-    def dropouts(self, dr):
-        """
-        Add allelic dropouts to an array of genotypic data.
-
-        Parameters
-        ----------
-        dr: float
-            Diploid dropout rate.
-
-        Returns
-        -------
-        A copy of the input genotype data, but with dropouts. Alleles which dropout are
-        given as -9, in contrast to useful data which can only be 0 or 1 (or 2 for diploid
-        genotypes).
-        """
-        ninds    = self.geno.shape[0]
-        nloci    = self.geno.shape[1]
-
-        # pick data points to dropout
-        positions = np.reshape(np.random.binomial(1, dr, ninds*nloci),[ninds,nloci])
-        positions = np.repeat(positions[:,:,np.newaxis], 2, axis =2)
-
-        # make a copy of the genotype data, just in case
-        new_alleles = np.copy(self.geno)
-        # insert missing data into parental genotypes
-        new_alleles = new_alleles - positions*3 # make all dropped loci < 0
-        new_alleles[new_alleles < 0] = -9 # make dropped loci -9, just for tidyness.
-
-        output = genotypeArray(new_alleles, self.names, self.mothers, self.fathers)
-
-        return output
-
     def split(self, by, return_dict=True):
         """
         Split up a gentotypeArray into groups according to some grouping
@@ -364,6 +311,102 @@ class genotypeArray(object):
         else:
             output = [self.subset(i) for i in ix]
         return output
+
+    def subset(self, individuals=None, loci=None):
+        """
+        Subset the genotype array by individual or number of loci.
+
+        To subset by both individuals and loci, call the function twice.
+
+        Parameters
+        ----------
+        individuals: int, str, or a vector thereof
+            Either a list of individual names, or integers indexing those
+            individuals.
+
+        loci: int, str, or a vector thereof
+            Either a list of individual markers, or integers indexing those
+            individuals.
+        Returns
+        -------
+        A genotype array with only the target individuals included.
+        """
+        # if no subsetting indices are given, return the whole object.
+        if individuals is None and loci is None:
+            return self
+
+        # Subset individuals if necessary
+        if individuals is not None:
+            # If only a single individual is given, make it a list.
+            if isinstance(individuals, int):
+                individuals = [individuals]
+            if isinstance(individuals, str):
+                individuals = [individuals]
+            # If a names are given, find the positions in the list of names
+            if all(isinstance(x, str) for x in individuals):
+                individuals = [np.where(self.names == x)[0][0] for x in individuals]
+            # Subset the genotypeArray
+            output = genotypeArray(
+                geno       = self.geno[individuals],
+                geno_probs = self.geno_probs[individuals],
+                names      = self.names[individuals],
+                mothers    = self.mothers[individuals],
+                fathers    = self.fathers[individuals],
+                markers    = self.markers)
+
+        # Subset loci if necessary
+        if loci is not None:
+            # If only a single locus is given, make it a list.
+            if isinstance(loci, int):
+                loci = [loci]
+            if isinstance(loci, str):
+                loci = [loci]
+            # If a marker names are given, find the positions in the list of names
+            if all(isinstance(x, str) for x in loci):
+                loci = [np.where(self.markersz == x)[0][0] for x in loci]
+            # If an array of boolean values are given, make to a list
+            if isinstance(loci, np.ndarray):
+                if np.result_type(loci) == 'bool':
+                    loci = np.arange(len(loci))[loci]
+                loci = loci.tolist()
+            # Subset the genotypeArray
+            output = genotypeArray(
+                geno       = self.geno[:,loci],
+                geno_probs = self.geno[:,loci],
+                names      = self.names,
+                mothers    = self.mothers,
+                fathers    = self.fathers,
+                markers    = self.markers[loci])
+        return output
+
+    def true_partition(self):
+        """
+        For families of known parentage, usually simulated data, create a full sibship partition
+        vector from the identities of known mothers and fathers contained in variables 'mothers'
+        and 'fathers' of a genotype array.
+
+        If one or more individuals has at least one missing parent they will be assigned to the
+        same full sibship group.
+
+        Returns
+        -------
+        An array of integers with an entry for each offspring individual. Individuals are labelled
+        according to their full sibling group.
+        """
+        if 'NA' in self.mothers or 'NA' in self.fathers:
+            warn('Warning: one or more individuals has at least one parent of unkown identity.')
+            warn('All such individuals will be assigned to the same sibship group.')
+
+        # concatenate mother and father names to create a vector of parent pairs.
+        #parentage = np.array([str(self.mothers[o]) + '/' + str(self.fathers[o]) for o in range(noffs)])
+        possible_families = np.unique(self.parents) # get a list of all unique parent pairs
+
+        partitions = np.zeros(self.size).astype('int') # empty vector of zeros.
+        for o in range(self.nfamilies):
+            # for every possible family label individuals with an identical integer.
+            partitions[self.parents == possible_families[o]] += o
+
+        return partitions
 
     def write(self, filename, delimiter = ','):
 	    """

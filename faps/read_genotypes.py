@@ -1,8 +1,9 @@
 import numpy as np
 from faps.convert_genotypes import convert_genotypes
 from faps.genotypeArray import genotypeArray
+from faps.calculate_geno_probs import calculate_geno_probs
 
-def read_genotypes(path, genotype_col = 1, mothers_col=None, fathers_col=None, delimiter=","):
+def read_genotypes(path, genotype_col = 1, mothers_col=None, fathers_col=None, mu=1e-12, delimiter=","):
     """
     Import a text file containing of diploid SNP data to FAPS.
 
@@ -28,6 +29,10 @@ def read_genotypes(path, genotype_col = 1, mothers_col=None, fathers_col=None, d
         here.
     fathers_col: If a column of paternal names has been included, indicate column
         index here.
+    mu: float or 1-d array between 0 and 1
+        Per locus genotype error rate; the probability that the called
+        genotype is incorrect. Alternatively, supply a vector of error rates
+        for each locus. Defaults to 1e-12.
     delimiter The symbol used to separate values in the text file. Defaults to
         commas.
 
@@ -62,4 +67,14 @@ def read_genotypes(path, genotype_col = 1, mothers_col=None, fathers_col=None, d
     if fathers_col is None:
         fathers = np.repeat('NA', geno.shape[0])
 
-    return genotypeArray(geno, np.array(names), np.array(mothers), np.array(fathers), markers=np.array(marker_names))
+    geno_probs = calculate_geno_probs(geno, mu)
+
+    output = genotypeArray(
+        geno = geno,
+        geno_probs = geno_probs,
+        names = np.array(names),
+        mothers = np.array(mothers),
+        fathers = np.array(fathers),
+        markers=np.array(marker_names)
+        )
+    return output
