@@ -88,7 +88,7 @@ class genotypeArray(object):
 
         if any([i < 0 or i > self.size for i in individuals]):
             raise ValueError("One or more indices for individuals to drop is greater than the total number of individuals, or less than zero.")
-        
+
         # Indices of candidates to keep.
         new_index = ~np.isin(np.arange(self.size), individuals)
         new_index = np.where(new_index)[0]
@@ -372,7 +372,7 @@ class genotypeArray(object):
             # Subset the genotypeArray
             output = genotypeArray(
                 geno       = self.geno[:,loci],
-                geno_probs = self.geno[:,loci],
+                geno_probs = self.geno_probs[:,loci],
                 names      = self.names,
                 mothers    = self.mothers,
                 fathers    = self.fathers,
