@@ -180,10 +180,12 @@ class genotypeArray(object):
         -------
         Vector of floats.
         """
+        d = np.copy(self.geno)
+        d[d == -9] = np.nan
         if by == 'marker' or by == 0:
-            return (self.geno[:,:,0] == -9).mean(0)
+            return np.isnan(d[:,:,0]).mean(0)
         elif by == 'individual' or by == 1:
-            return (self.geno[:,:,0] == -9).mean(1)
+            return np.isnan(d[:,:,0]).mean(1)
         else:
             raise ValueError("`by` should be either 'marker' or 'individual'.")
 

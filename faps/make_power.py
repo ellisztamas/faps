@@ -6,6 +6,7 @@ from faps.make_generation import make_generation
 from time import time, localtime, asctime
 from pandas import DataFrame as df
 from sys import stdout
+from tqdm import tqdm
 
 def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, missing_loci, mu_real, mu_input=None, unsampled_real=None, unsampled_input=None, selfing_rate=0, cluster_draws=1000, exp_clusters=True, return_paternities=False, return_clusters=False, verbose=True, progress=True):
     """
@@ -329,20 +330,20 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
 
     counter=0
 
-    # set up the progress bar, if required
-    if progress:
-        from ipywidgets import FloatProgress
-        from IPython.display import display
-        fp = FloatProgress(min=0, max=nreps) # instantiate the bar
-        display(fp) # display the bar
+    # # set up the progress bar, if required
+    # if progress:
+    #     from ipywidgets import FloatProgress
+    #     from IPython.display import display
+    #     fp = FloatProgress(min=0, max=nreps) # instantiate the bar
+    #     display(fp) # display the bar
 
-    for l in nloci:
-        for c in candidates:
-            for mr in mu_real:
-                for ml in missing_loci:
-                    for th in unsampled_input:
-                        for sr in selfing_rate:
-                            for r in range(replicates):
+    for r in tqdm(range(replicates)):
+        for l in nloci:
+            for c in candidates:
+                for mr in mu_real:
+                    for ml in missing_loci:
+                        for th in unsampled_input:
+                            for sr in selfing_rate:
                                 # set up allele frequencies
                                 if isinstance(allele_freqs, float):
                                     af = np.repeat(allele_freqs, l)
@@ -374,9 +375,9 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
                                 if return_clusters:    clusters = clusters + [rx[2]]
 
                                 counter += 1
-                                # update progress bar
-                                if progress:
-                                    fp.value += 1 # signal to increment the progress bar
+                                # # update progress bar
+                                # if progress:
+                                #     fp.value += 1 # signal to increment the progress bar
 
     if verbose:
         print("Simulations completed after {} minutes.".format(round((time() - t0) / 60, 2)))

@@ -109,9 +109,19 @@ def make_generation(allele_freqs, candidates, sires, offspring, missing_loci=0, 
     adults = make_parents(candidates, allele_freqs) # parents
     # Generate the progeny
     if isinstance(sires, int):
-        progeny = make_sibships(adults, 0, np.arange(1,sires+1), offspring)
+        progeny = make_sibships(
+        parents = adults,
+        dam = 0,
+        sires = np.arange(1,sires+1).tolist(),
+        family_size = offspring
+    )
     elif isinstance(sires, list) or isinstance(sires, np.ndarray):
-        progeny = make_sibships(adults, 0, sires, offspring)
+        progeny = make_sibships(
+            progeny = adults,
+            dam = 0,
+            sires = sires,
+            family_size = offspring
+        )
     # introduce genotyping errors
     adults = adults.mutations(mu_real).dropouts(missing_loci)
     progeny= progeny.mutations(mu_real).dropouts(missing_loci)

@@ -87,7 +87,7 @@ class sibshipCluster(object):
             return None
         else:
             raise TypeError("covariate should be a 1-d NumPy array.")
-    
+
     def accuracy(self, progeny, adults):
         """
         Summarise statistics about the accuracy of sibship reconstruction when
