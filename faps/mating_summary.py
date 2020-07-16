@@ -24,8 +24,6 @@ def mating_summary(mating_event1, mating_event2, phenotype, absent_label=np.nan,
         to dispersal only.
     phenotype: array
         1-d numerical vector indicating phenotype category for each candidate.
-        Where there is missing data this should be indicated with a suitable
-        value, such as -9.
     absent_label: float, int, nan
         Value to use for missing fathers. See documentation for matingEvents.
     percentiles = list

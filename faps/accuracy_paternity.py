@@ -51,7 +51,7 @@ def accuracy_paternity(progeny, parents, paternity_array, partition, target_pare
 
     # If there are no individuals with fathers present, return
     if sum(parent_present) == 0:
-        mean_patprob = -9
+        mean_patprob = np.nan
     if sum(parent_present) >= 1:
         # subset the progeny to select just those non-orphaned offspring
         not_orphans = progeny.subset(np.arange(progeny.size)[np.array(parent_present)])
@@ -70,9 +70,9 @@ def accuracy_paternity(progeny, parents, paternity_array, partition, target_pare
         mean_patprob = pat_probs.mean()
 
     # POSTERIOR PROBABILITIES THAT A SIRE WAS NOT SAMPLED.
-    # If there are no individuals with missing fathers, return -9
+    # If there are no individuals with missing fathers, return NA
     if sum(parent_missing) == 0:
-        mean_absprob = -9
+        mean_absprob = np.nan
     # Otherwise, get the posterior probabilities that each sire is missing
     if sum(parent_missing) >= 1:
         # subset the progeny to select just those orphaned offspring

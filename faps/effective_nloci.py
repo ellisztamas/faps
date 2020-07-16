@@ -27,9 +27,9 @@ def effective_nloci(progeny, mothers, adults):
 
         else:
             # Arrays indexing the positions of missing data in each genotypeArray
-            prog_na = (progeny.geno[:,:,0] == -9)[np.newaxis]
-            moth_na = (mothers.geno[:,:,0] == -9)[np.newaxis]
-            adult_na= (adults.geno[ :,:,0] == -9)[:,np.newaxis]
+            prog_na = np.isnan(progeny.geno[:,:,0])[np.newaxis]
+            moth_na = np.isnan(mothers.geno[:,:,0])[np.newaxis]
+            adult_na= np.isnan(adults.geno[ :,:,0])[:,np.newaxis]
             # sum positions
             mat = prog_na + moth_na + adult_na
             # subtract from total for each triplet

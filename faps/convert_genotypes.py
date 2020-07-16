@@ -26,13 +26,19 @@ def convert_genotypes(diploid_data):
     n_inds = diploid_data.shape[0]         # number of individuals in the array
     n_loci = diploid_data.shape[1]         # number of loci, accounting for the index column.
 
-    parMat = np.zeros([n_inds,n_loci,2]).astype('int')    # empty matrix to store data.
+    # parMat = np.zeros([n_inds,n_loci,2]).astype(float)    # empty matrix to store data.
+    parMat = np.full([n_inds,n_loci,2], np.nan)
 
-    parMat[:,:,0]                     = np.copy(diploid_data)
-    parMat[:,:,0][parMat[:,:,0] == 1] = 0       # for heterozygotes, set this locus to 0.
-    parMat[:,:,0][parMat[:,:,0] == 2] = 1       # for minor allele homozygotes, set this locus to 1.
+    # First allele
+    parMat[:,:,0][diploid_data == 0] = 0 # For 0/0 homozygotes, set to 0
+    parMat[:,:,0][diploid_data == 1] = 0 # for heterozygotes, set this locus to 0.
+    parMat[:,:,0][diploid_data == 2] = 1 # for minor allele homozygotes, set this locus to 1.
+    # Second allele
+    parMat[:,:,1][diploid_data == 0] = 0 # For 0/0 homozygotes, set to 0
+    parMat[:,:,1][diploid_data == 1] = 1 # for heterozygotes, set this locus to 0.
+    parMat[:,:,1][diploid_data == 2] = 1 # for minor allele homozygotes, set this locus to 1.
 
-    parMat[:,:,1]                     = np.copy(diploid_data)
-    parMat[:,:,1][parMat[:,:,1] == 2] = 1       # for minor allele homozygotes, set this locus to 1.
+    # parMat[:,:,1]                     = np.copy(diploid_data)
+    # parMat[:,:,1][parMat[:,:,1] == 2] = 1       # for minor allele homozygotes, set this locus to 1.
 
     return parMat

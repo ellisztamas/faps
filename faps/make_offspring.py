@@ -65,7 +65,7 @@ def make_offspring(parents, noffs=None, dam_list=None, sire_list=None, mu=1e-12,
     for o in range(noffs):
         offs_genotypes[o,:,0] = np.array([dam_genotypes [o,l][dam_alleles [o,l]] for l in range(nloci)])
         offs_genotypes[o,:,1] = np.array([sire_genotypes[o,l][sire_alleles[o,l]] for l in range(nloci)])
-    offs_genotypes = offs_genotypes.astype('int')
+    offs_genotypes = offs_genotypes.astype(float)
 
     # extra information on names.
     offspring_names   = np.array([family_name+'_'+str(a) for a in np.arange(noffs)])

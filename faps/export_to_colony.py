@@ -134,6 +134,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
              '\n')
 
     # Offspring genotypes
+    offspring.geno[np.isnan(offspring.geno)] = -9
     for o in range(offspring.size):
         thisrow = offspring.geno[o].flatten()+9
         t= offspring.names[o]
@@ -155,6 +156,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
              '\n')
 
     # Candidate male genotypes
+    males.geno[np.isnan(males.geno)] = -9
     for m in range(males.size):
         thisrow = males.geno[m].flatten()+9
         t= males.names[m]
@@ -174,6 +176,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
             t = t + '\n'
             fo.write(t)
     elif two_sexes is 2: # separate sexes
+        mothers.geno[np.isnan(mothers.geno)] = -9
         for m in range(mothers.size):
             thisrow = mothers.geno[m].flatten()+9
             t= mothers.names[m]

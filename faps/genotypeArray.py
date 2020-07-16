@@ -9,7 +9,7 @@ class genotypeArray(object):
 
     Currently only SNP data are supported. Data are recorded as integers: zeros
     and twos indicate opposing homozygous genotypes, and ones heterozygous
-    genotypes. If marker data is missing at a locus, this is indicated by -9.
+    genotypes.
 
     Parameters
     ----------
@@ -57,7 +57,7 @@ class genotypeArray(object):
         labelled as 1.
         """
         diploid = self.geno.sum(2) * 0.5
-        return np.array([diploid[:,i][diploid[:,i] >= 0].mean() for i in range(self.nloci)])
+        return np.nanmean(diploid, axis = 0)
 
     def drop(self, individuals):
         """
@@ -114,9 +114,7 @@ class genotypeArray(object):
 
         Returns
         -------
-        A copy of the input genotype data, but with dropouts. Alleles which dropout are
-        given as -9, in contrast to useful data which can only be 0 or 1 (or 2 for diploid
-        genotypes).
+        A copy of the input genotype data, but with dropouts (shown as nan).
         """
 
         # pick data points to dropout
@@ -125,11 +123,11 @@ class genotypeArray(object):
         positions = positions.astype("bool")
 
         # make a copy of the genotype data, just in case
-        new_geno       = np.copy(self.geno)
-        new_geno_probs = np.copy(self.geno_probs)
+        new_geno       = np.copy(self.geno).astype(float)
+        new_geno_probs = np.copy(self.geno_probs).astype(float)
         # insert missing data into parental genotypes
-        new_geno[positions] = -9
-        new_geno_probs[positions] = -9
+        new_geno[positions] = np.nan
+        new_geno_probs[positions] = np.nan
 
         output = genotypeArray(
             geno = new_geno,
@@ -180,7 +178,7 @@ class genotypeArray(object):
         -------
         Vector of floats.
         """
-        d = np.copy(self.geno)
+        d = np.copy(self.geno).astype(float)
         d[d == -9] = np.nan
         if by == 'marker' or by == 0:
             return np.isnan(d[:,:,0]).mean(0)

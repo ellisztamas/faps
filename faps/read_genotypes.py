@@ -41,8 +41,8 @@ def read_genotypes(path, genotype_col = 1, mothers_col=None, fathers_col=None, m
     A genotypeArray object.
     """
     # Import genotype data
-    geno = np.genfromtxt(path, dtype='int', delimiter=delimiter)[1:, genotype_col:]
-    geno[geno == -1] = -9 # set missing data to -9
+    geno = np.genfromtxt(path, dtype='float', delimiter=delimiter)[1:, genotype_col:]
+    # geno[geno < 0] = np.nan # set missing data to NA
     geno = convert_genotypes(geno)
     # pull out marker names.
     marker_names = np.genfromtxt(path, dtype=str)[0].split(",")[genotype_col:]

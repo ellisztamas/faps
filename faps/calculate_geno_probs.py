@@ -56,6 +56,6 @@ def calculate_geno_probs(geno, mu):
     # mu/2 because we don't know which other genotype it could be.
     probs = (probs * (1-mu)) + (~probs * mu/2)
     # Where data are not observed, we set this to NaN.
-    probs[diploid < 0] = np.nan
+    # probs[diploid < 0] = np.nan
 
     return probs
