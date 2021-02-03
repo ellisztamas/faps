@@ -4,7 +4,7 @@ import fastcluster
 from scipy.cluster.hierarchy import fcluster
 from faps.pairwise_lik_fullsibs import pairwise_lik_fullsibs
 
-def sibship_partitions(paternity_array, exp=False, method='average', criterion = 'distance', use_covariates=False):
+def sibship_partitions(paternity_array, exp=False, method='average', criterion = 'distance', use_covariates=True):
     """
     Generate a sample of partition structures from an array of likelihoods that
     each pair of individuals in a half-sib array are really full sibs.
@@ -26,6 +26,7 @@ def sibship_partitions(paternity_array, exp=False, method='average', criterion =
     use_covariates: logical, optional
         If True, information on prbabilities associated with covariates stored
         in paternityArray objects are incorporated into sibship clustering.
+        Defaults to True
 
     Returns
     -------

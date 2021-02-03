@@ -72,7 +72,7 @@ def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False)
             if len(paternity_array.covariate.shape) > 1:
                 raise ValueError("covariate should be a 1-d array, but has shape {}".format(covariate.shape))
             if paternity_array.prob_array().shape[1] != len(paternity_array.covariate):
-                raise ValueError("Length of vector of covariates ({}) does not match the number of fathers ({})".format(paternity_array.prob_array().shape[1], len(paternity_array.covariate)))
+                raise ValueError("Length of vector of covariates ({}) does not match the number of fathers ({})".format(len(paternity_array.covariate), paternity_array.prob_array().shape[1]))
             if not all(paternity_array.covariate <= 0):
                 warn("Not all values in covariate are less or equal to zero. Is it possible probabilities have not been log transformed?")
             covar = paternity_array.covariate[np.newaxis]

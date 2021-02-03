@@ -75,7 +75,7 @@ def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total
 
     # Determine how to draw the correct number of samples for each half-sib array.
     # For a user-supplied vector of weights check this is the right format
-    if family_weights is np.ndarray:
+    if isinstance(family_weights, np.ndarray):
         if len(family_weights.shape) > 1:
             raise ValueError("family_weights should be a 1-d vector, but has shape {}.".format(family_weights.shape))
         if len(family_weights) != len(sibship_clusters):
@@ -89,7 +89,7 @@ def mating_events(sibship_clusters, paternity_arrays, family_draws = 1000, total
         family_weights = {k : v * total_weight for k,v in family_weights.items()} # normalise to sum to total_draws
         family_weights = {k : np.around(v).astype('int') for k,v in family_weights.items()}
     else:
-        raise TypeError('family_weights is type {}. If supplied, it should be a NumPy array.').format(type(family_weights))
+        raise TypeError('family_weights is type {}. If supplied, it should be a NumPy array.'.format(type(family_weights)))
 
     # If nothing is given for null_probs
     if null_probs is None:
