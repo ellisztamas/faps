@@ -24,6 +24,11 @@ def transition_probability(offspring, mothers, males, mu, inverse=False, integra
         If true, function return 1-transition probabilities, or the
         probability of *not* generating the offspring given maternal and
         candidate paternal genotypes
+    integration: str, optional
+        From version 2.5 onwards, transition probabilities are calculated by
+        integrating fully over all possible offspring, maternal and paternal
+        genotypes. For backwards compatibility, the previous implementation
+        can be accessed by setting integration to 'partial'.
 
     Returns
     -------

@@ -5,7 +5,7 @@ from faps.transition_probability import transition_probability
 from faps.incompatibilities import incompatibilities
 from warnings import warn
 
-def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, purge=None, selfing_rate=None, max_clashes=None, covariate=None):
+def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, purge=None, selfing_rate=None, max_clashes=None, covariate=None, integration="full"):
     """
     Construct a paternityArray object for the offspring given known mothers
     and a set of candidate fathers using genotype data. Currently only SNP
@@ -55,6 +55,11 @@ def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, pu
         supplied for offspring genotypes, `covariate` should likewise be a
         dictionary with and entry for each half-sib family and key names that
         match those given for the offspring.
+    integration: str, optional
+        From version 2.5 onwards, transition probabilities are calculated by
+        integrating fully over all possible offspring, maternal and paternal
+        genotypes. For backwards compatibility, the previous implementation
+        can be accessed by setting integration to 'partial'.
 
     Returns
     -------
@@ -64,18 +69,18 @@ def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, pu
 
     Examples
     --------
-    from faps import *
+    import faps as fp
     import numpy as np
 
     # Generate a population of adults
     allele_freqs = np.random.uniform(0.3,0.5,50)
-    adults = make_parents(20, allele_freqs)
+    adults = fp.make_parents(20, allele_freqs)
 
     # Mate the first adult to the next three.
     mother = adults.subset(0)
-    progeny = make_sibships(adults, 0, [1,2,3], 5, 'x')
+    progeny = fp.make_sibships(adults, 0, [1,2,3], 5, 'x')
     # Create paternityArray
-    patlik = paternity_array(
+    patlik = fp.paternity_array(
         progeny,
         mother,
         adults,
@@ -94,7 +99,7 @@ def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, pu
     patlik.purge = 0.2 # Throw two candidates out at random
 
     # Another way to do the previous steps in a direct call to paternity_array.
-    paternity_array(
+    fp.paternity_array(
         progeny,
         mother,
         adults,
@@ -141,19 +146,23 @@ def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, pu
         # array of opposing homozygous genotypes.
         incomp = incompatibilities(males, offspring)
         # take the log of transition probabilities, and assign dropout_masks.
-        prob_f, prob_a = transition_probability(offspring, mothers, males, mu)
-        output = paternityArray(likelihood=prob_f,
-                                lik_absent=prob_a,
-                                offspring=offspring.names,
-                                mothers=offspring.mothers,
-                                fathers=offspring.fathers,
-                                candidates=males.names,
-                                mu=mu,
-                                purge=purge,
-                                missing_parents=missing_parents,
-                                selfing_rate=selfing_rate,
-                                clashes=incomp,
-                                max_clashes=max_clashes)
+        prob_f, prob_a = transition_probability(
+            offspring, mothers, males, mu, integration=integration
+            )
+        output = paternityArray(
+            likelihood=prob_f,
+            lik_absent=prob_a,
+            offspring=offspring.names,
+            mothers=offspring.mothers,
+            fathers=offspring.fathers,
+            candidates=males.names,
+            mu=mu,
+            purge=purge,
+            missing_parents=missing_parents,
+            selfing_rate=selfing_rate,
+            clashes=incomp,
+            max_clashes=max_clashes,
+            )
 
         if covariate is not None:
             output.add_covariate(covariate)
@@ -184,20 +193,24 @@ def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, pu
             # array of opposing homozygous genotypes.
             incomp = incompatibilities(males, offspring[i])
             # take the log of transition probabilities, and assign dropout_masks.
-            prob_f, prob_a = transition_probability(offspring[i], mothers[i], males, mu)
+            prob_f, prob_a = transition_probability(
+                offspring[i], mothers[i], males, mu,integration=integration
+                )
             # create paternityArray and send to output
-            patlik = paternityArray(likelihood=prob_f,
-                                    lik_absent=prob_a,
-                                    offspring=offspring[i].names,
-                                    mothers=offspring[i].mothers,
-                                    fathers=offspring[i].fathers,
-                                    candidates=males.names,
-                                    mu=mu,
-                                    purge=purge,
-                                    missing_parents=missing_parents,
-                                    selfing_rate=selfing_rate,
-                                    clashes=incomp,
-                                    max_clashes=max_clashes)
+            patlik = paternityArray(
+                likelihood=prob_f,
+                lik_absent=prob_a,
+                offspring=offspring[i].names,
+                mothers=offspring[i].mothers,
+                fathers=offspring[i].fathers,
+                candidates=males.names,
+                mu=mu,
+                purge=purge,
+                missing_parents=missing_parents,
+                selfing_rate=selfing_rate,
+                clashes=incomp,
+                max_clashes=max_clashes
+            )
 
             patlik.add_covariate(cov[i])
             output[i] = patlik
@@ -226,20 +239,23 @@ def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, pu
             # array of opposing homozygous genotypes.
             incomp = incompatibilities(males, offspring[i])
             # take the log of transition probabilities, and assign dropout_masks.
-            prob_f, prob_a = transition_probability(offspring[i], mothers[i], males, mu)
+            prob_f, prob_a = transition_probability(
+                offspring[i], mothers[i], males, mu, integration=integration
+                )
             # create paternityArray and send to output
-            patlik = paternityArray(likelihood=prob_f,
-                                    lik_absent=prob_a,
-                                    offspring=offspring[i].names,
-                                    mothers=offspring[i].mothers,
-                                    fathers=offspring[i].fathers,
-                                    candidates=males.names,
-                                    mu=mu,
-                                    purge=purge,
-                                    missing_parents=missing_parents,
-                                    selfing_rate=selfing_rate,
-                                    clashes=incomp,
-                                    max_clashes=max_clashes)
+            patlik = paternityArray(
+                likelihood=prob_f,
+                lik_absent=prob_a,
+                offspring=offspring[i].names,
+                mothers=offspring[i].mothers,
+                fathers=offspring[i].fathers,
+                candidates=males.names,
+                mu=mu,
+                purge=purge,
+                missing_parents=missing_parents,
+                selfing_rate=selfing_rate,
+                clashes=incomp,
+                max_clashes=max_clashes)
             patlik.add_covariate(cov[i])
             output[i] = patlik
         return output
