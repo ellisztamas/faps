@@ -38,7 +38,7 @@ class sibshipCluster(object):
     npartitions: int
         Number of partitions recovered from the dendrogram.
     """
-    def __init__(self, paternity_array, linkage_matrix, partitions, lik_partitions, paths, path_likelihoods, path_probs):
+    def __init__(self, paternity_array, linkage_matrix, partitions, lik_partitions, paths, path_likelihoods, path_probs, covariate):
         self.candidates       = paternity_array.candidates
         self.paternity_array  = paternity_array.prob_array()
         self.partitions       = partitions
@@ -51,6 +51,7 @@ class sibshipCluster(object):
         self.paths            = paths
         self.path_likelihoods = path_likelihoods
         self.path_probs       = path_probs
+        self.covariate       = covariate
 
     def add_covariate(self, covariate):
         """
@@ -275,9 +276,9 @@ class sibshipCluster(object):
         rm  = relation_matrix(reference)
 
         # Matrix of ones and zeroes to reference elements for each relationship type.
-        if   rtype is 'all': ix = np.triu(np.ones(rm.shape), 1)
-        elif rtype is 'fs':  ix = np.triu(rm, 1)
-        elif rtype is 'hs':  ix = np.triu(1-rm, 1)
+        if   rtype == 'all': ix = np.triu(np.ones(rm.shape), 1)
+        elif rtype == 'fs':  ix = np.triu(rm, 1)
+        elif rtype == 'hs':  ix = np.triu(1-rm, 1)
         else:
             raise ValueError("rtype must be one of 'all', 'fs' or 'hs'.")
             return None
@@ -307,8 +308,10 @@ class sibshipCluster(object):
         Array or vector of log posterior probabilities.
         """
         if reference is None:
-            probs = np.zeros([self.npartitions, self.noffspring, self.paternity_array.shape[1]]) # empty matrix to store probs for each partitions
-            for j in range(self.npartitions): # loop over partitions
+            # empty matrix to store probs for each partitions
+            probs = np.zeros([self.npartitions, self.noffspring, self.paternity_array.shape[1]])
+            # loop over partitions
+            for j in range(self.npartitions):
                 this_part = self.partitions[j]
                 this_array = np.array([self.paternity_array[this_part[i] == this_part].sum(0) for i in range(self.noffspring)])
                 this_array = this_array - alogsumexp(this_array,1)[:, np.newaxis] # normalise

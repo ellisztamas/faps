@@ -152,6 +152,7 @@ def do_clustering(paternity_array, ndraws=1000, exp=False, use_covariates=False)
         lik_partitions   = lik_partitions,
         paths            = paths,
         path_likelihoods = path_likelihoods,
-        path_probs       = path_probs
+        path_probs       = path_probs,
+        covariate       = covar
     )
     return output
