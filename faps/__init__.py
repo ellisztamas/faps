@@ -28,7 +28,5 @@ from faps.sibshipCluster import sibshipCluster
 from faps.lik_partition import lik_partition
 from faps.sibship_clustering import sibship_clustering
 from faps.summarise_sires import summarise_sires
-# mating events
-from faps.matingEvents import matingEvents
-from faps.mating_events import mating_events
-from faps.mating_summary import mating_summary
+# mating
+from faps.posterior_mating import posterior_mating

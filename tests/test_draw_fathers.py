@@ -1,3 +1,4 @@
+from faps.draw_fathers import draw_fathers
 import numpy as np
 import faps as fp
 
@@ -20,17 +21,32 @@ def test_draw_fathers():
     assert all([x in [1,2,3] for x in dr])
 
     # Add a nonsense covariate
-    cov = -np.log(np.random.normal(5, size=adults.size+1))
+    cov = np.arange(0,adults.size)
+    cov = -cov/cov.sum()
     patlik.add_covariate(cov)
     sc2 = fp.sibship_clustering(patlik)
-    dr2 = fp.draw_fathers(sc.mlpartition, genetic = sc.paternity_array, covariate = cov)
+    dr2 = fp.draw_fathers(sc2.mlpartition, genetic = sc.paternity_array, covariate = cov)
     assert isinstance(dr2, np.ndarray)
     assert len(dr2) == ndraws
     # Check that using only the covariate samples more or less at random
     dr3 = fp.draw_fathers(
-        sc.mlpartition,
+        sc2.mlpartition,
         genetic = sc.paternity_array,
         covariate = cov,
-        covariate_only = True)
+        covariates_only = True)
     assert isinstance(dr3, np.ndarray)
     assert not all([x in [1,2,3] for x in dr3])
+    # Remove one of the real fathers.
+    # Check that he doesn't appear, but the index for missing fathers (100 in
+    # this case) does.
+    patlik.purge = "a_1"
+    sc3 = fp.sibship_clustering(patlik)
+    dr4 = fp.draw_fathers(
+        sc3.mlpartition,
+        genetic = sc3.paternity_array
+        )
+    assert 1 not in dr4
+    assert 100 in dr4
+
+
+    

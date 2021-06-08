@@ -6,7 +6,7 @@ from faps.squash_siblings import squash_siblings
 from faps.paternityArray import paternityArray
 
 
-def draw_fathers(partition, genetic=None, covariate = None, ndraws=1000, use_covariates=False,covariate_only = False):
+def draw_fathers(partition, genetic=None, covariate = None, ndraws=10000, use_covariates=False,covariates_only = False):
     """
     Draws a sample of compatible fathers for each family in a single partition.
     Candidates are drawn proportional to their posterior probability of paternity.
@@ -19,8 +19,8 @@ def draw_fathers(partition, genetic=None, covariate = None, ndraws=1000, use_cov
     partition: list
         A 1-d array of integers labelling individuals into families. This should
         have as many elements as there are individuals in paternity_probs.
-    paternity_array: paternityArray
-        Object listing information on paternity of individuals.
+    genetic: numpy array
+        2-D matrix listing information on paternity of individuals.
     covariate: array, optional
         1-d vector of log probabilities that each candidate is the sire of each
         full sibship in the partition. Probabilities are assumed to be the same
@@ -28,10 +28,13 @@ def draw_fathers(partition, genetic=None, covariate = None, ndraws=1000, use_cov
         to do so.
     ndraws: int
         Number of Monte Carlo draws for each family.
-    use_covariates: logical, optional
+    use_covariates: boolean, optional
         If True, information on prbabilities associated with covariates stored
         in paternityArray objects are incorporated into weights for drawing likely
         fathers.
+    covariates_only: boolean, optional
+        If True, candidates are drawn based on covariate probabilities only 
+        (i.e. ignoring genetic data)
 
     Returns
     -------
@@ -41,9 +44,10 @@ def draw_fathers(partition, genetic=None, covariate = None, ndraws=1000, use_cov
     # number of sibships and compatible fathers
     nfamilies = len(np.unique(partition))
 
-    if use_covariates is True or covariate_only:
+    if use_covariates is True or covariates_only:
         if isinstance(covariate, np.ndarray):
-            if len(covariate.shape) > 1:
+            covariate = np.array(covariate.squeeze())
+            if len(covariate.squeeze().shape) > 1:
                 raise ValueError("covariate should be a 1-d array, but has shape {}".format(covariate.shape))
             if genetic.shape[1] != len(covariate):
                 raise ValueError("Length of vector of covariates ({}) does not match the number of fathers ({})".format(covariate.shape[0], genetic.shape[1]))
@@ -54,15 +58,15 @@ def draw_fathers(partition, genetic=None, covariate = None, ndraws=1000, use_cov
         covar = 0
 
     # Simulate from genetic data, including covariates if `use_covariates` is set to True
-    if covariate_only is False:    
+    if covariates_only is False:    
         nfathers  = genetic.shape[1]
         # multiply likelihoods for individuals within each full sibship, then normalise rows to sum to 1.
         prob_array = squash_siblings(genetic, partition)
         prob_array = prob_array + covar
         prob_array = np.exp(prob_array - alogsumexp(prob_array,1)[:, np.newaxis])
     # Simulate from covariates only
-    elif covariate_only:
-        if covariate is 0:
+    elif covariates_only:
+        if isinstance(covariate, int) and covariate == 0:
             raise ValueError('Requested drawing fathers from covariate probabilities, but covariates are set to 0.')    
         nfathers   = covariate.shape[0]
         prob_array = covariate - alogsumexp(covariate)
@@ -78,7 +82,7 @@ def draw_fathers(partition, genetic=None, covariate = None, ndraws=1000, use_cov
     path_samples = np.array(path_samples)[np.array(valid)]
     output = [val for sublist in path_samples for val in sublist]
     # output is currently of size ndraws * n families
-    # subsample fown to ndraws
-    output = np.random.choice(output, size=ndraws, replace=False)
+    # subsample down to ndraws
+    output = np.random.choice(output, size=ndraws, replace=True)
 
     return output

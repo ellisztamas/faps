@@ -49,7 +49,7 @@ def sibship_clustering(paternity_array, ndraws=1000, use_covariates = False, exp
     allele_freqs = np.random.uniform(0.3,0.5,50)
     adults = make_parents(20, allele_freqs)
 
-    # Ecample with a single family
+    # Example with a single family
     # Mate the first adult to the next three.
     mother = adults.subset(0)
     progeny = make_sibships(adults, 0, [1,2,3], 5, 'x')

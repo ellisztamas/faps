@@ -188,7 +188,7 @@ class paternityArray(object):
                     raise ValueError(" Error: purge must be between zero and one.")
                 # Random set of candidate indices to be purged.
                 ix = np.random.choice(range(nc), np.round(self.purge*nc).astype('int'), replace=False)
-                with(np.errstate(divide='ignore')):
+                with np.errstate(divide='ignore'):
                     new_array[:, ix] = np.log(0)
 
             # If one or more integers is given, remove candidates at those indices
@@ -200,7 +200,7 @@ class paternityArray(object):
                     if not all(np.isin(self.purge, self.candidates)):
                         raise ValueError("One or more names in paternityArray.purge are not found in paternityArray.candidates")
                     self.purge = [np.where(x == self.candidates)[0][0] for x in self.purge]
-                with(np.errstate(divide='ignore')):
+                with np.errstate(divide='ignore'):
                     new_array[:, self.purge] = np.log(0)
             else:
                 raise TypeError("Error: purge should be a float or list of floats between zero and one.")
@@ -215,12 +215,12 @@ class paternityArray(object):
         if self.missing_parents >= 0 and self.missing_parents <= 1:
             if self.missing_parents ==0: warn("Missing_parents set to 0. Only continue if you are sure you really have 100% of possible fathers.")
             if self.missing_parents ==1: warn("Missing_parents set to 100%. Are you sure this is what you mean?")
-            with(np.errstate(divide='ignore')):
+            with np.errstate(divide='ignore'):
                 new_array[:, -1] = new_array[:, -1] + np.log(  self.missing_parents)
                 new_array[:,:-1] = new_array[:,:-1] + np.log(1-self.missing_parents)
         # if missing_parents is 0, set the term for unrelated fathers to zero.
         if self.missing_parents == 0:
-            with(np.errstate(divide='ignore')): new_array[:,-1] = np.log(0)
+            with np.errstate(divide='ignore'): new_array[:,-1] = np.log(0)
 
         # correct for selfing rate.
         if self.selfing_rate is not None:

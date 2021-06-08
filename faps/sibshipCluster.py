@@ -1,6 +1,6 @@
 import numpy as np
+from warnings import warn
 from faps.paternityArray import paternityArray
-from faps.matingEvents import matingEvents
 from faps.alogsumexp import alogsumexp
 from faps.relation_matrix import relation_matrix
 from faps.draw_fathers import draw_fathers
@@ -419,122 +419,115 @@ class sibshipCluster(object):
         # Return DataFrame of information on sires
         return output
 
-    def mating_events(self, ndraws=1000, use_covariates=True, covariates_only=False):
+    def posterior_mating(self, ndraws=10000, use_covariates=True, covariates_only=False):
         """
-        Sample plausible mating events from a sibshipCluster. These can then be
-        used to infer mating patterns using and array of phenotypes for each male.
+        Simulate plausible mating events from the posterior distribution of all possible
+        pairings between the mother and candidate fathers, integrating over uncertainty
+        in sibship structure.
 
-        Indices for possible fathers are drawn based on genetic data, other pertinent
-        information (such as distance between parents), or a combination of these
-        types. Mating events are drawn for each partition in a `sibshipCluster` object.
-        These samples are then resampled in proportion to a weight on each unit.
-        To assess uncertainty, the aggregate mating events can be subsampled.
+        For a single partitition structure, `simulate_mating` draws a sample of putative
+        fathers for each full-sib family in propotion to posterior probabilities of
+        paternity from genetic information. Paternity information from covariate
+        probabilities can be incorporated as well by setting `use_covariates` to `True`.
+        Covariate data are taken from the sibshipCluster object directly (see
+        `sibshipCluster.add_covariate`).
+        
+        Samples are drawn for every partition structure, excluding partitions with zero 
+        posterior probability. Samples for each partition are then subsampled in 
+        proportion to the posterior probability of each partition to generate a final
+        sample of plausible fathers for the whole half-sib family. In this way, fathers
+        are drawn in proportion to their probability of paternity, and uncertainty in
+        sibship structure is accounted for.
 
-        You can also supply an array of probabilities that a given father is the sire
-        based on some appropriare null model, which can then be compared with observed
-        mating patterns. For example, to test whether observed patterns could be
-        explained by random mating but with spatial clustering, you could supply an
-        array of probabilities derived from an appropriate dispersal function.
+        Samples of fathers can also be drawn in proportion to covariate probabilities
+        only by setting `covariates_only` to `True`. This can be used to compare "real"
+        mating events inferred using genetic (potentially including covariate information)
+        to a null distribution of mating based on covariates only. For example, if 
+        covariates describe a model of dispersal, such a comparison might tell you if
+        there is non-random mating for some trait other than distance.
 
         Parameters
         ----------
-        paternity_array: paternityArray
-            Object listing information on paternity of individuals. This should be the
-            same paternityArray object used to construct the sibshipCluster objects,
-            or else results will be meaningless.
-        unit_draws: int
-            Number of mating events to sample for each partition.
-        total_draws: int
-            Total number of mating events to resample for each partition.
-        n_subsamples: int, optional
-            Number of subsamples to draw from the total mating events. Defaults
-            to zero.
-        subsample_size: int, optional
-            Number of mating events in each subsample. Defaults to
-            0.1*total_draws.
-        null_probs: array, optional
-            1-d Array of probabilities for paternity if this were not based on
-            marker data. This should have an element for every candidate father.
+        ndraws: int
+            Number of Monte Carlo draws for each family.
         use_covariates: logical, optional
-            If True, information on prbabilities associated with covariates
-            stored in paternityArray objects are incorporated into weights for
-            drawing likely fathers.
-        return_names: logical, optional
-            If True, unit_events and total_events are returned as the names of
-            the candidates drawn for each partition. If False, their integer
-            positions in the list of candidates is returned.
+            If True, information on prbabilities associated with covariates stored
+            in paternityArray objects are incorporated into weights for drawing likely
+            fathers.
+        covariate_only: boolean, optional
+            If True, candidates are drawn based on covariate probabilities only 
+            (i.e. ignoring genetic data)
 
         Returns
         -------
-        A matingEvents object.
+        A DataFrame giving plausible fathers that could have mated with the mother, 
+        along with the proportion of pollen coming from each father.
 
         Examples
         --------
-        import numpy as np
-        from faps import *
+        # Simulate a starting population
+        allele_freqs = np.random.uniform(0.3,0.5,50)
+        adults = fp.make_parents(100, allele_freqs, family_name='a')
+        progeny = fp.make_sibships(adults, 0, [1,2,3], 5, 'x')
+        mothers = adults.subset(progeny.mothers)
+        patlik  = fp.paternity_array(progeny, mothers, adults, mu = 0.0015, missing_parents=0.01)
+        sc = fp.sibship_clustering(patlik)
+        # Check simulate_mating returns what it should in ideal case
+        me = sc.simulate_mating()
 
-        # simulate genotype data
-        allele_freqs = np.random.uniform(0.1, 0.5, 50)
-        males = make_parents(250, allele_freqs)
-        offspring = make_sibships(males, 0, range(1,5), 5)
-        mothers = males.subset(offspring.parent_index('m', males.names))
+        # Remove one of the fathers and check that a missing dad is sampled.
+        patlik.purge = "a_1"
+        sc2 = fp.sibship_clustering(patlik)
+        me2 = sc2.simulate_mating()
 
-        # Creat paternityArrays and cluster into full sibships.
-        patlik = paternity_array(offspring, mothers, males, mu=0.0015)
-        patlik.add_covariate(np.log(np.repeat(1.0/males.size, males.size)))
-        sc = sibship_clustering(patlik)
+        # Include a nonsense covariate
+        cov = np.arange(0,adults.size)
+        cov = -cov/cov.sum()
+        patlik.add_covariate(cov)
+        sc3 = fp.sibship_clustering(patlik, use_covariates=True)
+        me3 = sc3.simulate_mating(use_covariates=True)
 
-        # Basic usage
-        sc.mating_events(patlik)
-
-        # Including probabilities from covariates stored in the paternityArray.
-        sc.mating_events(patlik, use_covariates=True)
-
-        # Generate a sample in proportion to some other probability function not including genetic information
-        null_probs = np.repeat(1.0/males.size, males.size)
-        sc.mating_events(patlik, null_probs=null_probs)
+        # Draw individuals based on the covariate only.
+        sc4 = fp.sibship_clustering(patlik, use_covariates=True)
+        me4 = sc4.simulate_mating(use_covariates=True, covariates_only=True)
         """
+        dad_names = np.append(self.candidates, "missing")
 
         # only consider partitions that would account for at least one mating event.
         valid_ix = np.around(ndraws * np.exp(self.prob_partitions)) >= 1
         valid_partitions = self.partitions[valid_ix]
         # Get names for those
-        unit_names =  ['partition_' + str(x) for x in np.where(valid_ix)[0]]
+        unit_names = ['partition_' + str(x) for x in np.where(valid_ix)[0]]
 
-        # mating_events draws a sample of fathers from either genetic data,
-        # or else from some array of probabilties based on non-genetic data.
-        # Draw fathers from genetic data:
-        if not covariates_only:
-            # draw mating events for each partition.
-            unit_events = {}
-            for k,v in zip(unit_names, valid_partitions):
-                d = draw_fathers(v, paternity_array=self.prob_paternity(), ndraws=ndraws, use_covariates=use_covariates)
-                unit_events[k] = d
-        # Draw fathers from non-genetic data.
-        elif covariates_only:
-            if len(null_probs.shape) != 1:
-                raise ValueError("null_probs should be a 1-d vector, but has shape {}".format("null_probs.shape"))
-            elif len(null_probs) != len(paternity_array.candidates):
-                raise ValueError("null_probs should have an element for every candidate father, but has length {}.".format(len(null_probs)))
-            else:
-                unit_events = {}
-                for k,v in zip(unit_names, valid_partitions):
-                    unit_events[k] = draw_fathers(v, null_probs=null_probs, ndraws=ndraws)
-        else:
-            raise TypeError('null_probs is of type {}. If supplied, this should is supplied it should be an array.'.format(type(null_probs)))
+        # draw mating events for each partition.
+        unit_events = {}
+        for k,v in zip(unit_names, valid_partitions):
+            unit_events[k] = draw_fathers(
+                v,
+                genetic = self.paternity_array,
+                covariate = self.covariate, 
+                ndraws=ndraws,
+                covariates_only = covariates_only
+                )
         # Resample mating events for each partition weighted by the probability
-        # for that partition.
+        # for that partition to give a total sample of ndraws.
+        # In fact, sample size may be a little above or below ndraws, because 
+        # rounding probabilities to integers means things don't always add up.
+        #
         # First, get an set of integer number of draws for each partition.
         unit_weights = np.around(np.exp(self.prob_partitions[valid_ix]) * ndraws).astype('int')
         unit_weights = {k:v for k,v in zip(unit_names, unit_weights)}
         # Resample unit_events proportional to the prob of each unit.
         total_events = [np.random.choice(a=v, size=unit_weights[k], replace=True) for k,v in unit_events.items()]
         total_events = [item for sublist in total_events for item in sublist]
-        total_events = np.array(total_events)
+        total_events = dad_names[total_events]
+        # Count up how often each candidate appears and return a DataFrame
+        dad, freq = np.unique(total_events, return_counts = True)
+        
+        output = DataFrame({
+            'father'     : dad, 
+            'frequency'       : freq/sum(freq)
+            })
+        ouput = output#.sort_values(by='father')
 
-        return matingEvents(unit_names=unit_names,
-                            candidates=paternity_array.candidates,
-                            unit_weights=unit_weights,
-                            unit_events=unit_events,
-                            total_events=total_events,
-                            subsamples=sub_events)
+        return output
