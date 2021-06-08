@@ -6,7 +6,7 @@ from faps.squash_siblings import squash_siblings
 from faps.paternityArray import paternityArray
 
 
-def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000, use_covariates=False):
+def draw_fathers(partition, genetic=None, covariate = None, ndraws=1000, use_covariates=False,covariate_only = False):
     """
     Draws a sample of compatible fathers for each family in a single partition.
     Candidates are drawn proportional to their posterior probability of paternity.
@@ -21,7 +21,7 @@ def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000
         have as many elements as there are individuals in paternity_probs.
     paternity_array: paternityArray
         Object listing information on paternity of individuals.
-    null_probs: array, optional
+    covariate: array, optional
         1-d vector of log probabilities that each candidate is the sire of each
         full sibship in the partition. Probabilities are assumed to be the same
         for each partition. If values do not sum to one, they will be normalised
@@ -41,50 +41,44 @@ def draw_fathers(partition, paternity_array=None, null_probs = None, ndraws=1000
     # number of sibships and compatible fathers
     nfamilies = len(np.unique(partition))
 
-    if isinstance(paternity_array, paternityArray):
-        if use_covariates is True:
-            if paternity_array.covariate is 0:
-                covar = 0
-            elif isinstance(paternity_array.covariate, np.ndarray):
-                if len(paternity_array.covariate.shape) > 1:
-                    raise ValueError("covariate should be a 1-d array, but has shape {}".format(covariate.shape))
-                if paternity_array.prob_array().shape[1] != len(paternity_array.covariate):
-                    raise ValueError("Length of vector of covariates ({}) does not match the number of fathers ({})".format(len(paternity_array.candidates), paternity_array.covariate.shape[0]))
-                if not all(paternity_array.covariate <= 0):
-                    warn("Not all values in covariate are less or equal to zero. Is it possible probabilities have not been log transformed?")
-                covar = paternity_array.covariate[np.newaxis]
-            else:
-                raise TypeError("If use_covariates is set to True, the covraiate attribute of the paternityArray object should be a 1-d array.")
-        else:
-            covar = 0
+    if use_covariates is True or covariate_only:
+        if isinstance(covariate, np.ndarray):
+            if len(covariate.shape) > 1:
+                raise ValueError("covariate should be a 1-d array, but has shape {}".format(covariate.shape))
+            if genetic.shape[1] != len(covariate):
+                raise ValueError("Length of vector of covariates ({}) does not match the number of fathers ({})".format(covariate.shape[0], genetic.shape[1]))
+            if not all(covariate <= 0):
+                warn("Not all values in covariate are less or equal to zero. Is it possible probabilities have not been log transformed?")
+            covar = covariate[np.newaxis]
+    else:
+        covar = 0
 
-        nfathers  = len(paternity_array.candidates)+1
+    # Simulate from genetic data, including covariates if `use_covariates` is set to True
+    if covariate_only is False:    
+        nfathers  = genetic.shape[1]
         # multiply likelihoods for individuals within each full sibship, then normalise rows to sum to 1.
-        prob_array = squash_siblings(paternity_array.prob_array(), partition)
+        prob_array = squash_siblings(genetic, partition)
         prob_array = prob_array + covar
         prob_array = np.exp(prob_array - alogsumexp(prob_array,1)[:, np.newaxis])
-
-    elif isinstance(null_probs, np.ndarray):
-        if len(null_probs.shape) > 1:
-            raise ValueError("null_probs is supplied should be a one dimensional vector for a single half-sibs array, but has shape {}.format(null_probs.shape}.")
-        if not all(null_probs <= 0):
-            warn("Not all values in null_probs are less or equal to zero. Is it possible probabilities have not been log transformed?")
-        nfathers   = null_probs.shape[0]
-        prob_array = null_probs - alogsumexp(null_probs)
-        prob_array = np.tile(prob_array, nfamilies).reshape([nfamilies, len(null_probs)])
+    # Simulate from covariates only
+    elif covariate_only:
+        if covariate is 0:
+            raise ValueError('Requested drawing fathers from covariate probabilities, but covariates are set to 0.')    
+        nfathers   = covariate.shape[0]
+        prob_array = covariate - alogsumexp(covariate)
+        prob_array = np.tile(prob_array, nfamilies).reshape([nfamilies, len(covariate)])
         prob_array = np.exp(prob_array)
-    else:
-        raise TypeError("Supply an array for either paternity_probs or null_probs.")
-    if paternity_array is not None and null_probs is not None:
-        warn('Values supplied for both paternity_probs and null_probs. null_probs will be ignored.')
-
+    
     # generate a sample of possible paths through the matrix of candidate fathers.
     path_samples = np.array([np.random.choice(range(nfathers), ndraws, replace=True, p = prob_array[i]) for i in range(nfamilies)])
     path_samples = path_samples.T
     # identify samples with two or more famililies with shared paternity
-    counts = [np.unique(path_samples[i], return_counts=True)[1] for i in range(len(path_samples))]
-    valid  = [all((counts[i] == 1) & (counts[i] != nfathers))   for i in range(len(counts))]
+    counts = [np.unique(i, return_counts=True)[1] for i in path_samples]
+    valid  = [all((i == 1) & (i != nfathers))     for i in counts]
     path_samples = np.array(path_samples)[np.array(valid)]
     output = [val for sublist in path_samples for val in sublist]
+    # output is currently of size ndraws * n families
+    # subsample fown to ndraws
+    output = np.random.choice(output, size=ndraws, replace=False)
 
-    return np.array(output)
+    return output

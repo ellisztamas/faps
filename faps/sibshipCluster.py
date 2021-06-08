@@ -389,7 +389,7 @@ class sibshipCluster(object):
 
         sc.sires() # returns candidate names by default
         """
-        if labels is 'names':
+        if labels == 'names':
             labels = np.append(self.candidates, np.nan)
 
         # Get list of the unique set of fathers drawn for any partition.
@@ -419,7 +419,7 @@ class sibshipCluster(object):
         # Return DataFrame of information on sires
         return output
 
-    def mating_events(self, paternity_array, unit_draws=1000, total_draws=10000, n_subsamples = 0, subsample_size = None, null_probs=None, use_covariates=False, return_names=True):
+    def mating_events(self, ndraws=1000, use_covariates=True, covariates_only=False):
         """
         Sample plausible mating events from a sibshipCluster. These can then be
         used to infer mating patterns using and array of phenotypes for each male.
@@ -494,18 +494,9 @@ class sibshipCluster(object):
         null_probs = np.repeat(1.0/males.size, males.size)
         sc.mating_events(patlik, null_probs=null_probs)
         """
-        if not isinstance(paternity_array, paternityArray):
-            raise TypeError('paternity_array should be a paternityArray.')
-        elif paternity_array.prob_array().shape != self.paternity_array.shape:
-            raise ValueError('Number of offspring in paternity ({}) does not match the sibshipCluster ({}).'.format(paternity_array.prob_array().shape, self.paternity_array.shape))
-
-        if not isinstance(unit_draws, int):
-            raise ValueError('unit_draws should be an integer.')
-        if not isinstance(total_draws, int):
-            raise ValueError('total_draws should be an integer.')
 
         # only consider partitions that would account for at least one mating event.
-        valid_ix = np.around(total_draws * np.exp(self.prob_partitions)) >= 1
+        valid_ix = np.around(ndraws * np.exp(self.prob_partitions)) >= 1
         valid_partitions = self.partitions[valid_ix]
         # Get names for those
         unit_names =  ['partition_' + str(x) for x in np.where(valid_ix)[0]]
@@ -513,14 +504,14 @@ class sibshipCluster(object):
         # mating_events draws a sample of fathers from either genetic data,
         # or else from some array of probabilties based on non-genetic data.
         # Draw fathers from genetic data:
-        if null_probs is None:
+        if not covariates_only:
             # draw mating events for each partition.
             unit_events = {}
             for k,v in zip(unit_names, valid_partitions):
-                d = draw_fathers(v, paternity_array=paternity_array, ndraws=unit_draws, use_covariates=use_covariates)
+                d = draw_fathers(v, paternity_array=self.prob_paternity(), ndraws=ndraws, use_covariates=use_covariates)
                 unit_events[k] = d
         # Draw fathers from non-genetic data.
-        elif isinstance(null_probs, np.ndarray):
+        elif covariates_only:
             if len(null_probs.shape) != 1:
                 raise ValueError("null_probs should be a 1-d vector, but has shape {}".format("null_probs.shape"))
             elif len(null_probs) != len(paternity_array.candidates):
@@ -528,32 +519,18 @@ class sibshipCluster(object):
             else:
                 unit_events = {}
                 for k,v in zip(unit_names, valid_partitions):
-                    unit_events[k] = draw_fathers(v, null_probs=null_probs, ndraws=unit_draws)
+                    unit_events[k] = draw_fathers(v, null_probs=null_probs, ndraws=ndraws)
         else:
             raise TypeError('null_probs is of type {}. If supplied, this should is supplied it should be an array.'.format(type(null_probs)))
         # Resample mating events for each partition weighted by the probability
         # for that partition.
         # First, get an set of integer number of draws for each partition.
-        unit_weights = np.around(np.exp(self.prob_partitions[valid_ix]) * total_draws).astype('int')
+        unit_weights = np.around(np.exp(self.prob_partitions[valid_ix]) * ndraws).astype('int')
         unit_weights = {k:v for k,v in zip(unit_names, unit_weights)}
         # Resample unit_events proportional to the prob of each unit.
         total_events = [np.random.choice(a=v, size=unit_weights[k], replace=True) for k,v in unit_events.items()]
         total_events = [item for sublist in total_events for item in sublist]
         total_events = np.array(total_events)
-
-        # Subsample mating events.
-        if isinstance(n_subsamples, int):
-            if subsample_size is None:
-                subsample_size = np.around(total_draws*0.1).astype('int')
-            elif not isinstance(subsample_size, int):
-                raise TypeError("subsample_size should be an integer or None.")
-            if subsample_size >= total_draws:
-                raise ValueError('Number of subsamples must be smaller than total_draws')
-            sub_events = np.random.choice(total_events, n_subsamples*subsample_size, replace=True)
-            sub_events = sub_events.reshape([n_subsamples, subsample_size])
-        else:
-            raise ValueError('n_subsamples should be an integer.')
-
 
         return matingEvents(unit_names=unit_names,
                             candidates=paternity_array.candidates,
