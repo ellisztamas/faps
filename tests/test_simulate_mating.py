@@ -43,18 +43,16 @@ def test_method():
 allele_freqs = np.random.uniform(0.3,0.5,50)
 adults = fp.make_parents(20, allele_freqs)
 # Example with multiple half-sib families
-progeny = fp.make_offspring(parents = adults, dam_list=[7,7,1,8,8,0], sire_list=[2,4,6,3,0,7])
-# Split mothers and progeny up by half-sib array.
-mothers = adults.split(by=progeny.mothers, return_dict=True)
-progeny = progeny.split(by=progeny.mothers, return_dict=True)
-# Create paternity array for each family using dictionaries
-patlik = fp.paternity_array(progeny, mothers, adults, mu=0.0013, integration='partial')
+progeny = fp.make_offspring(parents = adults, dam_list=[7,7,7,7,7,1,8,8,0], sire_list=[2,4,4,4,4,6,3,0,7])
+# A single genotypeArray giving the mother of each of 984 offspring individuals.
+mothers = adults.subset(individuals=progeny.mothers)
+# Create the paternity array and save for later.
+patlik = fp.paternity_array(progeny, mothers, adults, mu = 0.0013 )
+patlik  = patlik.split(by=progeny.mothers)
 # The dictionary is passed to sibship_clustering.
 sibships = fp.sibship_clustering(patlik)
 
-# Note: this is returning the wrong fathers!
 me = fp.posterior_mating(sibships)
 
 me
 
-sibships['base_7'].posterior_mating()

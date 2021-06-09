@@ -298,10 +298,15 @@ class paternityArray(object):
             offspring  = self.offspring[indices],
             mothers    = self.mothers[indices],
             fathers    = self.fathers[indices],
-            candidates = self.candidates
+            candidates = self.candidates,
+            missing_parents= self.missing_parents,
+            purge = self.purge,
+            mu = self.mu,
+            selfing_rate = self.selfing_rate,
+            max_clashes = self.max_clashes
         )
         # Add additional attributes is these exist
-        if self.mu           is not None: new_array.clashes      = self.mu
+        if self.mu           is not None: new_array.mu           = self.mu
         if self.clashes      is not None: new_array.clashes      = self.clashes
         if self.covariate    is not None: new_array.covariate    = self.covariate
 
