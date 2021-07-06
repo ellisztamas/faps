@@ -28,7 +28,7 @@ There are however a number of extensions which I would be happy to attempt, but 
 The easiest way to install FAPS is to use Python's package manager, Pip. Instructions to install Pip so can be found at that projects [documentation page](https://pip.pypa.io/en/stable/installing/). Windows users might also consider [pip-Win](https://sites.google.com/site/pydatalog/python/pip-for-windows)
 
 To download the stable release run `pip install faps` in the command line.
-If Python is unable to locate the package, try `pip install fap --user`.
+If Python is unable to locate the package, try `pip install faps --user`.
 
 Be aware that when you have multiple versions of Python on your computer, including implementations like Jupyter, Pip might not be installing things to folders where Python is looking. It's useful to check Python is using the correct version of FAPS by opening Python and running
 ```
