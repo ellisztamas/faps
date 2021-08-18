@@ -230,9 +230,9 @@ def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, pu
             cov = covariate
         elif covariate is None:
             # Create a dictionary of zero vectors.
-            cov = {k: np.zeros(males.size) for k in offspring.keys()}
+            cov = {k : np.zeros(males.size) for k in offspring.keys()}
         else:
-            raise TypeError("If offspring and maternal genotypes are supplied as dictionaries, covariates should either be a 1-d of log probabilities, or a dictionary with the same keys as those for genotypes.")
+            raise TypeError("If offspring and maternal genotypes are supplied as dictionaries, covariates should either be a 1-d array of log probabilities, or a dictionary with the same keys as those for genotypes conatining log probabilities.")
 
         output = {}
         for i in offspring.keys():

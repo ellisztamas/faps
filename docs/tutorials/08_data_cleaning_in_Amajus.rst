@@ -25,7 +25,8 @@ necessarily be so critical of your own data.
 .. code:: ipython3
 
     import numpy as np
-    from faps import *
+    from pandas import DataFrame as df
+    import faps as fp
     import matplotlib.pyplot as plt
     %pylab inline
 
@@ -43,52 +44,11 @@ latter includes information on the ID of the maternal mother.
 
 .. code:: ipython3
 
-    progeny = read_genotypes('../manuscript_faps/data_files/offspring_SNPs_2012.csv', mothers_col=1, genotype_col=2)
-    adults  = read_genotypes('../manuscript_faps/data_files/parents_SNPs_2012.csv')
+    progeny = fp.read_genotypes('../../data/offspring_SNPs_2012.csv', mothers_col=1, genotype_col=2)
+    adults  = fp.read_genotypes('../../data/parents_SNPs_2012.csv')
     
     iix = [i in adults.names for i in progeny.mothers.tolist()]
     progeny = progeny.subset(iix)
-
-GPS data
-~~~~~~~~
-
-We will also import data GPS data for 2219 individuals tagged as alive
-in 2012. Since not all of these have been genotyped, we reformat the
-data to match the genotype data.
-
-.. code:: ipython3
-
-    gps_pos = np.genfromtxt('../manuscript_faps/data_files/amajus_GPS_2012.csv', delimiter=',', skip_header=1, usecols=[3,4]) # import CSV file
-    gps_lab = np.genfromtxt('../manuscript_faps/data_files/amajus_GPS_2012.csv', delimiter=',', skip_header=1, usecols=0, dtype='str') # import CSV file
-    # subset GPS data to match the genotype data.
-    ix = [i for i in range(len(gps_lab)) if gps_lab[i] in adults.names]
-    gps_pos, gps_lab = gps_pos[ix], gps_lab[ix]
-
-17 individuals are actually from about 15km to the East. It is hard to
-imagine that these individuals could contribute to the pollen pool of
-the mothers, so let's remove these from the sample.
-
-.. code:: ipython3
-
-    plt.scatter(gps_pos[:,0], gps_pos[:,1])
-
-
-
-
-.. parsed-literal::
-
-    <matplotlib.collections.PathCollection at 0x7f610159f290>
-
-
-
-
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_10_1.png
-
-
-.. code:: ipython3
-
-    ix = [i for i in range(len(gps_lab)) if gps_pos[i,0] > -5000]
-    gps_pos, gps_lab = gps_pos[ix], gps_lab[ix]
 
 Genotype information
 ~~~~~~~~~~~~~~~~~~~~
@@ -116,15 +76,17 @@ amplify) is respectable for the adults, but dire for the offspring.
 
 .. code:: ipython3
 
-    print adults.missing_data().max()
-    print progeny.missing_data().max()
+    print(
+        "Adults:",    adults.missing_data().max(),
+        "\nProgeny:", progeny.missing_data().max()
+    )
 
 
 
 .. parsed-literal::
 
-    0.027972027972027972
-    0.7916666666666666
+    Adults: 0.027972027972027972 
+    Progeny: 0.7916666666666666
 
 
 Luckily a lot of this is driven by a small number of loci/individuals
@@ -164,12 +126,12 @@ with very high dropout rates.
 
 .. parsed-literal::
 
-    Text(0.5,1,u'Per indiviudual: adults')
+    Text(0.5, 1.0, 'Per indiviudual: adults')
 
 
 
 
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_18_1.png
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_12_1.png
 
 
 Although overall per locus drop-out rates are low for the adults, there
@@ -180,31 +142,35 @@ information to exclude them.
 
 .. code:: ipython3
 
-    print adults.missing_data(by='individual').max()
-    print progeny.missing_data('individual').max()
+    print(
+        "Adults:",   adults.missing_data(by='individual').max(),
+        "\nProgeny:", progeny.missing_data('individual').max()
+    )
 
 
 .. parsed-literal::
 
-    0.8985507246376812
-    0.9710144927536232
+    Adults: 0.8985507246376812 
+    Progeny: 0.9710144927536232
 
 
 Count, then remove individuals with >5% missing data.
 
 .. code:: ipython3
 
-    print "Offspring:", len(np.array(progeny.names)[progeny.missing_data(1) > 0.05])
-    print "Parents:", len(np.array(adults.names)[adults.missing_data(1) > 0.05])
-    
-    progeny = progeny.subset(    individuals= progeny.missing_data(1) < 0.05)
+    print(
+        "Adults:", len(np.array(adults.names)[adults.missing_data(1) > 0.05]),
+        "\nProgeny:", len(np.array(progeny.names)[progeny.missing_data(1) > 0.05])
+    )
+        
     adults  = adults.subset(individuals= adults.missing_data(1) < 0.05)
+    progeny = progeny.subset(    individuals= progeny.missing_data(1) < 0.05)
 
 
 .. parsed-literal::
 
-    Offspring: 688
-    Parents: 66
+    Adults: 66 
+    Progeny: 688
 
 
 Histograms look much better. It would still worth removing some of the
@@ -244,12 +210,12 @@ dubious loci with high drop-out rates though.
 
 .. parsed-literal::
 
-    Text(0.5,1,u'Per indiviudual: adults')
+    Text(0.5, 1.0, 'Per indiviudual: adults')
 
 
 
 
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_24_1.png
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_18_1.png
 
 
 Remove the loci with dropouts >10% from both the offspring and adult
@@ -257,7 +223,7 @@ datasets.
 
 .. code:: ipython3
 
-    print np.array(progeny.markers)[progeny.missing_data(0) >= 0.1]
+    print(np.array(progeny.markers)[progeny.missing_data(0) >= 0.1])
     
     progeny= progeny.subset(loci= progeny.missing_data(0) < 0.1)
     adults = adults.subset(loci = progeny.missing_data(0) < 0.1)
@@ -282,18 +248,20 @@ a possible outlier.
 
 
 
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_28_0.png
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_22_0.png
 
 
 Loci with low heterozygosity are not dangerous in themselves; they might
 contribute some information, albeit little. To be on the safe side,
-let's remove loci with less than 0.2 heterozygosity, and the errant
+let’s remove loci with less than 0.2 heterozygosity, and the errant
 locus with high heterozygosity.
 
 .. code:: ipython3
 
-    print "Heterozygosity > 0.7:", adults.markers[adults.heterozygosity(0) >0.7]
-    print "Heterozygosity < 0.2:", progeny.markers[adults.heterozygosity(0) < 0.2]
+    print(
+        "Heterozygosity > 0.7:", adults.markers[adults.heterozygosity(0) >0.7],
+        "\nHeterozygosity < 0.2:", progeny.markers[adults.heterozygosity(0) < 0.2]
+    )
     
     progeny = progeny.subset(loci= (adults.heterozygosity(0) > 0.2) * (adults.heterozygosity(0) < 0.7))
     adults  = adults.subset( loci= (adults.heterozygosity(0) > 0.2) * (adults.heterozygosity(0) < 0.7))
@@ -301,7 +269,7 @@ locus with high heterozygosity.
 
 .. parsed-literal::
 
-    Heterozygosity > 0.7: ['s217_2722063']
+    Heterozygosity > 0.7: ['s217_2722063'] 
     Heterozygosity < 0.2: ['s154_504353' 's320_60828' 's316_93292']
 
 
@@ -343,40 +311,45 @@ and one for the progeny data however, which is less than ideal.
 
 .. parsed-literal::
 
-    Text(0.5,0,u'Heterozygosity')
+    Text(0.5, 0, 'Heterozygosity')
 
 
 
 
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_33_1.png
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_27_1.png
 
 
 The effective number of loci can be seen as the number of loci at which
 one can make compare the offspring, maternal and candidate paternal
-genotype (i.e. those loci with no missing data). Given how high dropouts
+genotype (i.e. those loci with no missing data). Given how high dropouts
 are in the offspring, it is worthwhile to check the effective number of
 loci for this dataset.
+
+To calculate the effective number of loci, we need genotype data for the
+mothers.
+
+.. code:: ipython3
+
+    # Check that the mother of each offspring is found in the array of adults,
+    # and select only those offspring.
+    ix = [i for i in range(progeny.size) if progeny.mothers[i] in adults.names]
+    progeny = progeny.subset(ix)
+    # Genotype data on those adults that are also mothers.
+    mothers = adults.subset(progeny.parent_index('m', adults.names))
 
 In fact, effective number of loci is good. The minimum number of valid
 loci to compare is 46, and in 99% of cases there are 57 or more loci.
 
 .. code:: ipython3
 
-    np.unique([progeny.mothers[i] for i in range(progeny.size) if progeny.mothers[i] not in adults.names])
-    ix = [i for i in range(progeny.size) if progeny.mothers[i] in adults.names]
-    progeny = progeny.subset(ix)
-
-
-.. code:: ipython3
-
-    mothers = adults.subset(progeny.parent_index('m', adults.names))
-    neloci  = effective_nloci(progeny, mothers, adults)
+    neloci  = fp.effective_nloci(progeny, mothers, adults)
+    
     plt.hist(neloci.flatten(), bins=np.arange(45.5,63.5,1))
     plt.show()
 
 
 
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_36_0.png
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_31_0.png
 
 
 Finally, print some summary statistics about the quality of the genotype
@@ -384,24 +357,37 @@ information in the data set.
 
 .. code:: ipython3
 
-    print(adults.nloci)
-    print progeny.missing_data(0).mean()
-    print adults.missing_data(0).mean()
-    print adults.heterozygosity(0).min(), adults.heterozygosity(0).max()
-    print adults.allele_freqs().min(), adults.allele_freqs().max()
+    print(
+        "Total n. loci:", adults.nloci,
+        "\nMean per-locus missing data in the adults:",  adults.missing_data(by = 'marker').mean(),
+        "\nMean per-locus missing data in the progeny:", progeny.missing_data(by = 'marker').mean(),
+        "\nMinimum heterozygosity at any locus:", adults.heterozygosity(by = 'marker').min(),
+        "\nMaximum heterozygosity at any locus:", adults.heterozygosity(by = 'marker').max(),
+        "\nLowest minor-allele frequency:",  adults.allele_freqs().min(),
+        "\nHighest minor-allele frequency:", adults.allele_freqs().max()
+    )
 
 
 .. parsed-literal::
 
-    64
-    0.01730390401146132
-    0.007726070226070227
-    0.2000962000962001 0.5483405483405484
-    0.2308624031007752 0.8760975609756098
+    Total n. loci: 64 
+    Mean per-locus missing data in the adults: 0.007726070226070227 
+    Mean per-locus missing data in the progeny: 0.01730390401146132 
+    Minimum heterozygosity at any locus: 0.2000962000962001 
+    Maximum heterozygosity at any locus: 0.5483405483405484 
+    Lowest minor-allele frequency: 0.2308624031007752 
+    Highest minor-allele frequency: 0.8760975609756098
 
 
 Example family: L1872
 ---------------------
+
+*Note from August 2021: this section includes some old and fairly ugly
+list comprehensions that aren’t the clearest way to do things, which I
+hope to update at some point. If you want to apply what follows to your
+own work, perhaps don’t worry too much about what they are doing, and
+just try to see which names you would need to substitute to apply it to
+your own data.*
 
 The ``progeny`` dataset consists of offspring from multiple families
 that were genotyped at the same time. It was convenient to consider them
@@ -431,7 +417,7 @@ frequency at each locus suggest no reason for alarm.
 
 .. code:: ipython3
 
-    ex_progeny = prlist[2]
+    ex_progeny = prlist["L1872"]
     ex_mother  = adults.subset(ex_progeny.parent_index('m', adults.names))
     
     ex_progeny.size
@@ -457,8 +443,14 @@ unrealistically high.
 .. code:: ipython3
 
     allele_freqs = adults.allele_freqs() # population allele frequencies
-    ex_patlik    = paternity_array(ex_progeny, ex_mother, adults, 0.0015, missing_parents=0.1)
-    ex_sc        = sibship_clustering(ex_patlik, 1000)
+    ex_patlik    = fp.paternity_array(
+        ex_progeny,
+        ex_mother,
+        adults,
+        mu = 0.0015,
+        missing_parents=0.1
+    )
+    ex_sc        = fp.sibship_clustering(ex_patlik, 1000)
 
 We can first look at the dendrogram of relatedness between individuals
 derived from the array of paternity likleihoods.
@@ -472,28 +464,30 @@ derived from the array of paternity likleihoods.
 
 
 
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_48_0.png
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_43_0.png
 
 
-We can compare this to the most-likely partition structure to get a
-rough idea of what as going on. This partition groups offspring into 7
-full sibships and has a posterior probability of 0.8. The partition
+We can compare this to the most-probable partition structure to get a
+rough idea of what as going on. This partition groups offspring into 6
+full sibships and has a posterior probability of 0.74. The partition
 structure simply labels individuals 0 to 20 with a unique, arbitrary
 identifier. For example, individuals 2 and 3 are grouped into an
-especially large family labelled '1'.
+especially large family labelled ‘1’.
 
 .. code:: ipython3
 
-    print "most-likely partition:", ex_sc.mlpartition
-    print "unique families:", np.unique(ex_sc.mlpartition)
-    print "partition probability:", np.exp(ex_sc.prob_partitions.max())
+    print(
+        "Most-probable partition:", ex_sc.mlpartition,
+        "\nUnique families:", np.unique(ex_sc.mlpartition),
+        "\nPosterior probability of most-probable partition:", np.exp(ex_sc.prob_partitions.max())
+    )
 
 
 .. parsed-literal::
 
-    most-likely partition: [2 1 1 4 3 2 1 5 4 1 1 3 3 3 3 1 3 1 7 6]
-    unique families: [1 2 3 4 5 6 7]
-    partition probability: 0.5216846355100478
+    Most-probable partition: [3 1 1 5 2 2 1 2 2 1 1 2 2 2 2 1 2 1 6 4] 
+    Unique families: [1 2 3 4 5 6] 
+    Posterior probability of most-probable partition: 0.7412552176970592
 
 
 We can recover posterior probabilties of paternity for each candidate on
@@ -504,10 +498,12 @@ single candidate with a probability of paternity close to one.
 
     postpat = ex_sc.prob_paternity()
     
+    # Add a label for missing fathers to the end of 
+    adults.names = np.append(adults.names, "missing")
     # names of most probable candidates
     mx = np.array([np.where(postpat[i].max() == postpat[i])[0][0] for i in range(ex_progeny.size)])
     
-    from pandas import DataFrame as df
+    # Print a dataframe summarising this
     df([adults.names[mx], np.exp(postpat.max(1))]).T
 
 
@@ -541,102 +537,102 @@ single candidate with a probability of paternity close to one.
         <tr>
           <th>0</th>
           <td>M0880</td>
-          <td>1</td>
+          <td>0.79962</td>
         </tr>
         <tr>
           <th>1</th>
           <td>M0819</td>
-          <td>1</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>2</th>
           <td>M0819</td>
-          <td>1</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>3</th>
           <td>M0698</td>
-          <td>1</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>4</th>
-          <td>M0122</td>
-          <td>1</td>
+          <td>missing</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>5</th>
-          <td>M0880</td>
-          <td>1</td>
+          <td>missing</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>6</th>
           <td>M0819</td>
-          <td>1</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>7</th>
-          <td>M0125</td>
-          <td>0.99994</td>
+          <td>missing</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>8</th>
-          <td>M0698</td>
-          <td>1</td>
+          <td>missing</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>9</th>
           <td>M0819</td>
-          <td>1</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>10</th>
           <td>M0819</td>
-          <td>1</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>11</th>
-          <td>M0122</td>
-          <td>1</td>
+          <td>missing</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>12</th>
-          <td>M0122</td>
-          <td>0.788393</td>
+          <td>missing</td>
+          <td>0.972253</td>
         </tr>
         <tr>
           <th>13</th>
-          <td>M0122</td>
-          <td>1</td>
+          <td>missing</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>14</th>
-          <td>M0122</td>
-          <td>1</td>
+          <td>missing</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>15</th>
           <td>M0819</td>
-          <td>1</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>16</th>
-          <td>M0122</td>
-          <td>0.983386</td>
+          <td>missing</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>17</th>
           <td>M0819</td>
-          <td>1</td>
+          <td>0.999438</td>
         </tr>
         <tr>
           <th>18</th>
           <td>M0107</td>
-          <td>1</td>
+          <td>1.0</td>
         </tr>
         <tr>
           <th>19</th>
           <td>M0854</td>
-          <td>1</td>
+          <td>0.999994</td>
         </tr>
       </tbody>
     </table>
@@ -667,7 +663,7 @@ a smaller number of larger families.
 
 
 
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_55_0.png
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_50_0.png
 
 
 Geographic positions
@@ -678,6 +674,16 @@ the mother. Since the most probable partition had fairly strong support
 and identified a set of candidates with posterior probabilities close to
 one, it is reasonable to use these individuals to get an idea of where
 the pollen donors are to be found.
+
+First, import GPS data and make sure sample IDs match genotype data.
+
+.. code:: ipython3
+
+    gps_pos = np.genfromtxt('../../data/amajus_GPS_2012.csv', delimiter=',', skip_header=1, usecols=[3,4]) # import CSV file
+    gps_lab = np.genfromtxt('../../data/amajus_GPS_2012.csv', delimiter=',', skip_header=1, usecols=0, dtype='str') # import CSV file
+    # subset GPS data to match the genotype data.
+    ix = [i for i in range(len(gps_lab)) if gps_lab[i] in adults.names]
+    gps_pos, gps_lab = gps_pos[ix], gps_lab[ix]
 
 .. code:: ipython3
 
@@ -706,6 +712,7 @@ paternity results.
     plt.xlabel('East-West positition (m)')
     plt.ylabel('North-South positition (m)')
     plt.xlim(-2500,2000)
+    plt.ylim(-500,1500)
     plt.scatter(gps_pos[:,0],  gps_pos[:,1], s=5, color='green', alpha=0.5)
     plt.scatter(gps_sec[:,0],  gps_sec[:,1], color='gold')
     plt.scatter(gps_cands[:,0],gps_cands[:,1], color='blue')
@@ -714,7 +721,7 @@ paternity results.
 
 
 
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_61_0.png
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_57_0.png
 
 
 We can use these data to get a very rough dispersal kernal. Most pollen
@@ -723,7 +730,7 @@ comes from within 50m of the maternal plant.
 .. code:: ipython3
 
     dists = np.sqrt((gps_ex[0] - gps_cands[:,0])**2 + (gps_ex[1] - gps_cands[:,1])**2)
-    print "Mean dispersal =",mean(dists)
+    print("Mean dispersal of top candidates =",mean(dists), "metres")
     
     plt.hist(dists, bins=np.arange(0,650,50))
     plt.show()
@@ -731,11 +738,11 @@ comes from within 50m of the maternal plant.
 
 .. parsed-literal::
 
-    Mean dispersal = 48.04159641841041
+    Mean dispersal of top candidates = 47.73636198050704 metres
 
 
 
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_63_1.png
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_59_1.png
 
 
 In contrast, the second-most-likely candidates are on average more than
@@ -744,110 +751,13 @@ In contrast, the second-most-likely candidates are on average more than
 .. code:: ipython3
 
     dists2 = np.sqrt((gps_ex[0] - gps_sec[:,0])**2 + (gps_ex[1] - gps_sec[:,1])**2)
-    print "Mean dispersal =",mean(dists2)
+    print("Mean dispersal of second candidates =",mean(dists2), "metres")
 
 
 
 .. parsed-literal::
 
-    Mean dispersal = 907.2250748822763
-
-
-Missing data in the candidates
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-When candidate fathers have substantial missing data, they can have
-apparently high likelihoods of paternity just because there are fewer
-opportunities to show an incompatibility.
-
-I previously found that candidates with ~10% missing data tended to be
-assigned as the true father alarmingly frequently. Here, we have already
-excluded candidates with more than 5% missing data. As a sanity to check
-to ensure missing data is not a substantial problem here, we can check
-how often the most likely candidate has 0, 1, 2, 3 or 4 loci with no
-genotype information.
-
-The histograms below show these distributions based on probabilities
-before and after sibship clustering. Top candidates have either one or
-zero missing data points. This is probably really a random draw from the
-pool of candidates, because these are the most common categories.
-
-.. code:: ipython3
-
-    md = ex_sc.prob_paternity()
-    px = [np.where(md[i]                  == md[i].max())[0][0]                     for i in range(ex_progeny.size)]
-    lx = [np.where(ex_patlik.lik_array[i] == ex_patlik.lik_array[i][i].max())[0][0] for i in range(ex_progeny.size)]
-    
-    fig= plt.figure(figsize=(16.9/2.54, 6/2.54))
-    fig.subplots_adjust(wspace=0.3)
-    
-    
-    lh= fig.add_subplot(1,2,1)
-    lh.bar(range(4), np.unique(adults.missing_data(1), return_counts=True)[1])
-    lh.set_title('All adults')
-    lh.set_xlabel('Number failed loci')
-    lh.set_ylabel('Number of individuals')
-    lh.set_xticks(np.arange(4)+0.4)
-    lh.set_xticklabels(np.arange(4))
-    
-    ph= fig.add_subplot(1,2,2)
-    ph.bar(np.arange(2), np.unique(adults.missing_data(1)[px], return_counts=True)[1])
-    ph.set_title('Top candidates')
-    ph.set_xlabel('Number failed loci')
-    ph.set_xticks(np.arange(4)+0.4)
-    ph.set_xticklabels(np.arange(4))
-    plt.show()
-
-
-
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_68_0.png
-
-
-Relatedness
-~~~~~~~~~~~
-
-Another explanation for splitting a full sibship into multiple smaller
-sibships would be that there is relatedness among candidates, and a
-relative of the true sire can sometimes have a higher likelihood of
-paternity than the true sire just by chance. If this is the case we
-would expect the most likely candidates to be more related to one
-another than we would expect if they were a random draw from the
-population.
-
-First, calculate a matrix of pairwise relatedness between all
-individuals in the sample of candidates:
-
-.. code:: ipython3
-
-    matches = [(adults.geno[:,:,i][np.newaxis] == adults.geno[:,:,j][:, np.newaxis]).mean(2) for i in [0,1] for j in [0,1]]
-    matches = np.array(matches)
-    matches = matches.mean(0)
-
-These histograms show pairwise relatedness for all pairs of candidates
-in blue, and the most probable father of each individual after
-clustering in orange (I have excluded duplicate candidates). There is no
-reason to suppose the top candidates are anything other than a random
-draw.
-
-.. code:: ipython3
-
-    ux = np.unique(px)
-    top_r = np.array([matches[ux[i],ux] for i in range(len(ux))])
-    
-    # weight bars to ensure the histograms sum to one.
-    w1 = np.ones_like(matches[np.triu_indices(2079, 1)]) / float(len(matches[np.triu_indices(2079, 1)]))
-    w2 = np.ones_like(top_r[np.triu_indices(len(ux), 1)]) / float(len(top_r[np.triu_indices(len(ux), 1)]))
-    
-    fig= plt.figure(figsize=(9/2.54, 8/2.54))
-    plt.hist(matches[np.triu_indices(2079, 1)],  histtype='step', bins=np.arange(0.3,0.7, 0.025), weights=w1)
-    plt.hist(top_r[np.triu_indices(len(ux), 1)], histtype='step', bins=np.arange(0.3,0.7, 0.025), weights=w2)
-    plt.xlabel('Relatedness')
-    plt.ylabel('Density')
-    plt.show()
-
-
-
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_73_0.png
+    Mean dispersal of second candidates = 887.9552522780782 metres
 
 
 Multiple families
@@ -861,13 +771,8 @@ array:
 
 .. code:: ipython3
 
-    plt.hist([prlist[i].size for i in range(len(prlist))], bins=np.arange(0,25))
+    plt.hist([prlist[k].size for k in prlist.keys()], bins=np.arange(0,25))
     plt.show()
-
-
-
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_76_0.png
-
 
 All of these families are samples from much larger half sib arrays, so
 comparing full-sibship sizes and number is even more difficult if there
@@ -886,54 +791,44 @@ familes of 17 offspring.
     mlist  = mothers.split(progeny.mothers)
     prlist = progeny.split(progeny.mothers)
     # families with 20 or more offspring
-    prog17 = [prlist[i] for i in range(len(prlist)) if prlist[i].size >=17] 
-    mlist = [mlist[i] for i in range(len(prlist)) if prlist[i].size >=17]
+    prog17 = {k : prlist[k] for k in prlist.keys() if prlist[k].size >=17} 
+    mlist  = {k : mlist[k]  for k in prlist.keys() if prlist[k].size >=17}
     # take the first 17 offspring
-    prog17 = [x.subset(range(17)) for x in prog17]
-    mlist  = [x.subset(range(17)) for x in mlist]
+    prog17 = {k : v.subset(range(17)) for k,v in prog17.items()}
+    mlist  = {k : v.subset(range(17)) for k,v in mlist.items()}
 
 Calculate likelihoods of paternity for each family. This took 3 seconds
 on a 2010 Macbook Pro; your mileage may vary. In order to do so we also
-need population allele frequencies.
+need population allele frequencies, and to remove the entry for missing
+fathers from the vector of candidate names that we added previously.
 
 .. code:: ipython3
 
     allele_freqs = adults.allele_freqs() # population allele frequencies
+    adults.names = adults.names[:-1] # Remove 'missing' from candidate names
     
     from time import time
     t0=time()
-    patlik = paternity_array(prog17, mlist, adults, mu=0.0013)
-    print "Completed in {} seconds.".format(time() - t0)
-
-
-.. parsed-literal::
-
-    Completed in 3.23130893707 seconds.
-
+    patlik = fp.paternity_array(prog17, mlist, adults, mu=0.0013, missing_parents=0.1)
+    print("Completed in {} seconds.".format(time() - t0))
 
 The next step is clustering each family into full sibships.
 
 .. code:: ipython3
 
     t1 = time()
-    sc = sibship_clustering(patlik)
-    print "Completed in {} seconds.".format(time() - t1)
-
-
-.. parsed-literal::
-
-    Completed in 1.0766479969 seconds.
-
+    sc = fp.sibship_clustering(patlik)
+    print("Completed in {} seconds.".format(time() - t1))
 
 Calculate probability distributions for family size and number of
 families for each array.
 
 .. code:: ipython3
 
-    nfamilies = [x.nfamilies() for x in sc]
+    nfamilies = [x.nfamilies() for x in sc.values()]
     nfamilies = np.array(nfamilies)
     
-    famsize = [x.family_size() for x in sc]
+    famsize = [x.family_size() for x in sc.values()]
     famsize = np.array(famsize)
 
 Plots below show the probability distributions for the number and sizes
@@ -965,11 +860,6 @@ Most families seem to be small, with a smaller number of large families.
     
     plt.show()
 
-
-
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_86_0.png
-
-
 Cumulative probability density plots demonstrate the credible intervals
 for family size and number.
 
@@ -997,8 +887,3 @@ for family size and number.
     fs.axhline(0.975, 0.05, 0.95, linestyle='dashed')
     fs.axhline(0.025, 0.05, 0.95, linestyle='dashed')
     fs.grid()
-
-
-
-.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_88_0.png
-

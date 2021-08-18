@@ -29,4 +29,4 @@ from faps.lik_partition import lik_partition
 from faps.sibship_clustering import sibship_clustering
 from faps.summarise_sires import summarise_sires
 # mating
-from faps.posterior_mating import posterior_mating
+# from faps.posterior_mating import posterior_mating
