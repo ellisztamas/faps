@@ -3,6 +3,18 @@ Paternity arrays
 
 Tom Ellis, March 2017, updated June 2020
 
+.. code:: ipython3
+
+    import faps as fp
+    import numpy as np
+    print("Created using FAPS version {}.".format(fp.__version__))
+
+
+.. parsed-literal::
+
+    Created using FAPS version 2.6.4.
+
+
 Paternity arrays are the what sibship clustering is built on in FAPS.
 They contain information about the probability that each candidate male
 is the father of each individual offspring - this is what the FAPS paper
@@ -24,7 +36,7 @@ is to cluster the individuals in your array into full sibship groups.
 
 Note that this tutorial only deals with the case where you have a
 ``paternityArray`` object for a single maternal family. If you have
-multiple families, you can apply what is here to each one, but you'll
+multiple families, you can apply what is here to each one, but you’ll
 have to iterate over those families. See the specific
 `tutorial <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/07_dealing_with_multiple_half-sib_families.html>`__
 on that.
@@ -41,16 +53,13 @@ adults and six offspring typed at 50 loci.
 
 .. code:: ipython3
 
-    import faps as fp
-    import numpy as np
-    
     np.random.seed(27) # this ensures you get exactly the same answers as I do.
     allele_freqs = np.random.uniform(0.3,0.5, 50)
     mypop        = fp.make_parents(4, allele_freqs, family_name='my_population')
     progeny      = fp.make_sibships(mypop, 0, [1,2], 3, 'myprogeny')
 
 We need to supply a ``genotypeArray`` for the mothers. This needs to
-have an entry for for every offspring, i.e. six replicates of the
+have an entry for for every offspring, i.e. six replicates of the
 mother.
 
 .. code:: ipython3
@@ -127,12 +136,12 @@ each candidate.
 
 .. parsed-literal::
 
-    array([[-211.5074549 , -140.28689445, -195.91484976, -185.21796594],
-           [-212.88775824, -139.60346998, -181.34681961, -197.62999358],
-           [-217.31266984, -140.97480372, -217.11239559, -196.60499636],
-           [-181.50722696, -186.32497429, -139.59977031, -177.72798551],
-           [-169.89679708, -203.98172946, -140.97558885, -180.22556077],
-           [-180.12692361, -197.01961064, -138.21946697, -169.85455796]])
+    array([[-429.02140753,  -30.49847594, -326.16586129, -271.82010979],
+           [-430.40770189,  -29.80532876, -246.13499882, -327.88862788],
+           [-456.65242865,  -31.19162313, -434.65442344, -326.85900847],
+           [-268.0873111 , -272.91736496,  -29.80532876, -220.69674793],
+           [-212.82526887, -356.05728839,  -31.19162313, -244.99556454],
+           [-266.70101674, -327.26311646,  -28.4190344 , -190.98628527]])
 
 
 
@@ -161,8 +170,8 @@ individual.
 
 .. parsed-literal::
 
-    array([-174.33954085, -178.45865643, -170.2110881 , -183.41884222,
-           -177.57516224, -182.36957151])
+    array([-56.18419755, -56.88945139, -61.84235747, -49.42854881,
+           -50.96313387, -48.80522532])
 
 
 
@@ -173,7 +182,7 @@ of information together, we also need to specify our *prior* belief
 about the proportion of fathers you think you sampled based on your
 domain expertise in the system, which should be a float between 0 and 1.
 
-Let's assume that we think we missed 10% of the fathers and set that as
+Let’s assume that we think we missed 10% of the fathers and set that as
 an attribute of the ``paternityArray`` object:
 
 .. code:: ipython3
@@ -181,7 +190,7 @@ an attribute of the ``paternityArray`` object:
     patlik.missing_parents = 0.1
 
 The function ``prob_array`` creates the **G** matrix by multiplying
-``lik_absent`` by 0.1 and ``lik_array`` by 0.9 (i.e. 1-0.1), then
+``lik_absent`` by 0.1 and ``lik_array`` by 0.9 (i.e. 1-0.1), then
 normalising the rows to sum to one. This returns a matrix with an extra
 column than ``lik_array`` had.
 
@@ -226,7 +235,7 @@ column has been set to negative infinity, which is log(0).
 
 .. parsed-literal::
 
-    /home/GMI/thomas.ellis/miniconda3/envs/faps/lib/python3.7/site-packages/faps/paternityArray.py:216: UserWarning: Missing_parents set to 0. Only continue if you are sure you really have 100% of possible fathers.
+    /home/thomas.ellis/.local/lib/python3.8/site-packages/faps/paternityArray.py:216: UserWarning: Missing_parents set to 0. Only continue if you are sure you really have 100% of possible fathers.
       if self.missing_parents ==0: warn("Missing_parents set to 0. Only continue if you are sure you really have 100% of possible fathers.")
 
 
@@ -234,18 +243,18 @@ column has been set to negative infinity, which is log(0).
 
 .. parsed-literal::
 
-    array([[-7.12205605e+01,  0.00000000e+00, -5.56279553e+01,
-            -4.49310715e+01,            -inf],
-           [-7.32842883e+01,  0.00000000e+00, -4.17433496e+01,
-            -5.80265236e+01,            -inf],
-           [-7.63378661e+01,  0.00000000e+00, -7.61375919e+01,
-            -5.56301926e+01,            -inf],
-           [-4.19074566e+01, -4.67252040e+01,  0.00000000e+00,
-            -3.81282152e+01,            -inf],
-           [-2.89212082e+01, -6.30061406e+01, -2.84217094e-13,
-            -3.92499719e+01,            -inf],
-           [-4.19074566e+01, -5.88001437e+01, -2.84217094e-14,
-            -3.16350910e+01,            -inf]])
+    array([[-398.52293159,    0.        , -295.66738534, -241.32163384,
+                     -inf],
+           [-400.60237313,    0.        , -216.32967006, -298.08329912,
+                     -inf],
+           [-425.46080552,    0.        , -403.46280032, -295.66738534,
+                     -inf],
+           [-238.28198233, -243.1120362 ,    0.        , -190.89141917,
+                     -inf],
+           [-181.63364574, -324.86566527,    0.        , -213.80394141,
+                     -inf],
+           [-238.28198233, -298.84408206,    0.        , -162.56725087,
+                     -inf]])
 
 
 
@@ -290,18 +299,18 @@ setting the attribute ``selfing_rate`` to zero:
 
 .. parsed-literal::
 
-    array([[           -inf,  0.00000000e+00, -5.56279553e+01,
-            -4.49310715e+01, -3.62498710e+01],
-           [           -inf,  0.00000000e+00, -4.17433496e+01,
-            -5.80265236e+01, -4.10524110e+01],
-           [           -inf, -2.84217094e-14, -7.61375919e+01,
-            -5.56301926e+01, -3.14335090e+01],
-           [           -inf, -4.67252040e+01,  0.00000000e+00,
-            -3.81282152e+01, -4.60162965e+01],
-           [           -inf, -6.30061406e+01,  0.00000000e+00,
-            -3.92499719e+01, -3.87967980e+01],
-           [           -inf, -5.88001437e+01, -2.84217094e-14,
-            -3.16350910e+01, -4.63473291e+01]])
+    array([[           -inf, -7.78044296e-13, -2.95667385e+02,
+            -2.41321634e+02, -2.78829462e+01],
+           [           -inf, -1.91846539e-13, -2.16329670e+02,
+            -2.98083299e+02, -2.92813472e+01],
+           [           -inf, -3.55271368e-15, -4.03462800e+02,
+            -2.95667385e+02, -3.28479589e+01],
+           [           -inf, -2.43112036e+02, -3.33812977e-10,
+            -1.90891419e+02, -2.18204446e+01],
+           [           -inf, -3.24865665e+02, -2.87805335e-10,
+            -2.13803941e+02, -2.19687353e+01],
+           [           -inf, -2.98844082e+02, -1.55647939e-10,
+            -1.62567251e+02, -2.25834155e+01]])
 
 
 
@@ -321,24 +330,24 @@ thaliana* selfs most of the time, so we could set a selfing rate of 95%.
 
 .. parsed-literal::
 
-    array([[-7.12718537e+01,  0.00000000e+00, -5.56279553e+01,
-            -4.49310715e+01, -3.62498710e+01],
-           [-7.33355816e+01,  0.00000000e+00, -4.17433496e+01,
-            -5.80265236e+01, -4.10524110e+01],
-           [-7.63891594e+01, -2.84217094e-14, -7.61375919e+01,
-            -5.56301926e+01, -3.14335090e+01],
-           [-4.19587499e+01, -4.67252040e+01,  0.00000000e+00,
-            -3.81282152e+01, -4.60162965e+01],
-           [-2.89725015e+01, -6.30061406e+01, -2.55795385e-13,
-            -3.92499719e+01, -3.87967980e+01],
-           [-4.19587499e+01, -5.88001437e+01, -2.84217094e-14,
-            -3.16350910e+01, -4.63473291e+01]])
+    array([[-3.98574225e+02, -7.78044296e-13, -2.95667385e+02,
+            -2.41321634e+02, -2.78829462e+01],
+           [-4.00653666e+02, -1.91846539e-13, -2.16329670e+02,
+            -2.98083299e+02, -2.92813472e+01],
+           [-4.25512099e+02, -3.55271368e-15, -4.03462800e+02,
+            -2.95667385e+02, -3.28479589e+01],
+           [-2.38333276e+02, -2.43112036e+02, -3.33812977e-10,
+            -1.90891419e+02, -2.18204446e+01],
+           [-1.81684939e+02, -3.24865665e+02, -2.87805335e-10,
+            -2.13803941e+02, -2.19687353e+01],
+           [-2.38333276e+02, -2.98844082e+02, -1.55647939e-10,
+            -1.62567251e+02, -2.25834155e+01]])
 
 
 
 However, notice that despite the strong prior favouring the mother, she
-still doesn't have the highest probablity of paternity for any
-offspring. That's because the signal from the genetic markers is so
+still doesn’t have the highest probablity of paternity for any
+offspring. That’s because the signal from the genetic markers is so
 strong that the true fathers still come out on top.
 
 Removing individual candidates
@@ -349,7 +358,7 @@ manually. You might want to do this if you wanted to test the effects of
 incomplete sampling on your results, or if you had a good reason to
 suspect that some candidates could not possibly be the sire (for
 example, if the data are multigenerational, and the candidate was born
-after the offspring). Let's remove candidate 3:
+after the offspring). Let’s remove candidate 3:
 
 .. code:: ipython3
 
@@ -361,18 +370,18 @@ after the offspring). Let's remove candidate 3:
 
 .. parsed-literal::
 
-    array([[-7.12718537e+01,  0.00000000e+00, -5.56279553e+01,
-                       -inf, -3.62498710e+01],
-           [-7.33355816e+01,  0.00000000e+00, -4.17433496e+01,
-                       -inf, -4.10524110e+01],
-           [-7.63891594e+01, -2.84217094e-14, -7.61375919e+01,
-                       -inf, -3.14335090e+01],
-           [-4.19587499e+01, -4.67252040e+01,  0.00000000e+00,
-                       -inf, -4.60162965e+01],
-           [-2.89725015e+01, -6.30061406e+01, -2.55795385e-13,
-                       -inf, -3.87967980e+01],
-           [-4.19587499e+01, -5.88001437e+01,  0.00000000e+00,
-                       -inf, -4.63473291e+01]])
+    array([[-3.98574225e+02, -7.78044296e-13, -2.95667385e+02,
+                       -inf, -2.78829462e+01],
+           [-4.00653666e+02, -1.91846539e-13, -2.16329670e+02,
+                       -inf, -2.92813472e+01],
+           [-4.25512099e+02, -3.55271368e-15, -4.03462800e+02,
+                       -inf, -3.28479589e+01],
+           [-2.38333276e+02, -2.43112036e+02, -3.33812977e-10,
+                       -inf, -2.18204446e+01],
+           [-1.81684939e+02, -3.24865665e+02, -2.87805335e-10,
+                       -inf, -2.19687353e+01],
+           [-2.38333276e+02, -2.98844082e+02, -1.55647939e-10,
+                       -inf, -2.25834155e+01]])
 
 
 
@@ -388,18 +397,18 @@ This also works using a list of candidates.
 
 .. parsed-literal::
 
-    array([[           -inf,  0.00000000e+00, -5.56279553e+01,
-                       -inf, -3.62498710e+01],
-           [           -inf,  0.00000000e+00, -4.17433496e+01,
-                       -inf, -4.10524110e+01],
-           [           -inf, -2.84217094e-14, -7.61375919e+01,
-                       -inf, -3.14335090e+01],
-           [           -inf, -4.67252040e+01,  0.00000000e+00,
-                       -inf, -4.60162965e+01],
-           [           -inf, -6.30061406e+01,  0.00000000e+00,
-                       -inf, -3.87967980e+01],
-           [           -inf, -5.88001437e+01,  0.00000000e+00,
-                       -inf, -4.63473291e+01]])
+    array([[           -inf, -7.78044296e-13, -2.95667385e+02,
+                       -inf, -2.78829462e+01],
+           [           -inf, -1.91846539e-13, -2.16329670e+02,
+                       -inf, -2.92813472e+01],
+           [           -inf, -3.55271368e-15, -4.03462800e+02,
+                       -inf, -3.28479589e+01],
+           [           -inf, -2.43112036e+02, -3.33812977e-10,
+                       -inf, -2.18204446e+01],
+           [           -inf, -3.24865665e+02, -2.87805335e-10,
+                       -inf, -2.19687353e+01],
+           [           -inf, -2.98844082e+02, -1.55647939e-10,
+                       -inf, -2.25834155e+01]])
 
 
 
@@ -419,18 +428,18 @@ removed at random, which can be useful for simulations.
 
 .. parsed-literal::
 
-    array([[-3.50219828e+01,            -inf, -1.93780843e+01,
-                       -inf, -3.83889187e-09],
-           [-3.26893724e+01,            -inf, -1.09714044e+00,
-                       -inf, -4.06201843e-01],
-           [-4.49556505e+01,            -inf, -4.47040829e+01,
+    array([[-3.70691279e+02,            -inf, -2.67784439e+02,
                        -inf,  0.00000000e+00],
-           [-4.19587499e+01,            -inf,  0.00000000e+00,
-                       -inf, -4.60162965e+01],
-           [-2.89725015e+01,            -inf, -2.55795385e-13,
-                       -inf, -3.87967980e+01],
-           [-4.19587499e+01,            -inf,  0.00000000e+00,
-                       -inf, -4.63473291e+01]])
+           [-3.71372319e+02,            -inf, -1.87048323e+02,
+                       -inf,  0.00000000e+00],
+           [-3.92664140e+02,            -inf, -3.70614841e+02,
+                       -inf,  0.00000000e+00],
+           [-2.38333276e+02,            -inf, -3.33812977e-10,
+                       -inf, -2.18204446e+01],
+           [-1.81684939e+02,            -inf, -2.87805335e-10,
+                       -inf, -2.19687353e+01],
+           [-2.38333276e+02,            -inf, -1.55647939e-10,
+                       -inf, -2.25834155e+01]])
 
 
 
@@ -472,7 +481,7 @@ matrix is created automatically ad can be called with:
 
 
 
-If you import a ``paternityArray`` object, this isn't automatically
+If you import a ``paternityArray`` object, this isn’t automatically
 generated, but you can recreate this manually with:
 
 .. code:: ipython3
@@ -537,7 +546,7 @@ data need to have a specific structure:
 2. Names of the mothers are usually given in the second column.
 3. If known for some reason, names of fathers can be given as well.
 4. Likelihood information should be given *to the right* of columns
-   indicating individual or parental names, with candidates' names in
+   indicating individual or parental names, with candidates’ names in
    the column headers.
 5. The final column should specify a likelihood that the true sire of an
    individual has *not* been sampled. Usually this is given as the

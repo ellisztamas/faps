@@ -1,7 +1,21 @@
 Dealing with multiple half-sib families
 =======================================
 
-Tom Ellis, March 2018
+Tom Ellis, March 2018, updated June 2020
+
+.. code:: ipython3
+
+    import numpy as np
+    import faps as fp
+    import matplotlib.pyplot as plt
+    
+    print("Created using FAPS version {}.".format(fp.__version__))
+
+
+.. parsed-literal::
+
+    Created using FAPS version 2.6.6.
+
 
 In the previous sections on `genotype
 arrays <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/02_genotype_data.html>`__,
@@ -59,13 +73,10 @@ fathers and the progeny.
 
 .. code:: ipython3
 
-    import numpy as np
-    from faps import *
-    import matplotlib.pyplot as plt
     %pylab inline
     
-    adults  = read_genotypes('../../data/parents_2012_genotypes.csv', genotype_col=1)
-    progeny = read_genotypes('../../data/offspring_2012_genotypes.csv', genotype_col=2, mothers_col=1)
+    adults  = fp.read_genotypes('../../data/parents_2012_genotypes.csv', genotype_col=1)
+    progeny = fp.read_genotypes('../../data/offspring_2012_genotypes.csv', genotype_col=2, mothers_col=1)
 
 
 .. parsed-literal::
@@ -73,7 +84,7 @@ fathers and the progeny.
     Populating the interactive namespace from numpy and matplotlib
 
 
-For simplicity, let's restrict the progeny to those offspring belonging
+For simplicity, let’s restrict the progeny to those offspring belonging
 to three maternal families.
 
 .. code:: ipython3
@@ -112,7 +123,7 @@ Split up the ``genotypeArray``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the data import we specified that the ID of the mother of each
-offspring individual was given in column 2 of the data file (i.e. column
+offspring individual was given in column 2 of the data file (i.e. column
 1 for Python, which starts counting from zero). Currently this
 information is contained in ``progeny.mothers``.
 
@@ -139,9 +150,9 @@ case is a ``genotypeArray`` object for each maternal family.
 
 .. parsed-literal::
 
-    {'J1246': <faps.genotypeArray.genotypeArray at 0x7fe0e58052d0>,
-     'K1809': <faps.genotypeArray.genotypeArray at 0x7fe0e5805950>,
-     'L1872': <faps.genotypeArray.genotypeArray at 0x7fe0e5805050>}
+    {'J1246': <faps.genotypeArray.genotypeArray at 0x7f21789fd400>,
+     'K1809': <faps.genotypeArray.genotypeArray at 0x7f21789fd250>,
+     'L1872': <faps.genotypeArray.genotypeArray at 0x7f21299dfbb0>}
 
 
 
@@ -220,13 +231,13 @@ dictionary of ``paternityArray`` objects.
 
 .. code:: ipython3
 
-    %time patlik1 = paternity_array(progeny2, mothers2, adults, mu, missing_parents=0.01)
+    %time patlik1 = fp.paternity_array(progeny2, mothers2, adults, mu, missing_parents=0.01)
 
 
 .. parsed-literal::
 
-    CPU times: user 893 ms, sys: 7.99 ms, total: 901 ms
-    Wall time: 899 ms
+    CPU times: user 1.04 s, sys: 77.9 ms, total: 1.12 s
+    Wall time: 1.12 s
 
 
 Split up an existing paternity array
@@ -243,25 +254,25 @@ genotype data first you can deal with small chunks at a time.
 
     mothers_full = adults.subset(progeny.mothers)
     
-    %time patlik2 = paternity_array(progeny, mothers_full, adults, mu)
+    %time patlik2 = fp.paternity_array(progeny, mothers_full, adults, mu, missing_parents=0.01)
     patlik2
 
 
 .. parsed-literal::
 
-    CPU times: user 863 ms, sys: 84 ms, total: 947 ms
-    Wall time: 947 ms
+    CPU times: user 980 ms, sys: 344 ms, total: 1.32 s
+    Wall time: 1.32 s
 
 
 
 
 .. parsed-literal::
 
-    <faps.paternityArray.paternityArray at 0x7fe0e58bbb90>
+    <faps.paternityArray.paternityArray at 0x7f217816c550>
 
 
 
-There doesn't seem to be any difference in speed the two methods,
+There doesn’t seem to be any difference in speed the two methods,
 although in other cases I have found that creating a single
 ``paternityArray`` is slower. Your mileage may vary.
 
@@ -278,9 +289,9 @@ We split up the ``paternity_array`` in the same way as a
 
 .. parsed-literal::
 
-    {'J1246': <faps.paternityArray.paternityArray at 0x7fe0dd4b4e10>,
-     'K1809': <faps.paternityArray.paternityArray at 0x7fe0dd4b4890>,
-     'L1872': <faps.paternityArray.paternityArray at 0x7fe0dc8c03d0>}
+    {'J1246': <faps.paternityArray.paternityArray at 0x7f2128deaee0>,
+     'K1809': <faps.paternityArray.paternityArray at 0x7f2127f45fa0>,
+     'L1872': <faps.paternityArray.paternityArray at 0x7f2127fe2460>}
 
 
 
@@ -333,23 +344,23 @@ independently. It returns a dictionary of ``sibshipCluster`` objects.
 .. code:: ipython3
 
     %%time
-    sc = sibship_clustering(patlik1)
+    sc = fp.sibship_clustering(patlik1)
     sc
 
 
 .. parsed-literal::
 
-    CPU times: user 499 ms, sys: 0 ns, total: 499 ms
-    Wall time: 497 ms
+    CPU times: user 258 ms, sys: 844 µs, total: 258 ms
+    Wall time: 257 ms
 
 
 
 
 .. parsed-literal::
 
-    {'J1246': <faps.sibshipCluster.sibshipCluster at 0x7fe0de42bf90>,
-     'K1809': <faps.sibshipCluster.sibshipCluster at 0x7fe0e3917790>,
-     'L1872': <faps.sibshipCluster.sibshipCluster at 0x7fe0e57a8550>}
+    {'J1246': <faps.sibshipCluster.sibshipCluster at 0x7f21789f1ca0>,
+     'K1809': <faps.sibshipCluster.sibshipCluster at 0x7f212883d850>,
+     'L1872': <faps.sibshipCluster.sibshipCluster at 0x7f2127c456d0>}
 
 
 
@@ -361,20 +372,20 @@ number of *pairs* of relationships to consider scales quadratically.
 
 .. code:: ipython3
 
-    %time sibship_clustering(patlik2)
+    %time fp.sibship_clustering(patlik2)
 
 
 .. parsed-literal::
 
-    CPU times: user 1.48 s, sys: 2.64 ms, total: 1.49 s
-    Wall time: 1.48 s
+    CPU times: user 637 ms, sys: 12 µs, total: 638 ms
+    Wall time: 636 ms
 
 
 
 
 .. parsed-literal::
 
-    <faps.sibshipCluster.sibshipCluster at 0x7fe0e6a5cc10>
+    <faps.sibshipCluster.sibshipCluster at 0x7f2178a0b280>
 
 
 
@@ -393,13 +404,13 @@ first maternal family.
 
 .. parsed-literal::
 
-    array([4.57906541e-001, 0.00000000e+000, 1.80697820e-001, 0.00000000e+000,
-           0.00000000e+000, 0.00000000e+000, 0.00000000e+000, 2.81585310e-004,
-           1.92238646e-001, 7.46085991e-002, 9.22427026e-002, 2.02410615e-003,
-           2.11864904e-020, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000,
-           0.00000000e+000, 0.00000000e+000, 0.00000000e+000, 0.00000000e+000,
-           0.00000000e+000, 1.42303289e-213, 0.00000000e+000, 0.00000000e+000,
-           1.00383692e-265])
+    array([4.98363699e-01, 0.00000000e+00, 2.50818150e-01, 0.00000000e+00,
+           0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
+           0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
+           0.00000000e+00, 0.00000000e+00, 0.00000000e+00, 0.00000000e+00,
+           0.00000000e+00, 0.00000000e+00, 1.09643257e-03, 2.45353454e-01,
+           4.36749302e-03, 7.70743245e-07, 0.00000000e+00, 0.00000000e+00,
+           1.58450339e-56])
 
 
 
@@ -417,7 +428,7 @@ structures for each maternal family.
 
 .. parsed-literal::
 
-    {'J1246': 25, 'K1809': 25, 'L1872': 26}
+    {'J1246': 15, 'K1809': 15, 'L1872': 11}
 
 
 
@@ -425,12 +436,13 @@ Paternity for many arrays
 -------------------------
 
 Since paternity is likely to be a common aim, there is a handy function
-for calling the ``sires`` method on a list of ``sibshipCluster``
-objects.
+for calling the ``sires`` method for `individual ``sibshipCluster``
+objects <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/04_sibship_clustering.html#mating-events>`__
+on an entire dictionary of ``sibshipCluster`` objects.
 
 .. code:: ipython3
 
-    summarise_sires(sc)
+    fp.summarise_sires(sc)
 
 
 
@@ -464,101 +476,132 @@ objects.
       </thead>
       <tbody>
         <tr>
-          <td>0</td>
+          <th>0</th>
           <td>J1246</td>
           <td>M0551</td>
-          <td>-489.404687</td>
-          <td>2.846066e-213</td>
-          <td>9.925957e-05</td>
+          <td>-1.319064e-02</td>
+          <td>0.986896</td>
+          <td>0.973894</td>
         </tr>
         <tr>
-          <td>1</td>
-          <td>J1246</td>
-          <td>M0554</td>
-          <td>-4.833608</td>
-          <td>7.957758e-03</td>
-          <td>9.030774e-04</td>
-        </tr>
-        <tr>
-          <td>2</td>
-          <td>J1246</td>
-          <td>M0570</td>
-          <td>-0.387012</td>
-          <td>6.790830e-01</td>
-          <td>6.410034e-01</td>
-        </tr>
-        <tr>
-          <td>3</td>
-          <td>J1246</td>
-          <td>M1077</td>
-          <td>-6.021227</td>
-          <td>2.426690e-03</td>
-          <td>2.602961e-03</td>
-        </tr>
-        <tr>
-          <td>4</td>
+          <th>1</th>
           <td>J1246</td>
           <td>M1103</td>
-          <td>-6.063947</td>
-          <td>2.325205e-03</td>
-          <td>2.494105e-03</td>
+          <td>-1.541488e-06</td>
+          <td>0.999998</td>
+          <td>0.999881</td>
         </tr>
         <tr>
-          <td>...</td>
-          <td>...</td>
-          <td>...</td>
-          <td>...</td>
-          <td>...</td>
-          <td>...</td>
+          <th>2</th>
+          <td>J1246</td>
+          <td>M0147</td>
+          <td>-5.206256e+00</td>
+          <td>0.005482</td>
+          <td>0.000030</td>
         </tr>
         <tr>
-          <td>62</td>
+          <th>3</th>
+          <td>J1246</td>
+          <td>M0025</td>
+          <td>0.000000e+00</td>
+          <td>1.000000</td>
+          <td>3.000000</td>
+        </tr>
+        <tr>
+          <th>4</th>
+          <td>J1246</td>
+          <td>nan</td>
+          <td>0.000000e+00</td>
+          <td>1.000000</td>
+          <td>20.026195</td>
+        </tr>
+        <tr>
+          <th>5</th>
+          <td>K1809</td>
+          <td>M0551</td>
+          <td>-3.966770e-03</td>
+          <td>0.996041</td>
+          <td>0.992776</td>
+        </tr>
+        <tr>
+          <th>6</th>
+          <td>K1809</td>
+          <td>M2047</td>
+          <td>-3.327946e+00</td>
+          <td>0.035867</td>
+          <td>0.016896</td>
+        </tr>
+        <tr>
+          <th>7</th>
+          <td>K1809</td>
+          <td>M1971</td>
+          <td>-9.120326e-01</td>
+          <td>0.401707</td>
+          <td>0.189237</td>
+        </tr>
+        <tr>
+          <th>8</th>
+          <td>K1809</td>
+          <td>L0662</td>
+          <td>2.220446e-16</td>
+          <td>1.000000</td>
+          <td>1.000000</td>
+        </tr>
+        <tr>
+          <th>9</th>
+          <td>K1809</td>
+          <td>M0392</td>
+          <td>-3.327946e+00</td>
+          <td>0.035867</td>
+          <td>0.016896</td>
+        </tr>
+        <tr>
+          <th>10</th>
+          <td>K1809</td>
+          <td>nan</td>
+          <td>2.220446e-16</td>
+          <td>1.000000</td>
+          <td>22.784195</td>
+        </tr>
+        <tr>
+          <th>11</th>
           <td>L1872</td>
-          <td>M0878</td>
-          <td>-3.022599</td>
-          <td>4.867454e-02</td>
-          <td>2.358130e-03</td>
+          <td>L0124</td>
+          <td>0.000000e+00</td>
+          <td>1.000000</td>
+          <td>2.000000</td>
         </tr>
         <tr>
-          <td>63</td>
+          <th>12</th>
           <td>L1872</td>
-          <td>M0880</td>
-          <td>0.000000</td>
-          <td>1.000000e+00</td>
-          <td>2.000000e+00</td>
+          <td>M0107</td>
+          <td>-3.686856e+00</td>
+          <td>0.025051</td>
+          <td>0.000628</td>
         </tr>
         <tr>
-          <td>64</td>
+          <th>13</th>
           <td>L1872</td>
           <td>M0819</td>
-          <td>0.000000</td>
-          <td>1.000000e+00</td>
-          <td>9.000000e+00</td>
-        </tr>
-        <tr>
-          <td>65</td>
-          <td>L1872</td>
-          <td>M0204</td>
-          <td>-929.421064</td>
           <td>0.000000e+00</td>
-          <td>7.428108e-09</td>
+          <td>1.000000</td>
+          <td>9.000000</td>
         </tr>
         <tr>
-          <td>66</td>
+          <th>14</th>
           <td>L1872</td>
-          <td>M0124</td>
-          <td>-176.623401</td>
-          <td>1.965312e-77</td>
-          <td>8.497702e-08</td>
+          <td>nan</td>
+          <td>0.000000e+00</td>
+          <td>1.000000</td>
+          <td>14.999372</td>
         </tr>
       </tbody>
     </table>
-    <p>67 rows × 5 columns</p>
     </div>
 
 
 
-The output is similar to that of ``sires()`` except that it gives labels
-for mother and father separately, replacing the ``label`` column. The
-``prob`` and ``offspring`` columns have the same interpretation as for
-single ``sibshipCluster`` objects.
+The output is similar to that of the ``sires()`` method, except that it
+gives labels for mother and father separately, replacing the ``label``
+column. The ``prob`` and ``offspring`` columns have the same
+interpretation as for single ``sibshipCluster`` objects.

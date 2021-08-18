@@ -3,6 +3,19 @@ Sibship clustering
 
 Tom Ellis, March 2017, updated June 2020
 
+.. code:: ipython3
+
+    import faps as fp
+    import numpy as np
+    print("Created using FAPS version {}.".format(fp.__version__))
+
+
+
+.. parsed-literal::
+
+    Created using FAPS version 2.6.4.
+
+
 FAPS uses information in a ``paternityArray`` to generate plausible
 full-sibship configurations. This information is stored as a
 ``sibshipCluster`` object, and is the basis for almost all inference
@@ -18,7 +31,7 @@ This notebook will examine how to:
 
 Note that this tutorial only deals with the case where you have a single
 maternal family. If you have multiple families, you can apply what is
-here to each one, but you'll have to iterate over those families. See
+here to each one, but you’ll have to iterate over those families. See
 the specific
 `tutorial <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/07_dealing_with_multiple_half-sib_families.html>`__
 on that.
@@ -30,9 +43,6 @@ We will begin by generating a population of 100 adults with 50 loci.
 
 .. code:: ipython3
 
-    import faps as fp
-    import numpy as np
-    
     np.random.seed(867)
     allele_freqs = np.random.uniform(0.3,0.5,50)
     adults = fp.make_parents(100, allele_freqs, family_name='a')
@@ -48,7 +58,7 @@ create three full sibships of five offspring. We then generate a
     patlik  = fp.paternity_array(progeny, mothers, adults, mu = 0.0015, missing_parents=0.01)
 
 It is straightforward to cluster offspring into full sibships. For now
-we'll stick with the default number of Monte Carlo draws.
+we’ll stick with the default number of Monte Carlo draws.
 
 .. code:: ipython3
 
@@ -57,7 +67,7 @@ we'll stick with the default number of Monte Carlo draws.
 The default number of Monte Carlo draws is 1000, which seems to work in
 most cases. I have dropped it to 100 in cases where I wanted to call
 ``sibship_clustering`` many times, such as in an MCMC loop, when finding
-every possible candidate wasn't a priority. You could also use more
+every possible candidate wasn’t a priority. You could also use more
 draws if you really wanted to be sure you had completely sampled the
 space of compatible candidate fathers. Speeds are unlikely to increase
 linearly with number of draws:
@@ -71,9 +81,9 @@ linearly with number of draws:
 
 .. parsed-literal::
 
-    28.1 ms ± 233 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
-    48.7 ms ± 840 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
-    305 ms ± 1.81 ms per loop (mean ± std. dev. of 7 runs, 1 loop each)
+    13.4 ms ± 603 µs per loop (mean ± std. dev. of 7 runs, 100 loops each)
+    24.2 ms ± 81.9 µs per loop (mean ± std. dev. of 7 runs, 10 loops each)
+    205 ms ± 4.72 ms per loop (mean ± std. dev. of 7 runs, 10 loops each)
 
 
 We discussed this in figure 5 of the FAPS paper should you be interested
@@ -96,9 +106,7 @@ this dendrogram if we so wish, although the output is not pretty.
 
 
 
-.. parsed-literal::
-
-    <Figure size 640x480 with 1 Axes>
+.. image:: 04_sibship_clustering_files/04_sibship_clustering_16_0.png
 
 
 Offspring individuals are labelled by their *index* in the array. Since
@@ -112,7 +120,7 @@ ways to partition the offspring into full siblings.
 ``sc`` is an object of class ``sibshipCluster`` that contains various
 information about the array. Of primary interest are the set of
 partition structures inferred from the dendrogram. There are sixteen
-partitions - one for each individual in the array (i.e. one for each
+partitions - one for each individual in the array (i.e. one for each
 bifurcation in the dendrogram).
 
 .. code:: ipython3
@@ -215,7 +223,7 @@ wherever possible. We can check:
 
 
 You can directly call the most likely partition. This is somewhat
-against the spirit of fractional analyses though...
+against the spirit of fractional analyses though…
 
 .. code:: ipython3
 
@@ -248,7 +256,7 @@ probability of being full siblings).
 
 
 
-.. image:: 04_sibship_clustering_files/04_sibship_clustering_30_0.png
+.. image:: 04_sibship_clustering_files/04_sibship_clustering_31_0.png
 
 
 Note that real datasets seldom look this tidy!
@@ -284,8 +292,7 @@ We saw before that we could call a list of valid partitions for ``sc``
 using ``sc.partitions``. The output is not terribly enlightening on its
 own, however. We could instead ask how probable it is that there are *x*
 full sibships in the array, integrating over all partition structures.
-Here each number is the probability that there are 1, 2, ..., 15
-families.
+Here each number is the probability that there are 1, 2, …, 15 families.
 
 .. code:: ipython3
 
@@ -321,7 +328,7 @@ all the probability denisty is around :math:`x=5` families.
 
 
 
-.. image:: 04_sibship_clustering_files/04_sibship_clustering_39_0.png
+.. image:: 04_sibship_clustering_files/04_sibship_clustering_40_0.png
 
 
 Family size
@@ -330,8 +337,8 @@ Family size
 We can also get the distribution of family sizes within the array,
 averaged over all partitions. This returns a vector of the same length
 as the number of offspring in the array. ``family_size`` returns the
-posterior probability of observing one or more families of size 1, 2,
-... , 15. It will be clear that we are unable to distinguish a single
+posterior probability of observing one or more families of size 1, 2, …
+, 15. It will be clear that we are unable to distinguish a single
 sibship with high probability from multiple families of the same size,
 each with low probability; this is the price we pay for being able to
 integrate out uncertainty in partition structure.
@@ -365,7 +372,7 @@ family of sizes one, two, three, four and five.
 
 
 
-.. image:: 04_sibship_clustering_files/04_sibship_clustering_44_0.png
+.. image:: 04_sibship_clustering_files/04_sibship_clustering_45_0.png
 
 
 Identifying fathers
@@ -378,9 +385,9 @@ We very frequently want to know who the fathers of the offspring were to
 say something about mating events. There are several levels of
 complexity. Firstly, you can use the ``sires`` method to return a list
 of all the males who could possibly have mated with the mother.. This is
-essentially identifying **mating events**, but doesn't say anything
+essentially identifying **mating events**, but doesn’t say anything
 about the paternity of individual offspring. For many applications, that
-may be all you need because it's the mating events that are the unit of
+may be all you need because it’s the mating events that are the unit of
 interest, not the number of offspring per se.
 
 Once you have a ``sibshipCluster`` object, doing this is easy:
@@ -659,7 +666,7 @@ interesting of these are:
    structures. For example,
 3. **offspring** shows the expected number of offspring sired by the
    male, as a weighted average over partition structures. Specifically,
-   it's the sum over rows from ``prob_paternity``; see below.
+   it’s the sum over rows from ``prob_paternity``; see below.
 
 Note that if you have multiple maternal families the output will look a
 bit different. See the `tutorial on multiple maternal
@@ -687,11 +694,11 @@ fathers, followed by the number of offspring sired by each.
 The first five rows of the table above show that these fathers have
 posterior probabilities of paternity of one or close to one, and seem to
 have sired the correct numbers of offspring each. Of note is that
-although a\_1 to a\_4 have posterior probabilities of exactly one, the
-posterior probability for a\_5 is slightly less than one. This is
-because the first four fathers sired multiple offspring, and there is
-shared information between siblings about the father, but this is not
-the case for father a\_5.
+although a_1 to a_4 have posterior probabilities of exactly one, the
+posterior probability for a_5 is slightly less than one. This is because
+the first four fathers sired multiple offspring, and there is shared
+information between siblings about the father, but this is not the case
+for father a_5.
 
 After the true fathers there are a long list of extra candidates with
 very low posterior probabilities of paternity. In this case we know they

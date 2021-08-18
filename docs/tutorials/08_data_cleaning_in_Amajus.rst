@@ -1,6 +1,23 @@
 Data cleaning for *Antirrhinum majus* data set from 2012
 ========================================================
 
+.. code:: ipython3
+
+    import numpy as np
+    from pandas import DataFrame as df
+    import faps as fp
+    import matplotlib.pyplot as plt
+    %pylab inline
+    
+    print("Created using FAPS version {}.".format(fp.__version__))
+
+
+.. parsed-literal::
+
+    Populating the interactive namespace from numpy and matplotlib
+    Created using FAPS version 2.6.4.
+
+
 Tom Ellis, June 2017
 
 In this notebook we will examine an empirical dataset using the
@@ -21,20 +38,6 @@ Below, we will do an initial data inspection to weed out dubious loci
 and individuals. It can be argued that this process was overly
 conservative, and we threw out a lot of useful data, so you need not
 necessarily be so critical of your own data.
-
-.. code:: ipython3
-
-    import numpy as np
-    from pandas import DataFrame as df
-    import faps as fp
-    import matplotlib.pyplot as plt
-    %pylab inline
-
-
-.. parsed-literal::
-
-    Populating the interactive namespace from numpy and matplotlib
-
 
 Data inspection
 ---------------

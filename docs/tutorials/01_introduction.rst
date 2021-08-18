@@ -6,8 +6,8 @@ Tom Ellis, February 2017
 FAPS stands for Fractional Analysis of Sibships and Paternity. It is a
 Python package for reconstructing genealogical relationships in wild
 populations, and making inference about biological processes. The
-sections of this document are intended as a user's guide to introduce
-how FAPS works. For full details of the method, see `Ellis *et al.*
+sections of this document are intended as a user’s guide to introduce
+how FAPS works. For full details of the method, see `Ellis et al.
 2018 <https://doi.org/10.1111/1755-0998.12782>`__.
 
 Background
@@ -28,7 +28,7 @@ to:
 1. Jointly inferring sibship and paternity relationships, and hence gain
    better estimates of both (Wang 2007), without using a random-walk
    algorithm such as MCMC or simulated annealing.
-2. Account for uncertainty about relationships (i.e. to integrate
+2. Account for uncertainty about relationships (i.e. to integrate
    fractional paternity assignment with sibship inference).
 3. Provide tools for testing biological hypotheses with minimal hassle.
 4. Do this efficiently for large populations.
@@ -66,7 +66,7 @@ the limitations of the data and method:
 1. Individuals come from two generations: a sample of offspring, and a
    sample of reproductive adults.
 2. At present FAPS is intended to deal with paternity assignment only,
-   i.e. when one parent is known and the second must be inferred. That
+   i.e. when one parent is known and the second must be inferred. That
    said, it would not take too much work to modify FAPS to accommodate
    bi-parental assignment.
 3. Sampling of the adults does not need to be complete, but the more
@@ -119,9 +119,9 @@ likelihood; see Bolker (2006, chapter 6) for an example of a general
 introduction.
 
 FAPS uses Python as an interface, but it is hoped that this guide should
-allow users who aren't familiar with Python to adapt the code to their
+allow users who aren’t familiar with Python to adapt the code to their
 needs. It would be worthwhile to at least familiarise yourself with
-Python's data types, especially lists and NumPy arrays, and how list
+Python’s data types, especially lists and NumPy arrays, and how list
 comprehensions work. A general introduction to Python concepts can be
 found `here <v>`__. I recommend interacting with FAPS through
 `IPython/Jupyter <http://ipython.org/>`__, which allows you to test
@@ -147,13 +147,13 @@ All testing and development of FAPS was done on Linux and Mac machines.
 I have not tested it on Windows, nor do I intend to. That said, an
 advantage of Python is that it ought to work on any operating system, so
 in principle FAPS ought to run as well as on a Unix machine. One
-important difference is that Windows uses '' instead of '/' in its file
+important difference is that Windows uses ‘' instead of’/’ in its file
 paths, so you will need to edit accordingly.
 
 Installing FAPS
 ~~~~~~~~~~~~~~~
 
-The best way to install FAPS is to use Python's package manager, Pip.
+The best way to install FAPS is to use Python’s package manager, Pip.
 Instructions to do so can be found at that projects `documentation
 page <https://pip.pypa.io/en/stable/installing/>`__. Windows users might
 also consider
@@ -164,9 +164,9 @@ line. If Python is unable to locate the package, try
 FAPS from `the project github
 repository <https://github.com/ellisztamas/faps>`__.
 
-Once in Python/IPython you'll need to import the package, as well as the
-NumPy library on which it is based. In the rest of this document, I'll
-assume you've run the following lines to do this if this isn't
+Once in Python/IPython you’ll need to import the package, as well as the
+NumPy library on which it is based. In the rest of this document, I’ll
+assume you’ve run the following lines to do this if this isn’t
 explicitly stated.
 
 from faps import \* import numpy as np
@@ -183,7 +183,7 @@ paternities, with a row for each offspring individual and a column for
 each candidate father (matrix G in Ellis *et al.* 2018). Each element
 represents the likelihood that a single candidate male is the father of
 a single offspring individual based on alleles shared between them and
-the offspring's mother. One of the aims of FAPS was to create a method
+the offspring’s mother. One of the aims of FAPS was to create a method
 which did not depend on marker type, mating system, ploidy, or
 genotyping technology, with the aim that it should be applicable to as
 broad a range of datasets that exist, or may yet exist. As such, the
@@ -198,9 +198,9 @@ strongly encouraged to think about the most appropriate way to calculate
 G for their data. Once you have done this, all other aspects of the
 analysis are independent of marker type. See the sections on `Importing
 genotype
-data <https://github.com/ellisztamas/faps/blob/master/docs/02%20Genotype%20data.ipynb>`__
+data <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/02_genotype_data.html#importing-genotype-data>`__
 and `Paternity
-arrays <http://localhost:8888/notebooks/docs/03%20Paternity%20arrays.ipynb>`__
+arrays <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/03_paternity_arrays.html#importing-a-paternityarray>`__
 for more details on how to import data.
 
 FAPS will also work given an appropriate G matrix for a polyploid

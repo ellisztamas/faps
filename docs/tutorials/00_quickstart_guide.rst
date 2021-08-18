@@ -10,12 +10,12 @@ example. The work flow is as follows:
 1. Import marker data on offspring and parents
 2. Create a matrix of paternity of each individual offspring
 3. Cluster offspring into full sibships.
-4. '????'
+4. ????
 5. Profit.
 
 It goes without saying that to understand what the code is doing and get
 the most out of the data, you should read the
-`tutorials <https://github.com/ellisztamas/faps#using-faps>`__.
+`tutorials <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/index.html>`__.
 
 Import the package.
 
@@ -53,7 +53,7 @@ scenario, but if you happen to only have a sigle maternal family, you
 can skip this.
 
 Calculate paternity of individuals. This is equivalent to the **G**
-matrix in `Ellis *et al*
+matrix in `Ellis et al
 (2018) <https://doi.org/10.1111/1755-0998.12782>`__.
 
 .. code:: ipython3
@@ -67,7 +67,7 @@ Cluster offspring in each family into full-sibling families.
     sibships = fp.sibship_clustering(patlik)
 
 You can pull out `various kinds of
-information <https://github.com/ellisztamas/faps/blob/master/docs/04%20Sibship%20clustering.ipynb>`__
+information <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/04_sibship_clustering.html>`__
 about the each clustered maternal family. For example, get the
 most-likely number of full-sib families in maternal family J1246.
 

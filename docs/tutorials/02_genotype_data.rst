@@ -1,11 +1,23 @@
 Genotype data in FAPS
 =====================
 
+.. code:: ipython3
+
+    import numpy as np
+    import faps as fp
+    print("Created using FAPS version {}.".format(fp.__version__))
+
+
+.. parsed-literal::
+
+    Created using FAPS version 2.6.4.
+
+
 Tom Ellis, March 2017
 
 In most cases, researchers will have a sample of offspring, maternal and
 candidate paternal individuals typed at a set of markers. In this
-section we'll look in more detail at how FAPS deals with genotype data
+section we’ll look in more detail at how FAPS deals with genotype data
 to build a matrix we can use for sibship inference.
 
 This notebook will examine how to:
@@ -21,14 +33,14 @@ dataset is given in
 `here <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/08_data_cleaning_in_Amajus.html>`__.
 In the `next
 section <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/03_paternity_arrays.html>`__
-we'll see how to combine genotype information on offspring and a set of
+we’ll see how to combine genotype information on offspring and a set of
 candidate parents to create an array of likelihoods of paternity for
 dyads of offspring and candidate fathers.
 
 Note that the first half of this tutorial only deals with the case where
 you have a ``genotypeArray`` object for a single maternal family. If you
 have multiple families, you can apply what is here to each one, but at
-some point you'll have to iterate over those families. See
+some point you’ll have to iterate over those families. See
 `below <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/02_genotype_data.html#multiple-families>`__
 and the specific
 `tutorial <https://fractional-analysis-of-paternity-and-sibships.readthedocs.io/en/latest/tutorials/07_dealing_with_multiple_half-sib_families.html>`__
@@ -50,7 +62,7 @@ Basic genotype information
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Genotype data are stored in a class of objects called a
-``genotypeArray``. We'll illustrate how these work with simulated data,
+``genotypeArray``. We’ll illustrate how these work with simulated data,
 since not all information is available for real-world data sets. We
 first generate a vector of population allele frequencies for 10 unlinked
 SNP markers, and use these to create a population of five adult
@@ -60,9 +72,6 @@ you to name this generation.
 
 .. code:: ipython3
 
-    import faps as fp
-    import numpy as np
-    
     allele_freqs = np.random.uniform(0.3,0.5,10)
     mypop = fp.make_parents(5, allele_freqs, family_name='my_population')
 
@@ -82,16 +91,16 @@ not one):
 
 .. parsed-literal::
 
-    array([[1, 1],
-           [1, 0],
-           [0, 0],
-           [0, 0],
-           [0, 1],
-           [1, 0],
-           [0, 1],
-           [0, 0],
-           [0, 0],
-           [0, 0]])
+    array([[1., 1.],
+           [1., 0.],
+           [1., 0.],
+           [0., 0.],
+           [0., 0.],
+           [0., 0.],
+           [1., 1.],
+           [0., 0.],
+           [0., 0.],
+           [0., 0.]])
 
 
 
@@ -107,22 +116,22 @@ taking only the first two individuals and the first five loci:
 
 .. parsed-literal::
 
-    array([[[1, 1],
-            [1, 0],
-            [0, 0],
-            [0, 0],
-            [0, 1]],
+    array([[[1., 1.],
+            [1., 0.],
+            [1., 0.],
+            [0., 0.],
+            [0., 0.]],
     
-           [[0, 1],
-            [1, 1],
-            [0, 1],
-            [0, 1],
-            [0, 1]]])
+           [[0., 0.],
+            [0., 1.],
+            [0., 0.],
+            [0., 0.],
+            [0., 0.]]])
 
 
 
 For realistic examples with many more loci, this obviously gets unwieldy
-pretty soon. It's cleaner to supply a list of individuals to keep or
+pretty soon. It’s cleaner to supply a list of individuals to keep or
 remove to the ``subset`` and ``drop`` functions. These return return a
 new ``genotypeArray`` for the individuals of interest.
 
@@ -216,7 +225,7 @@ Information on markers
 ~~~~~~~~~~~~~~~~~~~~~~
 
 Pull out marker names with ``marker``. The names here are boring because
-they are simulated, but your data can have as exciting names as you'd
+they are simulated, but your data can have as exciting names as you’d
 like.
 
 .. code:: ipython3
@@ -234,7 +243,7 @@ like.
 
 Check whether the locus names for parents and offspring match. This is
 obvious vital for determining who shares alleles with whom, but easy to
-overlook! If they don't match, the most likely explanation is that you
+overlook! If they don’t match, the most likely explanation is that you
 have imported genotype data and misspecified where the genotype data
 start (the ``genotype_col`` argument).
 
@@ -266,7 +275,7 @@ allele frequencies for each locus:
 
 .. parsed-literal::
 
-    array([0.6, 0.4, 0.4, 0.4, 0.5, 0.2, 0.7, 0.2, 0.4, 0.2])
+    array([0.5, 0.4, 0.4, 0. , 0.1, 0.3, 0.7, 0.5, 0.1, 0.2])
 
 
 
@@ -282,7 +291,7 @@ and individual. By default, data for each marker are returned:
 .. parsed-literal::
 
     [0. 0. 0. 0. 0. 0. 0. 0. 0. 0.]
-    [0.8 0.4 0.8 0.4 1.  0.4 0.6 0.4 0.4 0.4]
+    [0.2 0.8 0.4 0.  0.2 0.6 0.2 0.6 0.2 0.4]
 
 
 To get summaries for each individual:
@@ -296,7 +305,7 @@ To get summaries for each individual:
 .. parsed-literal::
 
     [0. 0. 0. 0. 0.]
-    [0.4 0.6 0.6 0.7 0.5]
+    [0.2 0.4 0.5 0.3 0.4]
 
 
 In this instance there is no missing data, because data are simulated to
@@ -473,7 +482,7 @@ over each element. A convenient way to do this is with dictionary
 comprehensions by separating out the labels from the ``genotypeArray``
 objects using ``items``.
 
-As an example, here's how you call the number of offspring in each
+As an example, here’s how you call the number of offspring in each
 family. It splits up the dictionary into keys for each family, and calls
 ``size`` on each ``genotypeArray`` (labelled genArray in the
 comprehension).

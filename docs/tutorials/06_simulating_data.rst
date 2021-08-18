@@ -3,6 +3,22 @@ Simulating data and power analysis
 
 Tom Ellis, August 2017
 
+.. code:: ipython3
+
+    import numpy as np
+    import faps as fp
+    import matplotlib.pylab as plt
+    import pandas as pd
+    from time import time, localtime, asctime
+    
+    print("Created using FAPS version {}.".format(fp.__version__))
+
+
+.. parsed-literal::
+
+    Created using FAPS version 2.6.6.
+
+
 Before committing to the time and cost of genotyping samples for a
 paternity study, it is always sensible to run simulations to test the
 likely statistical power of your data set. This can help with important
@@ -42,13 +58,6 @@ yours may not.
 
 .. code:: ipython3
 
-    import numpy as np
-    import faps as fp
-    import matplotlib.pylab as plt
-    import pandas as pd
-    from time import time, localtime, asctime
-    
-    
     np.random.seed(37)
     allele_freqs = np.random.uniform(0.2, 0.5, 50)
     adults = fp.make_parents(10,  allele_freqs, family_name='adult')
@@ -180,7 +189,7 @@ the original data remains unchanged. For example:
 .. parsed-literal::
 
     0.0
-    0.018000000000000002
+    0.012000000000000002
 
 
 Paternity and sibships
@@ -199,7 +208,7 @@ and
     adults = fp.make_parents(10,  allele_freqs, family_name='adult')
     progeny = fp.make_sibships(parents=adults, dam=0, sires=[1,2,3,4], family_size=5)
     mothers = adults.subset(progeny.mothers)
-    patlik = fp.paternity_array(progeny, mothers, adults, mu=0.0015, missing_parents=0.01)
+    patlik = fp.paternity_array(progeny, mothers, adults, mu=0.0015, missing_parents=0.01, integration='partial')
     sc = fp.sibship_clustering(patlik)
 
 A very useful tool is the ``accuracy`` subfunction for
@@ -218,7 +227,7 @@ returns an array of handy information about the analysis:
 4. Mean probabilities that a pair of true half sibs are identified as
    half sibs.
 5. Mean probabilities that a pair of true half or full sibs are
-   correctly assigned as such (i.e. overall accuracy of sibship
+   correctly assigned as such (i.e. overall accuracy of sibship
    reconstruction.
 6. Mean (log) probability of paternity of the true sires for those sires
    who had been sampled (who had non-zero probability in the
@@ -235,7 +244,7 @@ returns an array of handy information about the analysis:
 
 .. parsed-literal::
 
-    array([1., 0., 1., 1., 1., 1., 1., 0.])
+    array([ 1.   , 28.68 ,  0.   ,  0.771,  0.952,  1.   ,  1.   ,  0.1  ])
 
 
 
@@ -244,14 +253,15 @@ is NaN because all the sires are present, and this number of calculated
 only for offspring whose sire was absent.
 
 We can adjust the ``paternityArray`` to see how much this effects the
-results. For example, if we remove the sire of the first family (i.e.
-the male indexed by 1), there is a drop in the accuracy for full-sibling
-relationships, although half-sibling relationships are unaffected.
+results. For example, if we remove the sire of the first family
+(i.e. the male indexed by 1), there is a drop in the accuracy for
+full-sibling relationships, although half-sibling relationships are
+unaffected.
 
 .. code:: ipython3
 
     patlik.purge = 'adult_1'
-    patlik.missing_parents=0.25
+    patlik.missing_parents=0.5
     sc = fp.sibship_clustering(patlik)
     sc.accuracy(progeny, adults)
 
@@ -260,7 +270,7 @@ relationships, although half-sibling relationships are unaffected.
 
 .. parsed-literal::
 
-    array([ 1.   , 28.26 ,  0.   ,  0.766,  0.951,  1.   ,  1.   ,  0.093])
+    array([ 1.   , 29.38 ,  0.   ,  0.771,  0.952,  1.   ,  1.   ,  0.1  ])
 
 
 
@@ -278,7 +288,7 @@ this affect things?
 
 .. parsed-literal::
 
-    array([ 1.   , 27.57 ,  0.   ,  0.766,  0.951,  1.   ,  1.   ,  0.093])
+    array([ 1.   , 28.68 ,  0.   ,  0.771,  0.952,  1.   ,  1.   ,  0.1  ])
 
 
 
@@ -342,37 +352,33 @@ have found that results tend to asymptote with 300 simulations.
     Self-fertilisation rate of 0.
     Performing 1000 Monte Carlo draws for sibship inference.
     
-    Parameters set. Beginning simulations on Thu Jun  4 14:35:46 2020.
-
-
-
-.. parsed-literal::
-
-    FloatProgress(value=0.0, max=90.0)
+    Parameters set. Beginning simulations on Wed Aug 18 11:10:47 2021.
 
 
 .. parsed-literal::
 
-    /home/GMI/thomas.ellis/miniconda3/envs/faps/lib/python3.7/site-packages/faps/sibshipCluster.py:252: RuntimeWarning: invalid value encountered in double_scalars
-      dev = dev.sum() / ix.sum()
+    100%|██████████| 10/10 [00:12<00:00,  1.26s/it]
+
+.. parsed-literal::
+
+    Simulations completed after 0.21 minutes.
 
 
 .. parsed-literal::
 
-    Simulations completed after 0.03 minutes.
+    
 
 
 For convenience, ``make_power`` provides a summary of the input
 parameters. This can be turned off by setting ``verbose`` to ``False``.
 Similarly, the progress bar can be removed by setting ``progress`` to
-``False``. This bar uses iPython widgets, and probably won't work
+``False``. This bar uses iPython widgets, and probably won’t work
 outside of iPython, so it may be necessary to turn them off.
 
-The results of make\_power are basically the output from the
-``accuracy`` function we saw before, but include information on
-simulation parameters, and the time taken to create the
-``paternityArray`` and ``sibshipCluster`` objects. View them by
-inspecting ``eventab``.
+The results of make_power are basically the output from the ``accuracy``
+function we saw before, but include information on simulation
+parameters, and the time taken to create the ``paternityArray`` and
+``sibshipCluster`` objects. View them by inspecting ``eventab``.
 
 Arguments to set up the population work much like those to create
 ``genotypeArrays``, and are quite flexible. Have a look into the help
@@ -383,7 +389,7 @@ which considered a range of contrasting demographic scenarios; the
 example above is adapted from there.
 
 Error rates and missing candidates are important topics to get a handle
-on. We can estimate these parameters (e.g. by genotyping some
+on. We can estimate these parameters (e.g. by genotyping some
 individuals twice and counting how many loci are different), but we can
 never completely be sure how close to reality we are. With that in mind
 ``make_power`` allows you to simulate true values mu and the proportion
@@ -417,18 +423,21 @@ reality both parameters were double that amount.
     Self-fertilisation rate of 0.
     Performing 1000 Monte Carlo draws for sibship inference.
     
-    Parameters set. Beginning simulations on Thu Jun  4 14:37:13 2020.
-
-
-
-.. parsed-literal::
-
-    FloatProgress(value=0.0, max=90.0)
+    Parameters set. Beginning simulations on Wed Aug 18 11:11:33 2021.
 
 
 .. parsed-literal::
 
-    Simulations completed after 0.04 minutes.
+    100%|██████████| 10/10 [00:12<00:00,  1.29s/it]
+
+.. parsed-literal::
+
+    Simulations completed after 0.21 minutes.
+
+
+.. parsed-literal::
+
+    
 
 
 If you want to perform downstream analysis, you can tell ``make_power``
@@ -458,14 +467,13 @@ distribution of family sizes from each ``sibshipArray``, and plots it.
     plt.show()
 
 
-
 .. parsed-literal::
 
-    FloatProgress(value=0.0, max=90.0)
+    100%|██████████| 10/10 [00:12<00:00,  1.24s/it]
 
 
 
-.. image:: 06_simulating_data_files/06_simulating_data_41_1.png
+.. image:: 06_simulating_data_files/06_simulating_data_42_1.png
 
 
 Custom simulations
@@ -492,7 +500,7 @@ the true sire, but higher than that of the other candidates. I suspected
 this would not be the case when minor allele frequency is low and there
 are many candidates.
 
-This cell sets up the simulation. I'm considering 50 loci, and
+This cell sets up the simulation. I’m considering 50 loci, and
 mu=0.0015, but varying sample size and allele frequency.
 
 .. code:: ipython3
@@ -547,213 +555,6 @@ likelihoods of paternity for the candidates.
 
 .. parsed-literal::
 
-    Beginning simulations on Thu Jun  4 14:44:16 2020.
+    Beginning simulations on Wed Aug 18 11:12:20 2021.
     Completed in 0.03 hours.
-
-
-There is a strong dependency on minor allele frequency. As MAF goes from
-zero to 0.5, the effectiveness of identifying a missing sire using this
-likelihood estimator goes from 'basically useless' to 'useful'.
-
-.. code:: ipython3
-
-    dt.groupby('allele_freqs').mean()
-
-
-
-
-.. raw:: html
-
-    <div>
-    <style scoped>
-        .dataframe tbody tr th:only-of-type {
-            vertical-align: middle;
-        }
-    
-        .dataframe tbody tr th {
-            vertical-align: top;
-        }
-    
-        .dataframe thead th {
-            text-align: right;
-        }
-    </style>
-    <table border="1" class="dataframe">
-      <thead>
-        <tr style="text-align: right;">
-          <th></th>
-          <th>rep</th>
-          <th>nloci</th>
-          <th>nadults</th>
-          <th>mu</th>
-          <th>rank</th>
-          <th>prob_missing</th>
-        </tr>
-        <tr>
-          <th>allele_freqs</th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>0.1</td>
-          <td>4.5</td>
-          <td>50.0</td>
-          <td>435.0</td>
-          <td>0.0015</td>
-          <td>0.000000</td>
-          <td>3.651448e-41</td>
-        </tr>
-        <tr>
-          <td>0.2</td>
-          <td>4.5</td>
-          <td>50.0</td>
-          <td>435.0</td>
-          <td>0.0015</td>
-          <td>0.012691</td>
-          <td>1.494390e-22</td>
-        </tr>
-        <tr>
-          <td>0.3</td>
-          <td>4.5</td>
-          <td>50.0</td>
-          <td>435.0</td>
-          <td>0.0015</td>
-          <td>0.373086</td>
-          <td>1.441037e-16</td>
-        </tr>
-        <tr>
-          <td>0.4</td>
-          <td>4.5</td>
-          <td>50.0</td>
-          <td>435.0</td>
-          <td>0.0015</td>
-          <td>0.801709</td>
-          <td>5.331236e-14</td>
-        </tr>
-        <tr>
-          <td>0.5</td>
-          <td>4.5</td>
-          <td>50.0</td>
-          <td>435.0</td>
-          <td>0.0015</td>
-          <td>0.890448</td>
-          <td>1.288563e-13</td>
-        </tr>
-      </tbody>
-    </table>
-    </div>
-
-
-
-In contrast, there is no effect of the number of adults.
-
-.. code:: ipython3
-
-    dt.groupby('nadults').mean()
-
-
-
-
-.. raw:: html
-
-    <div>
-    <style scoped>
-        .dataframe tbody tr th:only-of-type {
-            vertical-align: middle;
-        }
-    
-        .dataframe tbody tr th {
-            vertical-align: top;
-        }
-    
-        .dataframe thead th {
-            text-align: right;
-        }
-    </style>
-    <table border="1" class="dataframe">
-      <thead>
-        <tr style="text-align: right;">
-          <th></th>
-          <th>rep</th>
-          <th>nloci</th>
-          <th>allele_freqs</th>
-          <th>mu</th>
-          <th>rank</th>
-          <th>prob_missing</th>
-        </tr>
-        <tr>
-          <th>nadults</th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>10.0</td>
-          <td>4.5</td>
-          <td>50.0</td>
-          <td>0.3</td>
-          <td>0.0015</td>
-          <td>0.344700</td>
-          <td>3.152225e-14</td>
-        </tr>
-        <tr>
-          <td>100.0</td>
-          <td>4.5</td>
-          <td>50.0</td>
-          <td>0.3</td>
-          <td>0.0015</td>
-          <td>0.424030</td>
-          <td>4.148485e-14</td>
-        </tr>
-        <tr>
-          <td>250.0</td>
-          <td>4.5</td>
-          <td>50.0</td>
-          <td>0.3</td>
-          <td>0.0015</td>
-          <td>0.427070</td>
-          <td>4.135763e-14</td>
-        </tr>
-        <tr>
-          <td>500.0</td>
-          <td>4.5</td>
-          <td>50.0</td>
-          <td>0.3</td>
-          <td>0.0015</td>
-          <td>0.431514</td>
-          <td>3.911093e-14</td>
-        </tr>
-        <tr>
-          <td>750.0</td>
-          <td>4.5</td>
-          <td>50.0</td>
-          <td>0.3</td>
-          <td>0.0015</td>
-          <td>0.433407</td>
-          <td>3.569228e-14</td>
-        </tr>
-        <tr>
-          <td>1000.0</td>
-          <td>4.5</td>
-          <td>50.0</td>
-          <td>0.3</td>
-          <td>0.0015</td>
-          <td>0.432798</td>
-          <td>2.960739e-14</td>
-        </tr>
-      </tbody>
-    </table>
-    </div>
-
 
