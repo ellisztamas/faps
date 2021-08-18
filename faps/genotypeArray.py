@@ -211,7 +211,7 @@ class genotypeArray(object):
         mutate = np.reshape(vals, [ self.size, self.nloci, 2])
         mutate = (mutate == 1)
         # swap zeroes and ones.
-        new_alleles[mutate] ^= 1
+        new_alleles[mutate] = 1 - new_alleles[mutate] 
 
         # Apply to geno_probs
         new_geno_probs = calculate_geno_probs(new_alleles, mu=mu)
