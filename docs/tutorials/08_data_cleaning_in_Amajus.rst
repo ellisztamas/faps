@@ -15,7 +15,7 @@ Data cleaning for *Antirrhinum majus* data set from 2012
 .. parsed-literal::
 
     Populating the interactive namespace from numpy and matplotlib
-    Created using FAPS version 2.6.4.
+    Created using FAPS version 2.6.6.
 
 
 Tom Ellis, June 2017
@@ -777,6 +777,11 @@ array:
     plt.hist([prlist[k].size for k in prlist.keys()], bins=np.arange(0,25))
     plt.show()
 
+
+
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_64_0.png
+
+
 All of these families are samples from much larger half sib arrays, so
 comparing full-sibship sizes and number is even more difficult if there
 are different numbers of offspring. For this reason we can pick out only
@@ -815,6 +820,12 @@ fathers from the vector of candidate names that we added previously.
     patlik = fp.paternity_array(prog17, mlist, adults, mu=0.0013, missing_parents=0.1)
     print("Completed in {} seconds.".format(time() - t0))
 
+
+.. parsed-literal::
+
+    Completed in 5.649540185928345 seconds.
+
+
 The next step is clustering each family into full sibships.
 
 .. code:: ipython3
@@ -822,6 +833,12 @@ The next step is clustering each family into full sibships.
     t1 = time()
     sc = fp.sibship_clustering(patlik)
     print("Completed in {} seconds.".format(time() - t1))
+
+
+.. parsed-literal::
+
+    Completed in 0.9360842704772949 seconds.
+
 
 Calculate probability distributions for family size and number of
 families for each array.
@@ -863,6 +880,11 @@ Most families seem to be small, with a smaller number of large families.
     
     plt.show()
 
+
+
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_74_0.png
+
+
 Cumulative probability density plots demonstrate the credible intervals
 for family size and number.
 
@@ -890,3 +912,9 @@ for family size and number.
     fs.axhline(0.975, 0.05, 0.95, linestyle='dashed')
     fs.axhline(0.025, 0.05, 0.95, linestyle='dashed')
     fs.grid()
+
+
+
+.. image:: 08_data_cleaning_in_Amajus_files/08_data_cleaning_in_Amajus_76_0.png
+
+
