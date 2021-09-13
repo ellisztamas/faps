@@ -666,7 +666,7 @@ interesting of these are:
    structures. For example,
 3. **offspring** shows the expected number of offspring sired by the
    male, as a weighted average over partition structures. Specifically,
-   it’s the sum over rows from ``prob_paternity``; see below.
+   it’s the sum over rows from ``posterior_paternity_matrix``; see below.
 
 Note that if you have multiple maternal families the output will look a
 bit different. See the `tutorial on multiple maternal
@@ -709,14 +709,14 @@ Paternity of individuals
 ~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you are interested in the paternity of individual offspring we can
-look at the output of the ``prob_paternity`` method of
+look at the output of the ``posterior_paternity_matrix`` method of
 ``sibshipCluster`` objects. This returns a matrix with a row for every
 offspring and a column for every candidate, plus an extra column for
 absent fathers.
 
 .. code:: ipython3
 
-    sc.prob_paternity().shape
+    sc.posterior_paternity_matrix().shape
 
 
 
@@ -732,7 +732,7 @@ distribution:
 
 .. code:: ipython3
 
-    np.exp(sc.prob_paternity()).sum(axis=1)
+    np.exp(sc.posterior_paternity_matrix()).sum(axis=1)
 
 
 
@@ -771,7 +771,7 @@ the first three candidates before and after clustering into sibships:
 .. code:: ipython3
 
     # After 
-    sc.prob_paternity()[:5, :3]
+    sc.posterior_paternity_matrix()[:5, :3]
 
 
 

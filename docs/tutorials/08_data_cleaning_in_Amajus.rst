@@ -494,12 +494,12 @@ especially large family labelled ‘1’.
 
 
 We can recover posterior probabilties of paternity for each candidate on
-each offspring using ``prob_paternity``. For most offspring, there is a
+each offspring using ``posterior_paternity_matrix``. For most offspring, there is a
 single candidate with a probability of paternity close to one.
 
 .. code:: ipython3
 
-    postpat = ex_sc.prob_paternity()
+    postpat = ex_sc.posterior_paternity_matrix()
     
     # Add a label for missing fathers to the end of 
     adults.names = np.append(adults.names, "missing")

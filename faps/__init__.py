@@ -27,6 +27,8 @@ from faps.pairwise_lik_fullsibs import pairwise_lik_fullsibs
 from faps.sibshipCluster import sibshipCluster
 from faps.lik_partition import lik_partition
 from faps.sibship_clustering import sibship_clustering
+# Summary functions for many half-sib arrays
 from faps.summarise_sires import summarise_sires
+from faps.summarise_paternity import summarise_paternity
 # mating
-# from faps.posterior_mating import posterior_mating
+from faps.posterior_mating import posterior_mating

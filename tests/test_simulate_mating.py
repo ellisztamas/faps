@@ -17,7 +17,7 @@ def test_method():
     # Check posterior_mating returns what it should in ideal case
     me = sc.posterior_mating()
     assert isinstance(me, pd.DataFrame)
-    assert me['posterior_probability'].sum() == 1.0
+    assert me['frequency'].sum() == 1.0
     assert all([x in sc.candidates for x in me['father']])
     # Remove one of the fathers and check that a missing dad is sampled.
     patlik.purge = "a_1"
@@ -32,12 +32,12 @@ def test_method():
     sc3 = fp.sibship_clustering(patlik, use_covariates=True)
     me3 = sc3.posterior_mating(use_covariates=True)
     assert isinstance(me3, pd.DataFrame)
-    assert me3['posterior_probability'].sum() == 1.0
+    assert me3['frequency'].sum() == 1.0
     # Check that 
     sc4 = fp.sibship_clustering(patlik, use_covariates=True)
     me4 = sc4.posterior_mating(use_covariates=True, covariates_only=True)
     assert isinstance(me3, pd.DataFrame)
-    assert me3['posterior_probability'].sum() == 1.0
+    assert me3['frequency'].sum() == 1.0
 
 # Generate a population of adults
 allele_freqs = np.random.uniform(0.3,0.5,50)
