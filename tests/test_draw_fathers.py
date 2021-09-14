@@ -24,16 +24,23 @@ def test_draw_fathers():
     cov = np.arange(0,adults.size)
     cov = -cov/cov.sum()
     patlik.add_covariate(cov)
-    sc2 = fp.sibship_clustering(patlik)
-    dr2 = fp.draw_fathers(sc2.mlpartition, genetic = sc.paternity_array, covariate = cov)
+    sc2 = fp.sibship_clustering(patlik, use_covariates=True)
+    dr2 = fp.draw_fathers(
+        sc2.mlpartition,
+        genetic = sc2.paternity_array,
+        covariate = sc2.covariate,
+        ndraws = ndraws,
+        use_covariates=True
+    )
     assert isinstance(dr2, np.ndarray)
     assert len(dr2) == ndraws
     # Check that using only the covariate samples more or less at random
     dr3 = fp.draw_fathers(
         sc2.mlpartition,
-        genetic = sc.paternity_array,
-        covariate = cov,
-        covariates_only = True)
+        genetic = sc2.paternity_array,
+        covariate = sc2.covariate,
+        covariates_only = True
+        )
     assert isinstance(dr3, np.ndarray)
     assert not all([x in [1,2,3] for x in dr3])
     # Remove one of the real fathers.

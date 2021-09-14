@@ -497,12 +497,12 @@ especially large family labelled '1'.
 
 
 We can recover posterior probabilties of paternity for each candidate on
-each offspring using ``prob_paternity``. For most offspring, there is a
+each offspring using ``posterior_paternity_matrix``. For most offspring, there is a
 single candidate with a probability of paternity close to one.
 
 .. code:: ipython3
 
-    postpat = ex_sc.prob_paternity()
+    postpat = ex_sc.posterior_paternity_matrix()
     
     # names of most probable candidates
     mx = np.array([np.where(postpat[i].max() == postpat[i])[0][0] for i in range(ex_progeny.size)])
@@ -774,7 +774,7 @@ pool of candidates, because these are the most common categories.
 
 .. code:: ipython3
 
-    md = ex_sc.prob_paternity()
+    md = ex_sc.posterior_paternity_matrix()
     px = [np.where(md[i]                  == md[i].max())[0][0]                     for i in range(ex_progeny.size)]
     lx = [np.where(ex_patlik.lik_array[i] == ex_patlik.lik_array[i][i].max())[0][0] for i in range(ex_progeny.size)]
     

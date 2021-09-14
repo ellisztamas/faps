@@ -40,6 +40,8 @@ class sibshipCluster(object):
     """
     def __init__(self, paternity_array, linkage_matrix, partitions, lik_partitions, paths, path_likelihoods, path_probs, covariate):
         self.candidates       = paternity_array.candidates
+        self.offspring        = paternity_array.offspring
+        self.mothers          = paternity_array.mothers
         self.paternity_array  = paternity_array.prob_array()
         self.partitions       = partitions
         self.linkage_matrix   = linkage_matrix
@@ -142,7 +144,7 @@ class sibshipCluster(object):
         sire_ix = progeny.parent_index('f', adults.names) # positions of the true sires.
         dad_present = np.isfinite(self.paternity_array[range(progeny.size), sire_ix]) # index those sires with non-zero probability of paternity
         if any(dad_present):
-            sire_probs = self.prob_paternity(sire_ix)
+            sire_probs = self.posterior_paternity_matrix(sire_ix)
             sire_probs = sire_probs[dad_present]
             sire_probs = alogsumexp(sire_probs) - np.log(len(np.array(sire_probs))) # take mean
             sire_probs = sire_probs.squeeze()
@@ -150,7 +152,7 @@ class sibshipCluster(object):
             sire_probs = np.nan
 
         # Mean probability that the father is absent
-        abs_probs = np.exp(self.prob_paternity(-1)).mean()
+        abs_probs = np.exp(self.posterior_paternity_matrix(-1)).mean()
 
         output = np.array([true_found,
                            delta_lik,
@@ -290,10 +292,13 @@ class sibshipCluster(object):
 
         return 1- dev
 
-    def prob_paternity(self, reference=None):
+    def posterior_paternity_matrix(self, reference=None):
         """
-        Posterior probabilities of paternity for a set of reference fathers
-        accounting for uncertainty in sibship structure.
+        Posterior probabilities of paternity accounting for uncertainty in
+        sibship structure. This is analogous to paternityArray.prob_array(), 
+        except that the latter is calculated on shared alleles between progeny
+        and individual candidates only, and therefore does not include
+        information from sibships.
 
         Parameters
         ----------
@@ -305,7 +310,10 @@ class sibshipCluster(object):
 
         Returns
         -------
-        Array or vector of log posterior probabilities.
+        An array of (log) probabilities with a row for each offspring and a
+        column for each candidate father. Each element contains the posterior
+        probability of paternity for the pair *after* averaging over possible
+        sibships structures.
         """
         if reference is None:
             # empty matrix to store probs for each partitions
@@ -346,6 +354,42 @@ class sibshipCluster(object):
             probs = alogsumexp(probs, 0)
 
             return probs
+
+    def paternity(self, n_candidates = 4):
+        """
+        For each offspring in a half-sib array, pull out the ID and log
+        posterior probability of paternity for the top candidates.
+        
+        Parameters
+        ----------
+        n_candidates: int
+            Maximum number of top candidates to return. Defaults to the top
+            four candidates.
+
+        Returns
+        -------
+        Dataframe with a row for every offspring, showing the names and log
+        posterior probabilities of paternity for the N most-probable candidates.
+        """
+        probs = self.paternity_array
+        sort_index = np.argsort(probs, axis = 1)
+        # Add an extra entry to the list of candidates for unsampled fathers.
+        candidate_names = np.append(self.candidates, "missing")
+
+        # Data frame with a column of only progeny names for now
+        out = DataFrame({
+            "progeny" : self.offspring
+        })
+        # Append the dataframe with columns for the names and posterior probabilities of paternity for the N top candidates.
+        for n in range(1,n_candidates + 1):
+            out = out.join(
+                DataFrame({
+                    "candidate_"      + str(n) : candidate_names[ sort_index ][:, -n],
+                    "logprob_" + str(n) : np.partition(probs, (-n), axis =1)[:, -n]
+                })
+            )
+
+        return out
 
     def sires(self, labels='names'):
         """
@@ -413,7 +457,7 @@ class sibshipCluster(object):
                 })
         output['prob'] = np.exp(output['log_prob'])
         # Get the expected number of offspring for each mating event
-        noffs = self.prob_paternity()[:, output['position']]
+        noffs = self.posterior_paternity_matrix()[:, output['position']]
         noffs = alogsumexp(noffs, axis=0)
         output['offspring'] = np.exp(noffs)
         # Return DataFrame of information on sires
@@ -525,8 +569,8 @@ class sibshipCluster(object):
         dad, freq = np.unique(total_events, return_counts = True)
         
         output = DataFrame({
-            'father'     : dad, 
-            'frequency'       : freq/sum(freq)
+            'father'    : dad, 
+            'frequency' : freq/sum(freq)
             })
         ouput = output#.sort_values(by='father')
 
