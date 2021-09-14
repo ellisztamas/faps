@@ -110,14 +110,14 @@ def make_generation(allele_freqs, candidates, sires, offspring, missing_loci=0, 
     # Generate the progeny
     if isinstance(sires, int):
         progeny = make_sibships(
-        parents = adults,
-        dam = 0,
-        sires = np.arange(1,sires+1).tolist(),
-        family_size = offspring
+            parents = adults,
+            dam = 0,
+            sires = np.arange(1,sires+1).tolist(),
+            family_size = offspring
     )
     elif isinstance(sires, list) or isinstance(sires, np.ndarray):
         progeny = make_sibships(
-            progeny = adults,
+            parents = adults,
             dam = 0,
             sires = sires,
             family_size = offspring

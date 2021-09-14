@@ -260,11 +260,11 @@ class genotypeArray(object):
         progeny.parent_index('mother', parents.names) # position of the mother
         progeny.parent_index('father', parents.names) # positions of the fathers
         """
-        if parent is 'mother' or parent is 'm':
+        if parent == 'mother' or parent == 'm':
             return [np.where(parent_names == x)[0][0] for x in self.mothers]
-        if parent is 'father' or parent is 'f':
+        if parent == 'father' or parent == 'f':
             return [np.where(parent_names == x)[0][0] for x in self.fathers]
-        if parent is 'parents' or parent is 'p':
+        if parent == 'parents' or parent == 'p':
             return [np.where(parent_names == x)[0][0] for x in self.parents]
         else:
             raise ValueError("parent must be 'mother', 'father', or 'parents'.")
