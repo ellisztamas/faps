@@ -463,7 +463,7 @@ class sibshipCluster(object):
         # Return DataFrame of information on sires
         return output
 
-    def posterior_mating(self, ndraws=10000, use_covariates=True, covariates_only=False):
+    def posterior_mating(self, ndraws=10000, use_covariates=True, covariates_only=False, down_sample = True):
         """
         Simulate plausible mating events from the posterior distribution of all possible
         pairings between the mother and candidate fathers, integrating over uncertainty
@@ -498,9 +498,15 @@ class sibshipCluster(object):
             If True, information on prbabilities associated with covariates stored
             in paternityArray objects are incorporated into weights for drawing likely
             fathers.
-        covariate_only: boolean, optional
+        covariates_only: boolean, optional
             If True, candidates are drawn based on covariate probabilities only 
             (i.e. ignoring genetic data)
+        down_sample: boolean, optional
+            If True, downsample the output so that there are as many mating
+            events as there would be in reality, by downsampling mating events
+            to the most-likely number of full sibships in the array. If False,
+            ndrawds candidates are returned, which are likely to include most 
+            of the candidates in the sample at least once.
 
         Returns
         -------
@@ -546,13 +552,16 @@ class sibshipCluster(object):
         # draw mating events for each partition.
         unit_events = {}
         for k,v in zip(unit_names, valid_partitions):
-            unit_events[k] = draw_fathers(
+            draws = draw_fathers(
                 v,
                 genetic = self.paternity_array,
                 covariate = self.covariate, 
                 ndraws=ndraws,
+                use_covariates=use_covariates,
                 covariates_only = covariates_only
                 )
+            if len(draws) > 0:
+                unit_events[k] = draws
         # Resample mating events for each partition weighted by the probability
         # for that partition to give a total sample of ndraws.
         # In fact, sample size may be a little above or below ndraws, because 
@@ -568,10 +577,18 @@ class sibshipCluster(object):
         # Count up how often each candidate appears and return a DataFrame
         dad, freq = np.unique(total_events, return_counts = True)
         
+        # If dads have been drawn based on covariates only, downsample the
+        # output so that there are as many mating events as there would be in 
+        # reality, by downsampling mating events to the most-likely number of
+        # full sibships in the array.
+        if covariates_only and down_sample:
+            nfamilies = np.argsort(self.nfamilies())[-1] +1
+            ix = np.random.choice(range(len(dad)),  nfamilies)
+            dad, freq = dad[ix], freq[ix]
+        
         output = DataFrame({
             'father'    : dad, 
             'frequency' : freq/sum(freq)
             })
-        ouput = output#.sort_values(by='father')
 
         return output

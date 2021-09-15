@@ -6,7 +6,7 @@ from faps.squash_siblings import squash_siblings
 from faps.paternityArray import paternityArray
 
 
-def draw_fathers(partition, genetic=None, covariate = None, ndraws=10000, use_covariates=False,covariates_only = False):
+def draw_fathers(partition, genetic=None, covariate = None, ndraws=10000, use_covariates=False, covariates_only=False):
     """
     Draws a sample of compatible fathers for each family in a single partition.
     Candidates are drawn proportional to their posterior probability of paternity.
@@ -44,7 +44,12 @@ def draw_fathers(partition, genetic=None, covariate = None, ndraws=10000, use_co
     # number of sibships and compatible fathers
     nfamilies = len(np.unique(partition))
 
-    if use_covariates is True or covariates_only:
+    if use_covariates is True or covariates_only is True:
+        if use_covariates is False:
+            warn("You have set use_covariates to False, but covariates_only to True. Covariates will be used.")
+        if covariate is 0:
+            warn("You have requested to use covariate information, but none is given in the sibshipCluster object. Check that `use_covariates` is set to True in your call to `sibshi_clustering`.")
+            covar = 0
         if isinstance(covariate, np.ndarray):
             covariate = np.array(covariate.squeeze())
             if len(covariate.squeeze().shape) > 1:
@@ -67,7 +72,8 @@ def draw_fathers(partition, genetic=None, covariate = None, ndraws=10000, use_co
     # Simulate from covariates only
     elif covariates_only:
         if isinstance(covariate, int) and covariate == 0:
-            raise ValueError('Requested drawing fathers from covariate probabilities, but covariates are set to 0.')    
+            raise ValueError('Requested drawing fathers from covariate probabilities, but covariates are set to 0.')
+        covariate  = covariate[:-1]
         nfathers   = covariate.shape[0]
         prob_array = covariate - alogsumexp(covariate)
         prob_array = np.tile(prob_array, nfamilies).reshape([nfamilies, len(covariate)])
@@ -79,10 +85,14 @@ def draw_fathers(partition, genetic=None, covariate = None, ndraws=10000, use_co
     # identify samples with two or more famililies with shared paternity
     counts = [np.unique(i, return_counts=True)[1] for i in path_samples]
     valid  = [all((i == 1) & (i != nfathers))     for i in counts]
-    path_samples = np.array(path_samples)[np.array(valid)]
-    output = [val for sublist in path_samples for val in sublist]
-    # output is currently of size ndraws * n families
-    # subsample down to ndraws
-    output = np.random.choice(output, size=ndraws, replace=True)
+    if not any(valid):
+        warn("Could not find a combination of fathers that were valid for one or more partitions, but that were found by sibship_clustering. Consider increasing `ndraws`.")
+        return []
+    else:
+        path_samples = np.array(path_samples)[np.array(valid)]
+        output = [val for sublist in path_samples for val in sublist]
+        # output is currently of size ndraws * n families
+        # subsample down to ndraws
+        output = np.random.choice(output, size=ndraws, replace=True)
 
-    return output
+        return output

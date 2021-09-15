@@ -22,7 +22,7 @@ def test_draw_fathers():
 
     # Add a nonsense covariate
     cov = np.arange(0,adults.size)
-    cov = -cov/cov.sum()
+    cov = np.log(cov/cov.sum())
     patlik.add_covariate(cov)
     sc2 = fp.sibship_clustering(patlik, use_covariates=True)
     dr2 = fp.draw_fathers(
