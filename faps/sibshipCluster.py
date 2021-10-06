@@ -465,39 +465,41 @@ class sibshipCluster(object):
 
     def posterior_mating(self, ndraws=10000, use_covariates=True, covariates_only=False, down_sample = True):
         """
-        Simulate plausible mating events from the posterior distribution of all possible
-        pairings between the mother and candidate fathers, integrating over uncertainty
-        in sibship structure.
+        Simulate plausible mating events from the posterior distribution of all
+        possible pairings between the mother and candidate fathers, integrating
+        over uncertainty in sibship structure.
 
-        For a single partitition structure, `simulate_mating` draws a sample of putative
-        fathers for each full-sib family in propotion to posterior probabilities of
-        paternity from genetic information. Paternity information from covariate
-        probabilities can be incorporated as well by setting `use_covariates` to `True`.
-        Covariate data are taken from the sibshipCluster object directly (see
-        `sibshipCluster.add_covariate`).
+        For a single partitition structure, `posterior_mating` draws a sample of
+        putative fathers for each full-sib family in propotion to posterior
+        probabilities of paternity from genetic information. Paternity 
+        information from covariate probabilities can be incorporated as well by
+        setting `use_covariates` to `True`. Covariate data are taken from the 
+        sibshipCluster object directly (see `sibshipCluster.add_covariate`).
         
-        Samples are drawn for every partition structure, excluding partitions with zero 
-        posterior probability. Samples for each partition are then subsampled in 
-        proportion to the posterior probability of each partition to generate a final
-        sample of plausible fathers for the whole half-sib family. In this way, fathers
-        are drawn in proportion to their probability of paternity, and uncertainty in
-        sibship structure is accounted for.
+        Samples are drawn for every partition structure, excluding partitions 
+        with zero posterior probability. Samples for each partition are then 
+        subsampled in proportion to the posterior probability of each partition 
+        to generate a final sample of plausible fathers for the whole half-sib 
+        family. In this way, fathers are drawn in proportion to their
+        probability of paternity, and uncertainty in sibship structure is 
+        accounted for.
 
-        Samples of fathers can also be drawn in proportion to covariate probabilities
-        only by setting `covariates_only` to `True`. This can be used to compare "real"
-        mating events inferred using genetic (potentially including covariate information)
-        to a null distribution of mating based on covariates only. For example, if 
-        covariates describe a model of dispersal, such a comparison might tell you if
-        there is non-random mating for some trait other than distance.
+        Samples of fathers can also be drawn in proportion to covariate 
+        probabilities only by setting `covariates_only` to `True`. This can be 
+        used to compare "real" mating events inferred using genetic (potentially
+        including covariate information) to a null distribution of mating based
+        on covariates only. For example, if covariates describe a model of 
+        dispersal, such a comparison might tell you if there is non-random
+        mating for some trait other than distance.
 
         Parameters
         ----------
         ndraws: int
             Number of Monte Carlo draws for each family.
         use_covariates: logical, optional
-            If True, information on prbabilities associated with covariates stored
-            in paternityArray objects are incorporated into weights for drawing likely
-            fathers.
+            If True, information on prbabilities associated with covariates
+            stored in paternityArray objects are incorporated into weights for 
+            drawing likely fathers.
         covariates_only: boolean, optional
             If True, candidates are drawn based on covariate probabilities only 
             (i.e. ignoring genetic data)
@@ -510,8 +512,8 @@ class sibshipCluster(object):
 
         Returns
         -------
-        A DataFrame giving plausible fathers that could have mated with the mother, 
-        along with the proportion of pollen coming from each father.
+        A DataFrame giving plausible fathers that could have mated with the
+        mother, along with the proportion of pollen coming from each father.
 
         Examples
         --------
@@ -522,24 +524,24 @@ class sibshipCluster(object):
         mothers = adults.subset(progeny.mothers)
         patlik  = fp.paternity_array(progeny, mothers, adults, mu = 0.0015, missing_parents=0.01)
         sc = fp.sibship_clustering(patlik)
-        # Check simulate_mating returns what it should in ideal case
-        me = sc.simulate_mating()
+        # Check posterior_mating returns what it should in ideal case
+        me = sc.posterior_mating()
 
         # Remove one of the fathers and check that a missing dad is sampled.
         patlik.purge = "a_1"
         sc2 = fp.sibship_clustering(patlik)
-        me2 = sc2.simulate_mating()
+        me2 = sc2.posterior_mating()
 
         # Include a nonsense covariate
         cov = np.arange(0,adults.size)
         cov = -cov/cov.sum()
         patlik.add_covariate(cov)
         sc3 = fp.sibship_clustering(patlik, use_covariates=True)
-        me3 = sc3.simulate_mating(use_covariates=True)
+        me3 = sc3.posterior_mating(use_covariates=True)
 
         # Draw individuals based on the covariate only.
         sc4 = fp.sibship_clustering(patlik, use_covariates=True)
-        me4 = sc4.simulate_mating(use_covariates=True, covariates_only=True)
+        me4 = sc4.posterior_mating(use_covariates=True, covariates_only=True)
         """
         dad_names = np.append(self.candidates, "missing")
 
