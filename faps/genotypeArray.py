@@ -363,7 +363,7 @@ class genotypeArray(object):
                 loci = [loci]
             # If a marker names are given, find the positions in the list of names
             if all(isinstance(x, str) for x in loci):
-                loci = [np.where(self.markersz == x)[0][0] for x in loci]
+                loci = [np.where(self.markers == x)[0][0] for x in loci]
             # If an array of boolean values are given, make to a list
             if isinstance(loci, np.ndarray):
                 if np.result_type(loci) == 'bool':
