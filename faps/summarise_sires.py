@@ -25,23 +25,23 @@ def summarise_sires(sibships, drop_na=False):
 
     Examples
     --------
-    from faps import *
+    import faps as fp
     import numpy as np
 
     # Generate a population of adults
     allele_freqs = np.random.uniform(0.3,0.5,50)
-    adults = make_parents(20, allele_freqs)
+    adults = fp.make_parents(20, allele_freqs)
 
     # Mate the first adult to the next three.
     mother = adults.subset(0)
-    progeny = make_sibships(adults, 0, [1,2,3], 5, 'x')
-    patlik = paternity_array(progeny, mother, adults, mu=0.0013)
+    progeny = fp.make_sibships(adults, 0, [1,2,3], 5, 'x')
+    patlik = fp.paternity_array(progeny, mother, adults, mu=0.0013)
     # Split offspring by paternal family
     patlik = patlik.split(by=progeny.fathers)
     # Cluster each paternal family into sibships
-    sc = sibship_clustering(patlik)
+    sc = fp.sibship_clustering(patlik)
 
-    summarise_sires(sc)
+    fp.summarise_sires(sc)
 
     """
 

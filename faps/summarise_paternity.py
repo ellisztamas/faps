@@ -28,6 +28,8 @@ def summarise_paternity(sibships, n_candidates = 4):
 
     Example
     -------
+    import numpy as np
+    import faps as fp
     # Example with multiple half-sib families
     allele_freqs = np.random.uniform(0.3,0.5,100)
     adults = fp.make_parents(100, allele_freqs)
@@ -39,7 +41,7 @@ def summarise_paternity(sibships, n_candidates = 4):
 
     # Pull out the top candidates
     N = 5
-    sp = summarise_paternity(sibships)
+    sp = fp.summarise_paternity(sibships)
     """
     if not isinstance(sibships, dict):
         raise TypeError("`sibships` should be a dictionary of sibshipCluster objects")

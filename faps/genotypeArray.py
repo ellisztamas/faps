@@ -423,14 +423,13 @@ class genotypeArray(object):
 	    Returns
 	    -------
 	    A text file at the specified path.
-
 	    """
-	    # Names of individuals, plus mothers and fathers.
-	    nms = np.column_stack([self.names, self.mothers, self.fathers])
-	    # format genotype data as a strings
-	    output = self.geno.sum(2).astype('str')
-	    output[output == '-18'] = 'NA' # coerce missing data to NA
-
-	    output = np.concatenate([nms, output], axis=1)
-	    header = 'ID,mother,father,' + ','.join(self.markers)
-	    np.savetxt(filename, output, delimiter=delimiter, fmt="%s", header=header, comments='')
+        # Names of individuals, plus mothers and fathers.
+        nms = np.column_stack([self.names, self.mothers, self.fathers])
+        # format genotype data as a strings
+        output = self.geno.sum(2).astype('str')
+        output[output == '-18'] = 'NA' # coerce missing data to NA
+        
+        output = np.concatenate([nms, output], axis=1)
+        header = 'ID,mother,father,' + ','.join(self.markers)
+        np.savetxt(filename, output, delimiter=delimiter, fmt="%s", header=header, comments='')
