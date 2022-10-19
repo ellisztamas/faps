@@ -35,7 +35,7 @@ Be aware that when you have multiple versions of Python on your computer, includ
 import faps as fp
 fp.__version__
 ```
-If this isn't showing the version you expected, install FAPS with a conda environments instead.
+If this isn't showing the version you expected, install FAPS with a conda environment instead.
 
 ### With conda
 Conda environments let you be explicit about what versions of each package you
@@ -67,7 +67,7 @@ conda deactivate
 
 See the [Conda environments documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#) for more details.
 
-# Remove an environment
+#### Remove an environment
 conda remove --name myenv --all
 
 
