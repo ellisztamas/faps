@@ -396,8 +396,8 @@ class sibshipCluster(object):
         For every candidate drawn as a father in any partition, calculate the
         (log) probability that each sired at least one offspring.
 
-        Probabilities are calculated as the sum of probabilties of each
-        partition in which a candidate appears.
+        Probabilities are calculated as the sum of likelihoods for every 
+        path in every partition in which a candidate appears.
 
         Parameters
         ----------
