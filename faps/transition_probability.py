@@ -61,7 +61,7 @@ def transition_probability(offspring, mothers, males, mu, inverse=False, integra
         allele_freqs = males.allele_freqs()
         af = np.array([
             (1-allele_freqs)**2,
-            allele_freqs * (1-allele_freqs),
+            2 * allele_freqs * (1-allele_freqs),
             allele_freqs ** 2
         ])
 

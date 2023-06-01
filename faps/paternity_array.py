@@ -5,7 +5,7 @@ from faps.transition_probability import transition_probability
 from faps.incompatibilities import incompatibilities
 from warnings import warn
 
-def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, purge=None, selfing_rate=None, max_clashes=None, covariate=None, integration="full"):
+def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0.5, purge=None, selfing_rate=None, max_clashes=None, covariate=None, integration="full"):
     """
     Construct a paternityArray object for the offspring given known mothers
     and a set of candidate fathers using genotype data. Currently only SNP
@@ -35,7 +35,8 @@ def paternity_array(offspring, mothers, males, mu=1e-12, missing_parents = 0, pu
         Input value for the proportion of adults who are missing from the sample.
         This is used to weight the probabilties of paternity for each father
         relative to the probability that a father was not sampled. Defaults to
-        zero, but you should definitely change this.
+        0.5, which effectively places no prior weight either way, and means
+        information comes from the likelihood.
     purge: vector of str, or float between zero and one, optional
         Individuals who can be removed from the paternity array a priori. If
         a float is given, that proportion of individuals is removed from the
