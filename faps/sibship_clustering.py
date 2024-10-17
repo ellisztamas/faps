@@ -1,6 +1,5 @@
 import numpy as np
 from faps.paternityArray import paternityArray
-from faps.sibshipCluster import sibshipCluster
 from faps.do_clustering import do_clustering
 from warnings import warn
 

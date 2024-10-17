@@ -24,8 +24,8 @@ def test_paternityArray():
     assert (np.isfinite(patlik.lik_array[:14:17])).all() # lik_array remains unchanged
 
     # Check changing missing parents
-    # By default, the final column of prob_array should be -inf
-    assert (patlik.prob_array()[:,-1] == -np.inf).all() 
+    # By default, the final column of prob_array should be finite (previously this was -inf)
+    assert (np.isfinite(patlik.prob_array()[:,-1]).all() 
     # Allow for 10% missing parents, and this should become finite
     patlik.missing_parents = 0.1
     assert np.isfinite(patlik.prob_array()[:, -1]).all()

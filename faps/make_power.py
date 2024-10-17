@@ -150,7 +150,7 @@ def make_power(replicates, nloci, allele_freqs, candidates, sires, offspring, mi
             raise ValueError("Allele frequencies must be between 0 and 1.")
         if len(allele_freqs) == 2 and verbose:
                 print("Drawing allele frequencies between {} and {}.".format(allele_freqs[0], allele_freqs[1]))
-        elif len(allele_freqs) == nloci and nloci is not 2:
+        elif len(allele_freqs) == nloci and nloci != 2:
             allele_freqs = allele_freqs
             if verbose:
                 print("Allele frequencies supplied by the user.")
