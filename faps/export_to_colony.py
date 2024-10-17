@@ -144,12 +144,12 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
         fo.write(t)
 
     # prob of including parents and numbers of mothers and fathers.
-    if two_sexes is 1:
+    if two_sexes == 1:
         fo.write('\n' +
              str(parents_present[0]) + '  ' + str(parents_present[1]) + ' ! prob. of dad/mum included in the candidates \n' +
              str(males.size)+ '  ' + str(males.size) + ' ! numbers of candidate males & females \n'+
              '\n')
-    elif two_sexes is 2:
+    elif two_sexes == 2:
         fo.write('\n' +
              str(parents_present[0]) + '  ' + str(parents_present[1]) + ' ! prob. of dad/mum included in the candidates \n' +
              str(males.size)+ '  ' + str(mothers.size) + ' ! numbers of candidate males & females \n'+
@@ -167,7 +167,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
     fo.write('\n')
 
     # Maternal genotypes
-    if two_sexes is 1: # Hermaphrodites
+    if two_sexes == 1: # Hermaphrodites
         for m in range(males.size):
             thisrow = males.geno[m].flatten()+9
             t= males.names[m]
@@ -175,7 +175,7 @@ def export_to_colony(offspring, mothers, males, allele_freqs,
                 t = t + '\t' + str(thisrow[i])
             t = t + '\n'
             fo.write(t)
-    elif two_sexes is 2: # separate sexes
+    elif two_sexes == 2: # separate sexes
         mothers.geno[np.isnan(mothers.geno)] = -9
         for m in range(mothers.size):
             thisrow = mothers.geno[m].flatten()+9

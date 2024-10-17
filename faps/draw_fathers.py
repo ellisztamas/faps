@@ -44,10 +44,10 @@ def draw_fathers(partition, genetic=None, covariate = None, ndraws=10000, use_co
     # number of sibships and compatible fathers
     nfamilies = len(np.unique(partition))
 
-    if use_covariates is True or covariates_only is True:
-        if use_covariates is False:
+    if use_covariates or covariates_only:
+        if not use_covariates:
             warn("You have set use_covariates to False, but covariates_only to True. Covariates will be used.")
-        if covariate is 0:
+        if covariate == 0:
             warn("You have requested to use covariate information, but none is given in the sibshipCluster object. Check that `use_covariates` is set to True in your call to `sibshi_clustering`.")
             covar = 0
         if isinstance(covariate, np.ndarray):

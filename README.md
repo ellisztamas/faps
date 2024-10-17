@@ -11,6 +11,7 @@ FAPS stands for Fractional Analysis of Sibships and Paternity. It is a Python pa
 5. [Authors and license information](#authors-and-license-information)
 
 ## Overview
+
 The basic workflow is:
 
 1. Import data
@@ -68,6 +69,7 @@ conda deactivate
 See the [Conda environments documentation](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#) for more details.
 
 #### Remove an environment
+
 conda remove --name myenv --all
 
 
