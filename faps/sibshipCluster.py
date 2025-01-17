@@ -371,7 +371,7 @@ class sibshipCluster(object):
         Dataframe with a row for every offspring, showing the names and log
         posterior probabilities of paternity for the N most-probable candidates.
         """
-        probs = self.paternity_array
+        probs = self.posterior_paternity_matrix()
         sort_index = np.argsort(probs, axis = 1)
         # Add an extra entry to the list of candidates for unsampled fathers.
         candidate_names = np.append(self.candidates, "missing")
