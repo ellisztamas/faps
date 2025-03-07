@@ -2,11 +2,17 @@ name: faps
 channels:
   - defaults
 dependencies:
-  - numpy
-  - scipy
   - pip
   - pip:
     - faps
-    - fastcluster
-prefix: /home/GMI/thomas.ellis/miniconda3/envs/faps
+    - matplotlib
+  - numpy==1.26
+  - scipy
+  - pandas
+  - bottleneck>=1.3.6
+  - python>=3.9
+  - tqdm
+  - ipykernel
+  - pip:
+    - faps
 

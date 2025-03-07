@@ -1,7 +1,6 @@
 import numpy as np
 from faps.unique_rows import unique_rows
-import fastcluster
-from scipy.cluster.hierarchy import fcluster
+import scipy.cluster.hierarchy as sch
 from faps.pairwise_lik_fullsibs import pairwise_lik_fullsibs
 
 def sibship_partitions(paternity_array, exp=False, method='average', criterion = 'distance', use_covariates=True):
@@ -62,12 +61,12 @@ def sibship_partitions(paternity_array, exp=False, method='average', criterion =
     else:
         fullpairs = pairwise_lik_fullsibs(paternity_array, use_covariates=use_covariates, exp = exp)
         # Clustering matrix z.
-        z= fastcluster.linkage(abs(fullpairs[np.triu_indices(fullpairs.shape[0], 1)]), method)
+        z= sch.linkage(abs(fullpairs[np.triu_indices(fullpairs.shape[0], 1)]), method)
         z = np.clip(z, 0, 10**12)
         # A list of thresholds to slice through the dendrogram
         thresholds = np.append(0,z[:,2])
         # store all possible partitions from the dendrogram
-        partition_sample = [fcluster(z, t, criterion) for t in thresholds]
+        partition_sample = [sch.fcluster(z, t, criterion) for t in thresholds]
         partition_sample = unique_rows(partition_sample)
 
     return partition_sample, z
